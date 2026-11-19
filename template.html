@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #060608;
+        --ink: #ffffff;
+        --gold: #facc15;
+        --red: #f87171;
+        --muted: #a1a1aa;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1920px; overflow: hidden;
+        background: var(--ground);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--ink);
+      }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+      .particles { position: absolute; inset: 0; pointer-events: none; }
+      .particle {
+        position: absolute; width: 6px; height: 6px; border-radius: 50%;
+        background: rgba(250, 204, 21, 0.55);
+        box-shadow: 0 0 12px rgba(250, 204, 21, 0.7);
+      }
+      .container {
+        position: absolute; top: 290px; left: 120px; right: 220px; bottom: 440px;
+        display: flex; flex-direction: column; justify-content: space-between;
+        align-items: center; text-align: center; z-index: 10;
+      }
+      .badge {
+        font-size: 28px; letter-spacing: 0.25em; text-transform: uppercase;
+        color: var(--gold); font-weight: 700;
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        padding: 14px 34px; border-radius: 9999px;
+        background: rgba(250, 204, 21, 0.1);
+      }
+      .card-wrap {
+        position: relative; width: 100%; height: 760px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .card {
+        position: absolute; width: 100%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      .pre-title {
+        font-size: 30px; text-transform: uppercase; letter-spacing: 0.22em;
+        color: var(--muted); margin-bottom: 24px; font-weight: 600;
+      }
+      .main-text {
+        font-size: 66px; line-height: 1.22; font-weight: 800; letter-spacing: -0.02em;
+        max-width: 740px; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
+      }
+      .gold { color: var(--gold); }
+      .red { color: var(--red); }
+      .verse {
+        font-size: 34px; color: #fef08a; margin-top: 30px;
+        font-weight: 700; letter-spacing: 0.05em;
+      }
+      .bottom-bar { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      .progress-track { width: 420px; height: 5px; background: rgba(255, 255, 255, 0.18); border-radius: 999px; overflow: hidden; }
+      .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #eab308, #fef08a); }
+      .footer { font-size: 28px; letter-spacing: 0.12em; color: #d4d4d8; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="__DURATION__" data-width="1080" data-height="1920">
+      <div class="particles">
+        <div class="particle" id="p1" style="left: 18%; top: 75%;"></div>
+        <div class="particle" id="p2" style="left: 42%; top: 82%;"></div>
+        <div class="particle" id="p3" style="left: 68%; top: 70%;"></div>
+        <div class="particle" id="p4" style="left: 80%; top: 85%;"></div>
+        <div class="particle" id="p5" style="left: 28%; top: 60%;"></div>
+        <div class="particle" id="p6" style="left: 55%; top: 65%;"></div>
+      </div>
+
+      <div class="container">
+        <div class="badge">PALAVRA DE FÉ</div>
+        <div class="card-wrap">
+          <div id="c1" class="clip card" data-start="0" data-duration="__D1__" data-track-index="0">
+            <div class="pre-title">__PRE1__</div>
+            <div class="main-text">__TEXT1__</div>
+          </div>
+          <div id="c2" class="clip card" data-start="__S2__" data-duration="__D2__" data-track-index="1">
+            <div class="pre-title">__PRE2__</div>
+            <div class="main-text">__TEXT2__</div>
+          </div>
+          <div id="c3" class="clip card" data-start="__S3__" data-duration="__D3__" data-track-index="2">
+            <div class="pre-title">__PRE3__</div>
+            <div class="main-text">__TEXT3__</div>
+            <div class="verse">— __VERSE__</div>
+          </div>
+          <div id="c4" class="clip card" data-start="__S4__" data-duration="__D4__" data-track-index="3">
+            <div class="pre-title">__PRE4__</div>
+            <div class="main-text">__TEXT4__</div>
+            <div class="verse" style="color: var(--gold); font-size: 32px; margin-top: 25px;">Comente AMÉM 🙏</div>
+          </div>
+        </div>
+        <div class="bottom-bar">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="footer">@wallasnascimento_ • ideepregai</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const DUR = __DURATION__;
+      const S2 = __S2__, S3 = __S3__, S4 = __S4__;
+      const tl = gsap.timeline({ paused: true });
+
+      tl.to("#progressFill", { width: "100%", duration: DUR, ease: "none" }, 0);
+      tl.to("#p1", { y: -650, opacity: 0, duration: DUR, ease: "none" }, 0);
+      tl.to("#p2", { y: -720, opacity: 0, duration: DUR, ease: "none" }, 0);
+      tl.to("#p3", { y: -580, opacity: 0, duration: DUR, ease: "none" }, 0);
+      tl.to("#p4", { y: -690, opacity: 0, duration: DUR, ease: "none" }, 0);
+      tl.to("#p5", { y: -500, opacity: 0, duration: DUR, ease: "none" }, 0);
+      tl.to("#p6", { y: -540, opacity: 0, duration: DUR, ease: "none" }, 0);
+
+      tl.fromTo("#c1", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 0);
+      tl.to("#c1", { opacity: 0, y: -28, scale: 1.03, duration: 0.35, ease: "power2.in" }, S2 - 0.35);
+
+      tl.fromTo("#c2", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S2);
+      tl.to("#c2", { opacity: 0, y: -28, scale: 1.03, duration: 0.35, ease: "power2.in" }, S3 - 0.35);
+
+      tl.fromTo("#c3", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S3);
+      tl.to("#c3", { scale: 1.04, duration: 2.5, ease: "none" }, S3 + 0.45);
+      tl.to("#c3", { opacity: 0, y: -28, duration: 0.35, ease: "power2.in" }, S4 - 0.35);
+
+      tl.fromTo("#c4", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S4);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
