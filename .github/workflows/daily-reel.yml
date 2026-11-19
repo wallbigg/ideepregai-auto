@@ -1,0 +1,58 @@
+name: Daily Christian Reel
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system and Python deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install edge-tts
+
+      - name: Generate Daily Reel (Script + Voice + B-roll + Motion + Piano)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py
+
+      - name: Upload video to temporary GitHub Release for Meta API
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: reel-${{ github.run_number }}
+          name: Daily Reel ${{ github.run_number }}
+          files: build/reel_final.mp4
+
+      - name: Publish Reel to Instagram
+        if: ${{ secrets.IG_USER_ID != '' && secrets.IG_ACCESS_TOKEN != '' }}
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          VIDEO_PUBLIC_URL: https://github.com/${{ github.repository }}/releases/download/reel-${{ github.run_number }}/reel_final.mp4
+        run: python publish.py
+
+      - name: Commit updated history.json
+        run: |
+          git config user.name "ideepregai-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add history.json
+          git diff --staged --quiet || git commit -m "chore: update posted verses history"
+          git push
