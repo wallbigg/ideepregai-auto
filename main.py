@@ -53,14 +53,22 @@ Regras:
   "caption": "Legenda humana e edificante para o Instagram (3 parágrafos curtos, max 2 emojis, terminando com referência bíblica e @wallasnascimento_ • ideepregai)"
 }}
 """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8},
     }).encode("utf-8")
     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        res = json.loads(resp.read().decode("utf-8"))
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                res = json.loads(resp.read().decode("utf-8"))
+            break
+        except Exception as e:
+            if attempt == 3:
+                raise
+            print(f"Gemini retry {attempt + 1}/3 after error: {e}")
+            time.sleep(5)
     raw = res["candidates"][0]["content"]["parts"][0]["text"]
     return json.loads(raw)
 
