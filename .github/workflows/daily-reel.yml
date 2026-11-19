@@ -42,7 +42,6 @@ jobs:
           files: build/reel_final.mp4
 
       - name: Publish Reel to Instagram
-        if: ${{ secrets.IG_USER_ID != '' && secrets.IG_ACCESS_TOKEN != '' }}
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
