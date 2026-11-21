@@ -10,7 +10,9 @@ from pathlib import Path
 IG_USER_ID = os.environ.get("IG_USER_ID", "")
 IG_ACCESS_TOKEN = os.environ.get("IG_ACCESS_TOKEN", "")
 VIDEO_URL = os.environ.get("VIDEO_PUBLIC_URL", "")
-CAPTION_FILE = Path(__file__).parent / "build" / "caption.txt"
+BUILD_DIR = Path(__file__).parent / "build"
+CAPTION_FILE = BUILD_DIR / "caption.txt"
+PUBLISHED_MARKER = BUILD_DIR / ".published"
 BASE_URL = (
     "https://graph.instagram.com/v21.0"
     if IG_ACCESS_TOKEN.startswith("IGA")
@@ -42,6 +44,9 @@ def api_get(endpoint: str, params: dict) -> dict:
 
 
 def main() -> None:
+    if PUBLISHED_MARKER.exists():
+        PUBLISHED_MARKER.unlink()
+
     if not (IG_ACCESS_TOKEN and VIDEO_URL) or (
         not IG_ACCESS_TOKEN.startswith("IGA") and not IG_USER_ID
     ):
@@ -52,6 +57,30 @@ def main() -> None:
     if not target_id and IG_ACCESS_TOKEN.startswith("IGA"):
         me = api_get("me", {"fields": "id,user_id,username", "access_token": IG_ACCESS_TOKEN})
         target_id = str(me.get("user_id") or me.get("id") or "me")
+
+    # Pre-flight check to prevent GitHub Actions failure-email spam on Meta account verification locks (5258005)
+    qs = urllib.parse.urlencode({"fields": "id", "access_token": IG_ACCESS_TOKEN})
+    try:
+        with urllib.request.urlopen(f"{BASE_URL}/{target_id}?{qs}", timeout=30) as resp:
+            resp.read()
+    except urllib.error.HTTPError as exc:
+        raw_body = exc.read().decode("utf-8", errors="replace")
+        is_blocked = "5258005" in raw_body or "API access blocked" in raw_body
+        try:
+            err_subcode = json.loads(raw_body).get("error", {}).get("error_subcode")
+            if err_subcode == 5258005:
+                is_blocked = True
+        except Exception:
+            pass
+        if is_blocked:
+            print(
+                "AVISO META (5258005): Conta desenvolvedor aguardando 'Confirmar conta' em "
+                "https://developers.facebook.com/r/user/error/. "
+                "Vídeo salvo no GitHub Releases; pulando publicação sem falhar o workflow."
+            )
+            sys.exit(0)
+        print(f"Meta API pre-flight error: {exc.code} {raw_body}")
+        raise
 
     caption = CAPTION_FILE.read_text(encoding="utf-8")
     container = api_post(f"{target_id}/media", {
@@ -82,6 +111,7 @@ def main() -> None:
         "access_token": IG_ACCESS_TOKEN,
     })
     print("Publicado no Instagram! Media ID:", pub["id"])
+    PUBLISHED_MARKER.write_text(str(pub["id"]), encoding="utf-8")
 
 
 if __name__ == "__main__":
