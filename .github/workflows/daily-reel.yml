@@ -1,23 +1,16 @@
-name: Daily Christian Reel
+name: Codigo Zero Reels Autopilot
 
 on:
   schedule:
-    # 10 videos/dia (BRT = UTC-3), em minutos fora de pico para evitar atraso no cron do GitHub:
-    # 07:17, 08:47, 10:17, 11:47, 13:17, 14:47, 16:17, 17:47, 19:17, 20:47 BRT
-    - cron: "17 10 * * *"
-    - cron: "47 11 * * *"
-    - cron: "17 13 * * *"
-    - cron: "47 14 * * *"
+    # 3 Reels/dia em horários de pico emocional (BRT = UTC-3), evitando spam/bloqueio da Meta (5258005):
+    # 08:17 BRT (11:17 UTC) · 13:17 BRT (16:17 UTC) · 21:17 BRT (00:17 UTC - pré-Zona Morta 22h-02h)
+    - cron: "17 11 * * *"
     - cron: "17 16 * * *"
-    - cron: "47 17 * * *"
-    - cron: "17 19 * * *"
-    - cron: "47 20 * * *"
-    - cron: "17 22 * * *"
-    - cron: "47 23 * * *"
+    - cron: "17 0 * * *"
   workflow_dispatch:
 
 concurrency:
-  group: daily-christian-reel
+  group: codigo-zero-reel
   cancel-in-progress: false
 
 permissions:
@@ -45,7 +38,7 @@ jobs:
           fi
           pip install -q edge-tts
 
-      - name: Generate Daily Reel (Script + Voice + B-roll + Motion + Piano)
+      - name: Generate Codigo Zero Reel (Script + Voice + B-roll + Motion + Piano)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
@@ -54,20 +47,26 @@ jobs:
         id: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: reel-${{ github.run_number }}-${{ github.run_attempt }}
-          name: Daily Reel ${{ github.run_number }}
-          files: build/reel_final.mp4
+          tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
+          name: Codigo Zero Reel ${{ github.run_number }}
+          files: |
+            build/reel_final.mp4
+            build/caption.txt
 
       - name: Publish Reel to Instagram
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          VIDEO_PUBLIC_URL: https://github.com/${{ github.repository }}/releases/download/reel-${{ github.run_number }}-${{ github.run_attempt }}/reel_final.mp4
+          VIDEO_PUBLIC_URL: https://github.com/${{ github.repository }}/releases/download/cz-reel-${{ github.run_number }}-${{ github.run_attempt }}/reel_final.mp4
         run: python publish.py
 
       - name: Commit updated history.json
         run: |
-          git config user.name "ideepregai-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add history.json
-          git diff --staged --quiet || (git commit -m "chore: update posted verses history" && git pull --rebase origin main && git push)
+          if [ -f build/.published ]; then
+            git config user.name "codigozero-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add history.json
+            git diff --staged --quiet || (git commit -m "chore: update codigo zero reel history" && git pull --rebase origin main && git push)
+          else
+            echo "Publicação pulada nesta execução; history.json mantido intacto."
+          fi
