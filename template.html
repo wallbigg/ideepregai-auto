@@ -3,43 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1080, height=1920" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <style>
       :root {
-        --ground: #060608;
-        --ink: #ffffff;
-        --gold: #facc15;
-        --red: #f87171;
-        --muted: #a1a1aa;
+        --ground: #060508;
+        --ink: #faf7f2;
+        --gold: #d4af6a;
+        --gold-light: #f0dfb8;
+        --burgundy: #e26b84;
+        --sage: #5cd3a6;
+        --muted: #c8bece;
       }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body {
         margin: 0; width: 1080px; height: 1920px; overflow: hidden;
         background: var(--ground);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--ink);
       }
       #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
       .particles { position: absolute; inset: 0; pointer-events: none; }
       .particle {
-        position: absolute; width: 6px; height: 6px; border-radius: 50%;
-        background: rgba(250, 204, 21, 0.55);
-        box-shadow: 0 0 12px rgba(250, 204, 21, 0.7);
+        position: absolute; width: 5px; height: 5px; border-radius: 50%;
+        background: rgba(212, 175, 106, 0.55);
+        box-shadow: 0 0 14px rgba(212, 175, 106, 0.8);
       }
+      /* Instagram Reels safe zone: top 290px, bottom 440px, left 105px, right 225px */
       .container {
-        position: absolute; top: 290px; left: 120px; right: 220px; bottom: 440px;
+        position: absolute; top: 290px; left: 105px; right: 225px; bottom: 440px;
         display: flex; flex-direction: column; justify-content: space-between;
         align-items: center; text-align: center; z-index: 10;
       }
       .badge {
-        font-size: 28px; letter-spacing: 0.25em; text-transform: uppercase;
-        color: var(--gold); font-weight: 700;
-        border: 1px solid rgba(250, 204, 21, 0.4);
-        padding: 14px 34px; border-radius: 9999px;
-        background: rgba(250, 204, 21, 0.1);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 24px; letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--gold-light); font-weight: 600;
+        border: 1.5px solid rgba(212, 175, 106, 0.55);
+        padding: 13px 32px; border-radius: 9999px;
+        background: rgba(14, 11, 18, 0.72);
       }
       .card-wrap {
-        position: relative; width: 100%; height: 760px;
+        position: relative; width: 100%; height: 820px;
         display: flex; align-items: center; justify-content: center;
       }
       .card {
@@ -47,38 +56,62 @@
         display: flex; flex-direction: column; align-items: center; justify-content: center;
       }
       .pre-title {
-        font-size: 30px; text-transform: uppercase; letter-spacing: 0.22em;
-        color: var(--muted); margin-bottom: 24px; font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 27px; text-transform: uppercase; letter-spacing: 0.2em;
+        color: var(--gold); margin-bottom: 24px; font-weight: 600;
+        text-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
       }
       .main-text {
-        font-size: 66px; line-height: 1.22; font-weight: 800; letter-spacing: -0.02em;
-        max-width: 740px; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 62px; line-height: 1.22; font-weight: 800; letter-spacing: -0.02em;
+        max-width: 740px; text-shadow: 0 8px 32px rgba(0, 0, 0, 0.92);
       }
-      .gold { color: var(--gold); }
-      .red { color: var(--red); }
-      .verse {
-        font-size: 34px; color: #fef08a; margin-top: 30px;
-        font-weight: 700; letter-spacing: 0.05em;
+      .serif-quote {
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-size: 72px; line-height: 1.15; font-weight: 700; font-style: italic;
+        max-width: 740px; color: #fffaf2;
+        text-shadow: 0 8px 32px rgba(0, 0, 0, 0.95);
       }
-      .bottom-bar { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 18px; }
-      .progress-track { width: 420px; height: 5px; background: rgba(255, 255, 255, 0.18); border-radius: 999px; overflow: hidden; }
-      .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #eab308, #fef08a); }
-      .footer { font-size: 28px; letter-spacing: 0.12em; color: #d4d4d8; font-weight: 600; }
+      .gold { color: var(--gold-light); }
+      .red { color: var(--burgundy); }
+      .sage { color: var(--sage); }
+      .ref-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px; color: var(--gold-light); margin-top: 30px;
+        font-weight: 600; letter-spacing: 0.08em;
+        text-shadow: 0 4px 18px rgba(0, 0, 0, 0.95);
+      }
+      .cta-pill {
+        margin-top: 32px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px; font-weight: 700; letter-spacing: 0.06em;
+        color: #120e18; background: linear-gradient(135deg, #f0dfb8, #c69e57);
+        padding: 16px 34px; border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+      }
+      .bottom-bar { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+      .progress-track { width: 420px; height: 5px; background: rgba(255, 255, 255, 0.22); border-radius: 999px; overflow: hidden; }
+      .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #9e2e46, #d4af6a, #5cd3a6); }
+      .footer {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 24px; letter-spacing: 0.14em; color: #e8d5ae; font-weight: 600;
+        text-shadow: 0 4px 14px rgba(0, 0, 0, 0.9);
+      }
     </style>
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="__DURATION__" data-width="1080" data-height="1920">
       <div class="particles">
-        <div class="particle" id="p1" style="left: 18%; top: 75%;"></div>
-        <div class="particle" id="p2" style="left: 42%; top: 82%;"></div>
-        <div class="particle" id="p3" style="left: 68%; top: 70%;"></div>
-        <div class="particle" id="p4" style="left: 80%; top: 85%;"></div>
-        <div class="particle" id="p5" style="left: 28%; top: 60%;"></div>
-        <div class="particle" id="p6" style="left: 55%; top: 65%;"></div>
+        <div class="particle" id="p1" style="left: 16%; top: 78%;"></div>
+        <div class="particle" id="p2" style="left: 38%; top: 84%;"></div>
+        <div class="particle" id="p3" style="left: 64%; top: 72%;"></div>
+        <div class="particle" id="p4" style="left: 78%; top: 86%;"></div>
+        <div class="particle" id="p5" style="left: 26%; top: 62%;"></div>
+        <div class="particle" id="p6" style="left: 52%; top: 66%;"></div>
       </div>
 
       <div class="container">
-        <div class="badge">PALAVRA DE FÉ</div>
+        <div class="badge">__BADGE__</div>
         <div class="card-wrap">
           <div id="c1" class="clip card" data-start="0" data-duration="__D1__" data-track-index="0">
             <div class="pre-title">__PRE1__</div>
@@ -90,18 +123,18 @@
           </div>
           <div id="c3" class="clip card" data-start="__S3__" data-duration="__D3__" data-track-index="2">
             <div class="pre-title">__PRE3__</div>
-            <div class="main-text">__TEXT3__</div>
-            <div class="verse">— __VERSE__</div>
+            <div class="serif-quote">__TEXT3__</div>
+            <div class="ref-tag">— __REF__</div>
           </div>
           <div id="c4" class="clip card" data-start="__S4__" data-duration="__D4__" data-track-index="3">
             <div class="pre-title">__PRE4__</div>
             <div class="main-text">__TEXT4__</div>
-            <div class="verse" style="color: var(--gold); font-size: 32px; margin-top: 25px;">Comente AMÉM 🙏</div>
+            <div class="cta-pill">__CTA__</div>
           </div>
         </div>
         <div class="bottom-bar">
           <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="footer">@wallasnascimento_ • ideepregai</div>
+          <div class="footer">CÓDIGO ZERO • LINK NA BIO</div>
         </div>
       </div>
     </div>
@@ -120,17 +153,17 @@
       tl.to("#p5", { y: -500, opacity: 0, duration: DUR, ease: "none" }, 0);
       tl.to("#p6", { y: -540, opacity: 0, duration: DUR, ease: "none" }, 0);
 
-      tl.fromTo("#c1", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 0);
-      tl.to("#c1", { opacity: 0, y: -28, scale: 1.03, duration: 0.35, ease: "power2.in" }, S2 - 0.35);
+      tl.fromTo("#c1", { opacity: 0, y: 34, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, 0);
+      tl.to("#c1", { opacity: 0, y: -26, scale: 1.02, duration: 0.32, ease: "power2.in" }, S2 - 0.32);
 
-      tl.fromTo("#c2", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S2);
-      tl.to("#c2", { opacity: 0, y: -28, scale: 1.03, duration: 0.35, ease: "power2.in" }, S3 - 0.35);
+      tl.fromTo("#c2", { opacity: 0, y: 34, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, S2);
+      tl.to("#c2", { opacity: 0, y: -26, scale: 1.02, duration: 0.32, ease: "power2.in" }, S3 - 0.32);
 
-      tl.fromTo("#c3", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S3);
-      tl.to("#c3", { scale: 1.04, duration: 2.5, ease: "none" }, S3 + 0.45);
-      tl.to("#c3", { opacity: 0, y: -28, duration: 0.35, ease: "power2.in" }, S4 - 0.35);
+      tl.fromTo("#c3", { opacity: 0, y: 34, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, S3);
+      tl.to("#c3", { scale: 1.04, duration: 2.8, ease: "none" }, S3 + 0.42);
+      tl.to("#c3", { opacity: 0, y: -26, duration: 0.32, ease: "power2.in" }, S4 - 0.32);
 
-      tl.fromTo("#c4", { opacity: 0, y: 36, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, S4);
+      tl.fromTo("#c4", { opacity: 0, y: 34, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" }, S4);
 
       window.__timelines["main"] = tl;
       tl.seek(0);
