@@ -4,6 +4,14 @@
       "date": "2026-11-22 04:47 UTC",
       "topic": "Abstinência afetiva e a tentação de stalkear a nova pessoa do ex",
       "visual_type": "whatsapp"
+    },
+    {
+      "date": "2026-11-22 06:16 UTC",
+      "topic": "Ex mandou 'Oi, tudo bem?' do nada (Script #01)",
+      "visual_type": "whatsapp",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
