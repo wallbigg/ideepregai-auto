@@ -1,12 +1,10 @@
-name: Codigo Zero Reels Autopilot 15m
+name: Codigo Zero Reels Autopilot 30m
 
 on:
   schedule:
-    # 4 gatilhos separados por hora (a cada 15 min, 96/dia, respeitando cota Meta em publish.py)
+    # A cada 30 minutos (48/dia): abaixo do teto minimo de 50/24h e reduz risco de bloqueio
     - cron: "7 * * * *"
-    - cron: "22 * * * *"
     - cron: "37 * * * *"
-    - cron: "52 * * * *"
   workflow_dispatch:
 
 concurrency:
