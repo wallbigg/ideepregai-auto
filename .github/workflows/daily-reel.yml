@@ -2,11 +2,13 @@ name: Codigo Zero Reels Autopilot
 
 on:
   schedule:
-    # 3 Reels/dia em horários de pico emocional (BRT = UTC-3), evitando spam/bloqueio da Meta (5258005):
-    # 08:17 BRT (11:17 UTC) · 13:17 BRT (16:17 UTC) · 21:17 BRT (00:17 UTC - pré-Zona Morta 22h-02h)
+    # 4 Reels/dia nos horários de maior retenção/dor emocional (BRT = UTC-3),
+    # espaçados para não canibalizar alcance nem acionar bloqueio 5258005 da Meta:
+    # 08:17 BRT · 12:47 BRT · 17:47 BRT · 21:47 BRT (pré-Zona Morta 22h-02h)
     - cron: "17 11 * * *"
-    - cron: "17 16 * * *"
-    - cron: "17 0 * * *"
+    - cron: "47 15 * * *"
+    - cron: "47 20 * * *"
+    - cron: "47 0 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -38,7 +40,7 @@ jobs:
           fi
           pip install -q edge-tts
 
-      - name: Generate Codigo Zero Reel (Script + Voice + B-roll + Motion + Piano)
+      - name: Generate Codigo Zero Reel v2 (Multi-cut B-roll + Hook Card + Synced Captions + Ducking)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
@@ -48,7 +50,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
-          name: Codigo Zero Reel ${{ github.run_number }}
+          name: Codigo Zero Reel v2 #${{ github.run_number }}
           files: |
             build/reel_final.mp4
             build/caption.txt
