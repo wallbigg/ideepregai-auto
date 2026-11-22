@@ -2,8 +2,8 @@ name: Codigo Zero Reels Autopilot
 
 on:
   schedule:
-    # A cada 30 minutos (minutos :13 e :43 reduzem atraso da fila do GitHub Actions)
-    - cron: "13,43 * * * *"
+    # Limite maximo da API Meta: a cada 15 min (96/dia, teto oficial 100/24h com margem de 4 slots)
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 concurrency:
