@@ -723,14 +723,15 @@ Retorne APENAS JSON válido com todas as chaves acima.
             "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9},
         }).encode("utf-8")
 
-        for model in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]:
+        for model in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
             for attempt in range(2):
                 try:
                     req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-                    with urllib.request.urlopen(req, timeout=22) as resp:
+                    with urllib.request.urlopen(req, timeout=40) as resp:
                         res = json.loads(resp.read().decode("utf-8"))
-                    raw = res["candidates"][0]["content"]["parts"][0]["text"]
+                    raw = res["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw, flags=re.I)
                     parsed = json.loads(raw)
                     if _validate_script(parsed):
                         parsed["caption"] = parsed["caption"].replace("—", "-").replace("link da bio", "WhatsApp da bio")
@@ -892,12 +893,19 @@ def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: 
     if not script_tokens:
         return [], "empty", ""
 
-    # Tentativa 1: faster-whisper tiny word timestamps mapeados no texto original
+    # Tentativa 1: faster-whisper tiny via PCM float32 NumPy (evita av.open metadata_errors)
     try:
+        import numpy as np
         from faster_whisper import WhisperModel
 
+        raw16k = BUILD_DIR / "voz16k.raw"
+        subprocess.check_call([
+            "ffmpeg", "-y", "-v", "error", "-i", str(mp3_path),
+            "-ar", "16000", "-ac", "1", "-f", "f32le", str(raw16k),
+        ])
+        audio_np = np.fromfile(str(raw16k), dtype=np.float32)
         model = WhisperModel("tiny", device="cpu", compute_type="int8")
-        segments, _ = model.transcribe(str(mp3_path), language="pt", word_timestamps=True, vad_filter=True)
+        segments, _ = model.transcribe(audio_np, language="pt", word_timestamps=True, vad_filter=True)
         raw_words: list[dict] = []
         for seg in segments:
             for w in getattr(seg, "words", []) or []:
@@ -1102,7 +1110,7 @@ def build_scene1_html(script: dict) -> str:
             <svg viewBox="0 0 380 48" width="380" height="48">
               <path id="s1WavePath" d="M 4 24 L 60 24 L 82 24 L 98 6 L 116 42 L 134 10 L 152 38 L 170 24 L 245 24 L 265 8 L 285 40 L 304 24 L 376 24"
                 fill="none" stroke="#ff5c77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+                pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
             </svg>
           </div>
         </div>
@@ -1139,7 +1147,7 @@ def build_scene1_html(script: dict) -> str:
           </g>
           <circle cx="160" cy="160" r="126" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="14"/>
           <circle id="timerArc" cx="160" cy="160" r="126" fill="none" stroke="url(#gArc)" stroke-width="14" stroke-linecap="round"
-            transform="rotate(-90 160 160)" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+            transform="rotate(-90 160 160)" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
         </svg>
         <div class="gauge-center">
           <div class="timer-label">{html.escape(script["hook_label"])}</div>
@@ -1176,7 +1184,7 @@ def build_scene2_html(script: dict) -> str:
             <path id="waveArea" d="M 40 215 C 120 215, 145 56, 225 56 C 325 56, 405 198, 690 210 L 690 215 L 40 215 Z" fill="url(#wFill)"/>
             <path id="wavePath" d="M 40 215 C 120 215, 145 56, 225 56 C 325 56, 405 198, 690 210"
               fill="none" stroke="url(#wStroke)" stroke-width="7" stroke-linecap="round"
-              pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+              pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
             <circle id="waveDot" cx="40" cy="215" r="11" fill="#faf7f2" stroke="#d4af6a" stroke-width="5"/>
           </svg>
         </div>
@@ -1217,14 +1225,14 @@ def build_scene2_html(script: dict) -> str:
         <div><div class="flow-lbl">{html.escape(script["scene2_a_label"])}</div><div class="flow-txt">{html.escape(script["scene2_a_text"])}</div></div>
       </div>
       <svg width="36" height="34" viewBox="0 0 36 34">
-        <path id="flowArr0" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#d4af6a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+        <path id="flowArr0" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#d4af6a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
       </svg>
       <div class="flow-node" id="flow1">
         <div class="flow-idx">2</div>
         <div><div class="flow-lbl">{html.escape(script["scene2_b_label"])}</div><div class="flow-txt">{html.escape(script["scene2_b_text"])}</div></div>
       </div>
       <svg width="36" height="34" viewBox="0 0 36 34">
-        <path id="flowArr1" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#5cd3a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+        <path id="flowArr1" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#5cd3a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
       </svg>
       <div class="flow-node" id="flow2" style="border-color:rgba(92,211,166,0.5);">
         <div class="flow-idx" style="background:rgba(92,211,166,0.2);color:#9ef2d2;border-color:rgba(92,211,166,0.5);">✓</div>
@@ -1247,7 +1255,7 @@ def build_scene3_html(script: dict) -> str:
           <svg class="step-chk" viewBox="0 0 42 42">
             <circle cx="21" cy="21" r="18" fill="rgba(92,211,166,0.12)" stroke="rgba(92,211,166,0.45)" stroke-width="2"/>
             <path id="chk{idx}" d="M13 21.5 L18.5 27 L29.5 15.5" fill="none" stroke="#5cd3a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"
-              pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+              pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
           </svg>
         </div>
         """)
