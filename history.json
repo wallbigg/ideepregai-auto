@@ -12,6 +12,14 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-22 14:29 UTC",
+      "topic": "Já mandou textão e se humilhou? Botão de Reinício (#16)",
+      "visual_type": "contrast",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
