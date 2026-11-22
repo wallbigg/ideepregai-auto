@@ -1057,7 +1057,11 @@ def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple
             cur_len = 0
 
     if cur:
-        chunks.append({"start": cur[0]["start"], "end": cur[-1]["end"], "words": cur})
+        if len(cur) == 1 and chunks and len(chunks[-1]["words"]) <= 4:
+            chunks[-1]["words"].append(cur[0])
+            chunks[-1]["end"] = cur[0]["end"]
+        else:
+            chunks.append({"start": cur[0]["start"], "end": cur[-1]["end"], "words": cur})
 
     for i in range(len(chunks) - 1):
         next_start = chunks[i + 1]["start"]
@@ -1371,7 +1375,7 @@ def main() -> None:
         f"[4:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=700,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.09,volume=0.14,adelay={d2_ms}|{d2_ms}[sfx2];"
         f"[5:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=750,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.09,volume=0.14,adelay={d3_ms}|{d3_ms}[sfx3];"
         f"[6:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=850,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.11,volume=0.16,adelay={d4_ms}|{d4_ms}[sfx4];"
-        f"[vmain][bgmduck][sfx1][sfx2][sfx3][sfx4]amix=inputs=6:duration=first:dropout_transition=2,alimiter=limit=0.95[aout]",
+        f"[vmain][bgmduck][sfx1][sfx2][sfx3][sfx4]amix=inputs=6:duration=first:dropout_transition=2:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=7,alimiter=limit=0.95[aout]",
         "-map", "0:v", "-map", "[aout]",
         "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
