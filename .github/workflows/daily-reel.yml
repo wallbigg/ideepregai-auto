@@ -2,13 +2,8 @@ name: Codigo Zero Reels Autopilot
 
 on:
   schedule:
-    # 4 Reels/dia nos horários de maior retenção/dor emocional (BRT = UTC-3),
-    # espaçados para não canibalizar alcance nem acionar bloqueio 5258005 da Meta:
-    # 08:17 BRT · 12:47 BRT · 17:47 BRT · 21:47 BRT (pré-Zona Morta 22h-02h)
-    - cron: "17 11 * * *"
-    - cron: "47 15 * * *"
-    - cron: "47 20 * * *"
-    - cron: "47 0 * * *"
+    # A cada 30 minutos (minutos :13 e :43 reduzem atraso da fila do GitHub Actions)
+    - cron: "13,43 * * * *"
   workflow_dispatch:
 
 concurrency:
