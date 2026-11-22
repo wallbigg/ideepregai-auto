@@ -1,10 +1,21 @@
-name: Codigo Zero Reels Autopilot 30m
+name: Codigo Zero Reels Autopilot
 
 on:
   schedule:
-    # A cada 30 minutos (48/dia): abaixo do teto minimo de 50/24h e reduz risco de bloqueio
-    - cron: "7 * * * *"
-    - cron: "37 * * * *"
+    # 12 horarios explicitos/dia (BRT = UTC-3), minuto :23 fora de pico:
+    # 07:23 · 09:23 · 11:23 · 13:23 · 15:23 · 17:23 · 18:23 · 19:23 · 20:23 · 21:23 · 23:23 · 01:23 BRT
+    - cron: "23 4 * * *"
+    - cron: "23 10 * * *"
+    - cron: "23 12 * * *"
+    - cron: "23 14 * * *"
+    - cron: "23 16 * * *"
+    - cron: "23 18 * * *"
+    - cron: "23 20 * * *"
+    - cron: "23 21 * * *"
+    - cron: "23 22 * * *"
+    - cron: "23 23 * * *"
+    - cron: "23 0 * * *"
+    - cron: "23 2 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -17,19 +28,20 @@ permissions:
 jobs:
   generate-and-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "22"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.12"
 
       - name: Cache Whisper tiny model for instant word-sync
-        uses: actions/cache@v4
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/huggingface
           key: faster-whisper-tiny-v1
@@ -40,7 +52,7 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y --no-install-recommends ffmpeg
           fi
-          pip install -q edge-tts faster-whisper
+          pip install -q edge-tts faster-whisper numpy
 
       - name: Generate Codigo Zero Reel v3 (Emotional Female Voice + 4-Scene 1080x1920 Motion Graphics)
         env:
@@ -49,7 +61,7 @@ jobs:
 
       - name: Upload video to temporary GitHub Release for Meta API
         id: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
           name: Codigo Zero Reel v3 #${{ github.run_number }}
