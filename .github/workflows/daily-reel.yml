@@ -1,9 +1,12 @@
-name: Codigo Zero Reels Autopilot
+name: Codigo Zero Reels Autopilot 15m
 
 on:
   schedule:
-    # Limite maximo da API Meta: a cada 15 min (96/dia, teto oficial 100/24h com margem de 4 slots)
-    - cron: "7,22,37,52 * * * *"
+    # 4 gatilhos separados por hora (a cada 15 min, 96/dia, respeitando cota Meta em publish.py)
+    - cron: "7 * * * *"
+    - cron: "22 * * * *"
+    - cron: "37 * * * *"
+    - cron: "52 * * * *"
   workflow_dispatch:
 
 concurrency:
