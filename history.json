@@ -20,6 +20,14 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-22 20:45 UTC",
+      "topic": "Ele pediu para 'continuarem amigos' (Script #11)",
+      "visual_type": "whatsapp",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
