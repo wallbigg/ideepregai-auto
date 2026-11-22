@@ -32,15 +32,21 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Cache Whisper tiny model for instant word-sync
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: faster-whisper-tiny-v1
+
       - name: Install system and Python deps
         run: |
           if ! command -v ffmpeg >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y --no-install-recommends ffmpeg
           fi
-          pip install -q edge-tts
+          pip install -q edge-tts faster-whisper
 
-      - name: Generate Codigo Zero Reel v2 (Multi-cut B-roll + Hook Card + Synced Captions + Ducking)
+      - name: Generate Codigo Zero Reel v3 (Emotional Female Voice + 4-Scene 1080x1920 Motion Graphics)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
@@ -50,10 +56,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
-          name: Codigo Zero Reel v2 #${{ github.run_number }}
+          name: Codigo Zero Reel v3 #${{ github.run_number }}
           files: |
             build/reel_final.mp4
             build/caption.txt
+            build/meta.json
 
       - name: Publish Reel to Instagram
         env:
