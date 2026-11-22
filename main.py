@@ -558,21 +558,36 @@ def synthesize_voice_with_word_timings(text: str, out_mp3: Path) -> tuple[float,
 
 
 def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple[list[dict], str]:
-    """Agrupa palavras em blocos de 3-4 palavras (max ~24 chars) para legendas cinéticas sincronizadas."""
+    """Agrupa palavras em blocos naturais (2-4 palavras) respeitando pausas e início de frases."""
     chunks: list[dict] = []
     cur: list[dict] = []
     cur_len = 0
 
-    for w in words:
-        clean = re.sub(r"[^\wÀ-ÿ]", "", w["text"]).lower()
+    for idx, w in enumerate(words):
+        raw_txt = w["text"].strip()
+        if not raw_txt:
+            continue
+        clean = re.sub(r"[^\wÀ-ÿ]", "", raw_txt).lower()
         item = {
-            "text": w["text"],
+            "text": raw_txt,
             "start": round(w["start"] + delay_offset, 3),
             "end": round(w["end"] + delay_offset, 3),
             "emphasis": clean in EMPHASIS_WORDS,
         }
-        ends_sentence = bool(re.search(r"[.!?]$", w["text"]))
-        if cur and (len(cur) >= 4 or cur_len + len(w["text"]) > 24):
+        prev_gap = (item["start"] - cur[-1]["end"]) if cur else 0.0
+        starts_new_sentence = (
+            bool(cur)
+            and raw_txt[0].isupper()
+            and clean not in {"zero", "whatsapp", "instagram", "sos", "stanford", "código", "codigo", "dia"}
+            and prev_gap >= 0.12
+        )
+        ends_sentence = bool(re.search(r"[.!?]$", raw_txt))
+        if cur and (
+            len(cur) >= 4
+            or cur_len + len(raw_txt) > 22
+            or prev_gap >= 0.24
+            or starts_new_sentence
+        ):
             chunks.append({
                 "start": cur[0]["start"],
                 "end": cur[-1]["end"],
@@ -581,7 +596,7 @@ def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple
             cur = []
             cur_len = 0
         cur.append(item)
-        cur_len += len(w["text"]) + 1
+        cur_len += len(raw_txt) + 1
         if ends_sentence and len(cur) >= 2:
             chunks.append({
                 "start": cur[0]["start"],
@@ -695,7 +710,7 @@ def build_multicut_bg(clips: list[Path], total_dur: float, out_bg: Path) -> None
     for i in range(len(clips)):
         filters.append(
             f"[{i}:v]scale=1160:2062:force_original_aspect_ratio=increase,"
-            f"crop=1080:1920,setsar=1,fps=30,eq=brightness=-0.26:contrast=1.12:saturation=0.76,"
+            f"crop=1080:1920,setsar=1,fps=30,eq=brightness=-0.06:contrast=1.12:saturation=0.88,"
             f"trim=0:{seg_dur},setpts=PTS-STARTPTS[v{i}]"
         )
         concat_in.append(f"[v{i}]")
