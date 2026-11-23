@@ -44,6 +44,14 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 03:55 UTC",
+      "topic": "Ele mandou 'Sonhei com você' (Script #08)",
+      "visual_type": "whatsapp",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
