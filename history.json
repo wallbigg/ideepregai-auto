@@ -82,6 +82,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 11:00 UTC",
+      "topic": "Ela pediu um tempo, mas continua ativa nas redes (Masculino #01)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "thriller.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "4701",
+        "28897",
+        "52079"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Charon"
     }
   ]
 }
