@@ -67,6 +67,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Charon"
+    },
+    {
+      "date": "2026-11-23 07:59 UTC",
+      "topic": "Ele sumiu sem explicação? O silêncio é a resposta (Feminino #13)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "arpege.mp3",
+      "theme_start": "paper",
+      "broll_used": [
+        "46702",
+        "2846",
+        "40746"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
