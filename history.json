@@ -112,6 +112,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 22:11 UTC",
+      "topic": "Ela postou foto provocando ou indireta nos stories (Masculino #04)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "compte-a-rebours.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "41638",
+        "4915",
+        "49878"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Charon"
     }
   ]
 }
