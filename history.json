@@ -36,6 +36,14 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 03:01 UTC",
+      "topic": "Ele apareceu com outra pessoa nas redes (Script #13)",
+      "visual_type": "timer",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
