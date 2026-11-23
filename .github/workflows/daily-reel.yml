@@ -54,7 +54,7 @@ jobs:
           fi
           pip install -q edge-tts faster-whisper numpy
 
-      - name: Generate Codigo Zero Reel v3 (Emotional Female Voice + 4-Scene 1080x1920 Motion Graphics)
+      - name: Generate Codigo Zero Studio v4 Reel (Male & Female Voices + Mixkit B-Roll + Multi-Beat Editorial)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
@@ -64,7 +64,7 @@ jobs:
         uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
-          name: Codigo Zero Reel v3 #${{ github.run_number }}
+          name: Codigo Zero Studio v4 #${{ github.run_number }}
           files: |
             build/reel_final.mp4
             build/caption.txt
