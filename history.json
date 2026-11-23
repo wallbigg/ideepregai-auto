@@ -28,6 +28,14 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 01:54 UTC",
+      "topic": "Devolver coisas em casa é a maior porta de recaída (Script #05)",
+      "visual_type": "whatsapp",
+      "scene2_type": "bars",
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
