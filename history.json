@@ -52,6 +52,21 @@
       "scene2_type": "bars",
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-23 05:32 UTC",
+      "topic": "Homem que manda textão implorando mata a atração (Masculino #02)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "enquete.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "35426",
+        "4915",
+        "40746"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Charon"
     }
   ]
 }
