@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import base64
 import difflib
@@ -16,15 +17,48 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 HISTORY_FILE = ROOT / "history.json"
+ASSETS_DIR = ROOT / "assets"
 BUILD_DIR = ROOT / "build"
+BROLL_CACHE_DIR = BUILD_DIR / "broll_cache"
 BUILD_DIR.mkdir(exist_ok=True)
+BROLL_CACHE_DIR.mkdir(exist_ok=True)
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_TTS_VOICE = os.environ.get("GEMINI_TTS_VOICE", "Sulafat")
-EDGE_FALLBACK_VOICE = os.environ.get("TTS_VOICE", "pt-BR-FranciscaNeural")
 WHATSAPP_DISPLAY = "(12) 99659-3222"
 
-MUSIC_TOPICS = ["piano", "ambient", "cinematic", "sad", "calm"]
+VOICE_PROFILES = {
+    "masculino": {
+        "gemini_voices": ["Charon", "Orus", "Fenrir"],
+        "edge_voices": ["pt-BR-AntonioNeural", "pt-BR-FabioNeural", "pt-BR-DonatoNeural"],
+        "edge_rate": "-2%",
+        "edge_pitch": "-2Hz",
+        "audio_profile": (
+            "AUDIO PROFILE: Homem brasileiro de 32 anos, voz grave, firme e lúcida, "
+            "estilo documentário editorial moderno. Fala direta de respeito próprio após término, "
+            "sem tom caricato de coach. Respire brevemente antes das verdades fortes."
+        ),
+    },
+    "feminino": {
+        "gemini_voices": ["Sulafat", "Kore", "Aoede"],
+        "edge_voices": ["pt-BR-ThalitaMultilingualNeural", "pt-BR-FranciscaNeural"],
+        "edge_rate": "-2%",
+        "edge_pitch": "+0Hz",
+        "audio_profile": (
+            "AUDIO PROFILE: Mulher brasileira de 30 anos, voz próxima do microfone, "
+            "calma, lúcida e firme, estilo documentário editorial intimista. "
+            "Cadência natural e protetora, com pausas curtas antes de frases de corte."
+        ),
+    },
+}
+
+# Clipes Mixkit reais testados com HTTP 200 (zero marca d'água, zero API key)
+BROLL_POOL = {
+    "masculino_dor": ["4701", "35426", "35889", "46448", "41638"],
+    "masculino_foco": ["52079", "4808", "40746", "49878"],
+    "feminino_dor": ["8739", "25586", "46702", "43270"],
+    "feminino_foco": ["2846", "40746", "49878"],
+    "mood": ["28897", "28893", "28901", "2846", "4915", "40746", "49878"],
+}
 
 EMPHASIS_WORDS = {
     "não", "nunca", "jamais", "pare", "trava", "silêncio", "zero", "dói",
@@ -32,628 +66,995 @@ EMPHASIS_WORDS = {
     "noventa", "segundos", "madrugada", "recaída", "stalkear", "bloqueia",
     "dignidade", "paz", "mentira", "armadilha", "whatsapp", "bio", "sozinho",
     "sozinha", "culpa", "queimadura", "física", "reservas", "amigos",
-    "respeito", "controle", "desmame", "lucidez", "carência",
+    "respeito", "controle", "desmame", "lucidez", "carência", "atração",
+    "homem", "mulher", "ela", "ele", "tempo", "textão", "validação",
 }
 
-# 18 roteiros estruturados v3 (4 atos visuais: Gatilho -> Ciência/Análise -> 3 Passos -> Código Zero)
+# 20 roteiros Studio v4 balanceados (8 masculino, 7 feminino, 5 ambos)
 CURATED_SCRIPTS = [
+    # ── MASCULINO (01..08) ────────────────────────────────────────────────────
     {
-        "topic": "Ex mandou 'Oi, tudo bem?' do nada (Script #01)",
-        "badge": "SCRIPT #01 • ESCUDO",
-        "emotion_direction": "Comece com urgência protetora de amiga íntima, seja firme na explicação e acolhedora no final.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 01:42",
-        "hook_msg": "\"Oi... tudo bem por aí? Sumiu.\"",
-        "hook_alert": "NÃO RESPONDA NO IMPULSO",
-        "scene2_type": "bars",
-        "scene2_title": "O que acontece em cada escolha",
-        "scene2_a_label": "SE RESPONDER COM TEXTÃO",
-        "scene2_a_text": "Alimenta o ego dele e você volta para a estaca zero",
-        "scene2_b_label": "SILÊNCIO DO ESCUDO #01",
-        "scene2_b_text": "Você quebra o teste e recupera respeito imediato",
-        "scene2_metric": "Esforço zero merece resposta zero",
+        "topic": "Ela pediu um tempo, mas continua ativa nas redes (Masculino #01)",
+        "audience": "masculino",
+        "music_bed": "thriller",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["4701", "28897", "52079"],
+        "case_tag": "HOMENS • ESCUDO #08",
+        "emotion_direction": "Grave, direto, postura firme de irmão mais velho sem clichê.",
+        "hook_headline": "ELA PEDIU UM TEMPO?",
+        "hook_highlight": "TEMPO?",
+        "hook_card": {"sender": "Ela • 23:40", "msg": "\"Acho melhor darmos um tempo pra pensar...\"", "stamp": "ARMADILHA CLÁSSICA"},
+        "beat1_kicker": "REALIDADE SEM FILTRO",
+        "beat1_big": "TEMPO É TESTE DE SAÍDA.",
+        "beat1_sub": "Enquanto você espera, ela testa o mercado sem culpa.",
+        "board_type": "strike_stat",
+        "board_title": "O erro que mata seu respeito",
+        "board_big": "90%",
+        "board_wrong_lbl": "O QUE A MAIORIA DOS CARAS FAZ",
+        "board_wrong": "Manda textão todo dia provando amor e ficando disponível",
+        "board_right_lbl": "POSTURA CÓDIGO ZERO",
+        "board_right": "Aceita o término no ato e corta 100% da validação",
+        "board_source": "REGRA DE DIGNIDADE • PROTOCOLO 14 DIAS",
+        "beat3_kicker": "VIRADA MENTAL",
+        "beat3_big": "NÃO SEJA PLANO B.",
+        "beat3_sub": "Homem disponível demais perde valor na hora.",
+        "rehook_text": "Mas quase ninguém faz o passo mais simples.",
+        "rehook_sub": "Nos primeiros 7 dias, silêncio vale mais que mil discursos.",
         "steps": [
-            {"title": "Trave o dedo por 15 min", "desc": "Tire o celular do rosto antes de qualquer reação."},
-            {"title": "Não compense visualizações", "desc": "Abriu sem querer? Apenas feche e siga em silêncio."},
-            {"title": "Responda ao esforço real", "desc": "Quem quer voltar assume erros, não manda isca vaga."},
+            {"title": "Aceite em 1 linha", "desc": "Responda: 'Tranquilo, respeito sua decisão.'"},
+            {"title": "Corte visualização", "desc": "Não veja stories nem mande checagem diária."},
+            {"title": "Volte pro seu eixo", "desc": "Treino, trabalho e sono antes de qualquer tela."},
         ],
+        "cue_words": ["testar", "textão", "respeito", "simples", "passo", "ZERO"],
         "narration": (
-            "Se o seu ex mandou 'oi, tudo bem?' depois de semanas sumido... trava o dedo agora. "
-            "Ele não voltou arrependido. Isso é isca de esforço zero pra testar se você ainda tá no banco de reservas. "
-            "Se você responder na hora com textão, o ego dele enche e ele some de novo amanhã. "
-            "A ação certa? Silêncio absoluto. Se visualizou sem querer, não manda nada pra compensar. "
-            "Manda esse vídeo pra quem quase caiu nisso hoje. E se quiser os dezesseis scripts prontos do Código Zero, comenta ZERO ou chama no WhatsApp da bio."
+            "Se ela pediu um tempo e já tá online até tarde... acorda agora. "
+            "Ninguém pede tempo pra te amar mais. Ela tá querendo testar a vida solteira sem perder sua rede de segurança. "
+            "Se você mandar textão cobrando atenção, mata o resto de respeito que ela ainda tinha por você. "
+            "Aceita a escolha em silêncio e sai do palco. "
+            "Mas quase ninguém faz o passo mais simples. "
+            "Em um passo: diga que respeita, suma dos stories dela e jogue sua energia no treino e no foco. "
+            "Comenta ZERO aqui que eu te envio os dezesseis scripts e o protocolo de catorze dias."
         ),
         "caption": (
-            "Salva antes de responder qualquer 'oi sumido' na madrugada.\n\n"
-            "Quando o ex manda mensagem vazia depois do término, responder na ansiedade só alimenta o ego dele e reinicia a sua dor. "
-            "A regra do contato zero no Código Zero é simples: responda ao tamanho real do esforço, nunca ao tamanho da sua saudade.\n\n"
+            "Pedido de tempo quase nunca é dúvida, é saída em câmera lenta.\n\n"
+            "Quando o homem tenta segurar no grito ou no textão, ele confirma carência e acelera o afastamento. "
+            "No Código Zero você aprende a cortar a validação na hora certa e recuperar seu eixo em 14 dias.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#contatozero #superartermino #dependenciaemocional #exmandoumensagem #codigozero"
+            "#desenvolvimentomasculino #contatozero #superartermino #postura #codigozero"
         ),
     },
     {
-        "topic": "Por que saudade dói no corpo como queimadura (Kross 2011)",
-        "badge": "NEUROCIÊNCIA • PÁG. 04",
-        "emotion_direction": "Tom acolhedor, humano e esclarecedor para tirar a culpa da pessoa que sofre.",
-        "visual_type": "timer",
-        "hook_label": "ESTUDO • UNIV. DE MICHIGAN",
-        "hook_big": "DOR FÍSICA",
-        "hook_sub": "Rejeição aciona a mesma rede cerebral de uma queimadura",
-        "scene2_type": "wave",
-        "scene2_title": "Curva da abstinência afetiva",
-        "scene2_a_label": "DIAS 1 A 4 • CORTE QUÍMICO",
-        "scene2_a_text": "Cérebro pede dopamina e gera dor física real",
-        "scene2_b_label": "DIA 14 • REORGANIZAÇÃO",
-        "scene2_b_text": "Circuito acalma com rotina de desmame diário",
-        "scene2_metric": "Não é fraqueza: é biologia pura",
+        "topic": "Homem que manda textão implorando mata a atração (Masculino #02)",
+        "audience": "masculino",
+        "music_bed": "enquete",
+        "theme_start": "noir",
+        "hook_mode": "cinema",
+        "broll_ids": ["35426", "4915", "40746"],
+        "case_tag": "HOMENS • ANTI-RECAÍDA",
+        "emotion_direction": "Tom lúcido, sério e respeitoso, falando diretamente de homem para homem.",
+        "hook_headline": "TEXTÃO MATA SUA ATRAÇÃO.",
+        "hook_highlight": "MATA",
+        "hook_card": {"sender": "Você • 01:12", "msg": "\"Eu juro que vou mudar, me dá só mais uma chance...\"", "stamp": "CARÊNCIA EXPOSTA"},
+        "beat1_kicker": "DINÂMICA REAL",
+        "beat1_big": "ATRAÇÃO NÃO SE NEGOCIA.",
+        "beat1_sub": "Lógica nunca convence quem já esfriou emocionalmente.",
+        "board_type": "strike_stat",
+        "board_title": "Textão vs Silêncio Frio",
+        "board_big": "0%",
+        "board_wrong_lbl": "CHANCE DE RECONQUISTA NO RASTO",
+        "board_wrong": "Explicar em 30 linhas tudo que vocês viveram juntos",
+        "board_right_lbl": "O QUE MUDA O JOGO",
+        "board_right": "Sair de cena de cabeça erguida no mesmo segundo",
+        "board_source": "ESTATÍSTICA DE POSTURA • CÓDIGO ZERO",
+        "beat3_kicker": "CONTRASTE",
+        "beat3_big": "RESPEITO VEM ANTES DE SAUDADE.",
+        "beat3_sub": "Ela só sente falta quando você para de orbitar.",
+        "rehook_text": "O erro tá em confundir dor com fraqueza.",
+        "rehook_sub": "Você pode sangrar por dentro sem se humilhar no WhatsApp.",
         "steps": [
-            {"title": "Pare de se culpar hoje", "desc": "Aceite que seu corpo está em desmame químico."},
-            {"title": "Corte gatilhos visuais", "desc": "Fotos e chat visíveis reiniciam o pico no cérebro."},
-            {"title": "Siga 14 dias estruturados", "desc": "Substitua força bruta por método passo a passo."},
+            {"title": "Apague o rascunho já", "desc": "Escreveu textão? Mova para notas, nunca envie."},
+            {"title": "Regra de 24 horas", "desc": "Nenhuma resposta sai com o peito acelerado."},
+            {"title": "Assuma o volante", "desc": "Retome sua rotina física e mental por 14 dias."},
         ],
+        "cue_words": ["lógica", "textão", "respeito", "erro", "apague", "ZERO"],
         "narration": (
-            "Você acordou hoje com um aperto real no peito e achou que perdeu o amor-próprio? Escuta isso. "
-            "Uma pesquisa da Universidade de Michigan provou que a rejeição amorosa aciona a mesma rede cerebral de uma queimadura física. "
-            "Não é fraqueza sua. É corte químico de dopamina. "
-            "Por isso conselho raso de 'é só esquecer' nunca funciona. Você precisa de um protocolo de desmame de catorze dias. "
-            "Envia pra alguém que tá se culpando por ainda sofrer. Quer o Código Zero completo? Comenta ZERO ou chama no WhatsApp da bio."
+            "Para de escrever textão tentando convencer sua ex a ficar. "
+            "Atração não obedece a argumento nem a promessa desesperada. A lógica nunca convence quem já desconectou por dentro. "
+            "Cada mensagem comprida provando amor só entrega alívio pro ego dela e tira o peso da perda. "
+            "Ela só respeita quem consegue se retirar de cena inteiro. "
+            "O erro tá em confundir dor com fraqueza. "
+            "Apague o rascunho agora, trave o dedo por vinte e quatro horas e reconstrua sua rotina em silêncio. "
+            "Comenta ZERO que eu te mando o plano completo no seu WhatsApp."
         ),
         "caption": (
-            "Para de se chamar de fraco ou fraca por ainda sentir aperto no peito.\n\n"
-            "Entender como superar término começa na neurociência: estudos de imagem cerebral mostram que a abstinência afetiva imita dor física. "
-            "Você não sai disso na força bruta, sai com método diário de 14 dias.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#dependenciaemocional #superartermino #neurociencia #saudeemocional #codigozero"
-        ),
-    },
-    {
-        "topic": "A Regra 90-15 antes de mandar mensagem às 23h",
-        "badge": "FASE Z • REGRA 90–15",
-        "emotion_direction": "Voz calma, firme e prática, guiando quem está prestes a ter uma recaída.",
-        "visual_type": "timer",
-        "hook_label": "TRAVA ANTI-RECAÍDA",
-        "hook_big": "01:30",
-        "hook_sub": "O pico químico da crise dura só 90 segundos",
-        "scene2_type": "wave",
-        "scene2_title": "O ciclo de 90 segundos da crise",
-        "scene2_a_label": "0 A 90 SEGUNDOS",
-        "scene2_a_text": "Adrenalina e vontade urgente sobem no limite",
-        "scene2_b_label": "APÓS 15 MINUTOS",
-        "scene2_b_text": "Onda passa e a lucidez assume o volante",
-        "scene2_metric": "90s de onda vs 15 min de trava",
-        "steps": [
-            {"title": "Largue o celular fora da vista", "desc": "Deixe o aparelho em outro cômodo imediatamente."},
-            {"title": "Dispare 15 min no relógio", "desc": "Escreva tudo num papel sem enviar nada."},
-            {"title": "Pergunte sobre as 9h da manhã", "desc": "Amanhã eu vou sentir orgulho ou vergonha?"},
-        ],
-        "narration": (
-            "Tá com o dedo coçando pra mandar mensagem pro seu ex agora? Faz a Regra Noventa Quinze. "
-            "A descarga química da crise emocional dura só noventa segundos no sangue. Ela só dura a noite inteira porque você fica olhando o celular. "
-            "Larga o aparelho em outro cômodo, dispara quinze minutos no relógio e escreve tudo num papel sem enviar. "
-            "Quando o alarme tocar, pergunta: amanhã às nove da manhã eu vou sentir orgulho ou vergonha? "
-            "Salva pra abrir hoje à noite. Quer a Central SOS com cronômetro no celular? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Nenhuma mensagem enviada no pico do pânico às 23h já reconquistou respeito.\n\n"
-            "A Regra 90-15 é a trava mais forte para parar de mandar mensagem para ex e evitar a ressaca moral no dia seguinte. "
-            "Na Central SOS do Código Zero você tem o cronômetro de 15 minutos direto no celular.\n\n"
+            "Nenhuma mensagem de 30 linhas já trouxe respeito de volta.\n\n"
+            "Homem também sente abstinência pesada no término, mas se humilhar no chat só destrói a própria imagem. "
+            "Segure a onda com técnica e protocolo prático de 14 dias.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#contatozero #fimderelacionamento #amorproprio #dependenciaemocional #codigozero"
+            "#homem #contatozero #amorproprio #termino #codigozero"
         ),
     },
     {
-        "topic": "Esta mensagem foi apagada (Script #04)",
-        "badge": "SCRIPT #04 • ISCA",
-        "emotion_direction": "Tom lúcido, direto e protetor, cortando a ansiedade da curiosidade na hora.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 23:54",
-        "hook_msg": "⊘ Esta mensagem foi apagada",
-        "hook_alert": "ARMADILHA DE CURIOSIDADE",
-        "scene2_type": "flow",
-        "scene2_title": "Como a isca captura sua mente",
-        "scene2_a_label": "A ISCA DIGITAL",
-        "scene2_a_text": "Apagar mensagem gera urgência sem compromisso algum",
-        "scene2_b_label": "SEU INSTINTO",
-        "scene2_b_text": "Perguntar 'o que era?' entrega controle de graça",
-        "scene2_metric": "Silêncio absoluto desarma a armadilha na hora",
+        "topic": "Por que o homem demora 14 dias pra sentir o baque (Masculino #03)",
+        "audience": "masculino",
+        "music_bed": "arpege",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["35889", "28893", "52079"],
+        "case_tag": "HOMENS • BIOLOGIA",
+        "emotion_direction": "Calmo, esclarecedor, documentário científico para homens.",
+        "hook_headline": "NO DIA 14 O BAQUE BATE.",
+        "hook_highlight": "DIA 14",
+        "hook_card": {"sender": "SEMANA 01", "msg": "\"Achei que eu tava bem... por que doeu agora?\"", "stamp": "REBOTE TARDIO"},
+        "beat1_kicker": "FISIOLOGIA DO TÉRMINO",
+        "beat1_big": "ALÍVIO NO INÍCIO É ILUSÃO.",
+        "beat1_sub": "O cérebro masculino anestesia o impacto na primeira semana.",
+        "board_type": "neuro_curve",
+        "board_title": "Curva masculina pós-término",
+        "board_a_label": "DIAS 1 A 7 • ANESTESIA",
+        "board_a_text": "Adrenalina e distração mascaram a perda real",
+        "board_b_label": "DIA 14 • PICO TARDIO",
+        "board_b_text": "Rotina silencia e a abstinência cobra o preço",
+        "board_source": "DINÂMICA DOPAMINÉRGICA • CENTRAL SOS",
+        "beat3_kicker": "ALERTA DE RECAÍDA",
+        "beat3_big": "É AÍ QUE O CARA TROPEÇA.",
+        "beat3_sub": "Na segunda semana ele procura ex achando que foi destino.",
+        "rehook_text": "Você não piorou. Seu cérebro só acordou.",
+        "rehook_sub": "Quem entende o relógio não cai na armadilha da madrugada.",
         "steps": [
-            {"title": "Não pergunte o que era", "desc": "Curiosidade aberta é convite para joguinho."},
-            {"title": "Lembre da regra adulta", "desc": "Se fosse sério e sincero, escreveria de novo."},
-            {"title": "Arquive a conversa", "desc": "Tire o chat do topo para não ficar olhando."},
+            {"title": "Antecipe o dia 10 a 14", "desc": "Saiba que o vazio tardio é químico, não intuição."},
+            {"title": "Use a Central SOS", "desc": "Dispare a trava de 15 min antes de reagir."},
+            {"title": "Feche o protocolo", "desc": "Mantenha contato zero mesmo quando a ficha cair."},
         ],
+        "cue_words": ["anestesia", "semana", "tropeça", "acordou", "antecipe", "ZERO"],
         "narration": (
-            "Apareceu 'esta mensagem foi apagada' no chat do seu ex? Pelo amor de Deus, não pergunta o que era. "
-            "Essa é uma das iscas mais velhas pra disparar ansiedade e fazer você puxar conversa primeiro. "
-            "Pensa comigo: se fosse algo adulto, sincero e importante de verdade, a pessoa teria coragem de escrever de novo. "
-            "Se apagou, deixa no vácuo. Você quebra o controle emocional na hora. "
-            "Manda pra amiga que ia perguntar 'o que você ia falar?'. Quer os dezesseis scripts prontos? Comenta ZERO ou chama no WhatsApp da bio."
+            "Você achou que tinha superado sua ex na primeira semana e no dia catorze desabou do nada? "
+            "Isso é biologia pura. Nos primeiros dias o cérebro cria uma anestesia de adrenalina e orgulho. "
+            "Quando a poeira baixa na segunda semana, a abstinência bate atrasada e o silêncio pesa de verdade. "
+            "É exatamente aí que a maioria dos caras tropeça e manda mensagem às onze da noite. "
+            "Você não piorou. Seu cérebro só acordou. "
+            "Antecipe essa janela, dispare a trava antes de agir e feche o protocolo completo. "
+            "Comenta ZERO aqui pra receber a Central SOS e os dezesseis scripts."
         ),
         "caption": (
-            "Se fosse adulto e importante de verdade, não teria sido apagado.\n\n"
-            "Saber lidar com sinais ambíguos evita recaídas no contato zero e devolve sua paz mental pós término. "
-            "No Código Zero você tem 16 scripts prontos para cada armadilha sem improvisar.\n\n"
+            "Muitos homens acham que estão bem nos primeiros dias e levam o golpe na semana dois.\n\n"
+            "Entender esse rebote tardio impede que você jogue fora duas semanas de postura em uma recaída às 23h.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#contatozero #exmandoumensagem #relacionamentotoxico #amorproprio #codigozero"
+            "#terminodenamoro #psicologiamasculina #contatozero #mente #codigozero"
         ),
     },
     {
-        "topic": "Já mandou textão e se humilhou? Botão de Reinício (#16)",
-        "badge": "SCRIPT #16 • RESGATE",
-        "emotion_direction": "Voz acolhedora no início para aliviar a vergonha, e cirurgicamente firme no script.",
-        "visual_type": "contrast",
-        "hook_left_tag": "O QUE PIORA TUDO",
-        "hook_left_text": "Mandar mais 10 áudios tentando explicar o textão",
-        "hook_right_tag": "BOTÃO DE REINÍCIO",
-        "hook_right_text": "1 frase elegante + silêncio absoluto",
-        "scene2_type": "bars",
-        "scene2_title": "Como salvar sua dignidade hoje",
-        "scene2_a_label": "SE TENTAR CONCERTAR",
-        "scene2_a_text": "Cada áudio novo aumenta a sensação de desespero",
-        "scene2_b_label": "BOTÃO DE REINÍCIO #16",
-        "scene2_b_text": "Encerra com classe e devolve mistério na hora",
-        "scene2_metric": "1 frase limpa apaga o peso do textão",
+        "topic": "Ela postou foto provocando ou indireta nos stories (Masculino #04)",
+        "audience": "masculino",
+        "music_bed": "compte-a-rebours",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["41638", "4915", "49878"],
+        "case_tag": "HOMENS • RADAR SOCIAL",
+        "emotion_direction": "Firme, estratégico e irônico na medida certa contra jogos de ego.",
+        "hook_headline": "ESSA FOTO FOI PRA VOCÊ VER.",
+        "hook_highlight": "PRA VOCÊ",
+        "hook_card": {"sender": "Stories • 22:18", "msg": "Postou saída noturna ou legenda enigmática...", "stamp": "ISCA DE REAÇÃO"},
+        "beat1_kicker": "JOGO DE VALIDAÇÃO",
+        "beat1_big": "ELA QUER SUA REAÇÃO.",
+        "beat1_sub": "Curtida, resposta ou ciúme provam que você ainda tá preso.",
+        "board_type": "msg_deconstruct",
+        "board_title": "Decodificando o story",
+        "board_msg": "\"Indireta / foto produzida às 22h no primeiro fim de semana\"",
+        "board_decode": "TRADUÇÃO: 'Preciso confirmar que ele ainda olha o meu nome primeiro.'",
+        "board_source": "BLINDAGEM DIGITAL • SCRIPT #09",
+        "beat3_kicker": "RESPOSTA MORTAL",
+        "beat3_big": "SILÊNCIO GELA O TESTE.",
+        "beat3_sub": "Quem não entra na isca inverte o poder na hora.",
+        "rehook_text": "Olhar o story já é dar ponto pra ela.",
+        "rehook_sub": "Se você silenciar hoje, sua paz volta antes do domingo.",
         "steps": [
-            {"title": "Pare os áudios agora", "desc": "Não envie nenhuma explicação longa extra."},
-            {"title": "Envie o Script #16", "desc": "Concorde com serenidade e deseje felicidades."},
-            {"title": "Entre no Contato Zero", "desc": "Depois de enviar, desapareça com dignidade."},
+            {"title": "Silencie stories e notas", "desc": "Não dê audiência para quem saiu da sua vida."},
+            {"title": "Nunca reaja com emoji", "desc": "Reação rápida entrega ansiedade disfarçada."},
+            {"title": "Construa presença real", "desc": "Sua ausência faz o barulho que você não fez."},
         ],
+        "cue_words": ["reação", "traduzindo", "teste", "olhar", "silencie", "ZERO"],
         "narration": (
-            "Chorou, mandou textão de madrugada e agora tá morrendo de vergonha? Para tudo. "
-            "O pior erro agora é mandar mais dez mensagens tentando se justificar. "
-            "Usa uma única vez o Botão de Reinício do Código Zero: 'Falei muita coisa no calor da emoção. Pensando com calma, você tinha razão, encerrar foi o melhor pra nós dois. Te desejo felicidades.' "
-            "Envia isso e some. Você retoma a última palavra com elegância cirúrgica. "
-            "Salva esse vídeo agora. Quer o protocolo completo de catorze dias? Comenta ZERO ou chama no WhatsApp da bio."
+            "Sua ex postou indireta ou foto provocando no sábado à noite? Não morda essa isca. "
+            "Ela não tá tentando voltar agora. Ela só quer confirmar que ainda controla sua reação com um clique. "
+            "Traduzindo pro português claro: cada curtida sua vira combustível pro ego dela seguir longe. "
+            "Quando você desaparece da lista de visualizações, o teste esfria na hora. "
+            "Só olhar o story dela já é dar ponto de graça. "
+            "Silencie tudo hoje, guarde sua energia e devolva sua ausência completa. "
+            "Comenta ZERO aqui pra acessar a blindagem digital completa."
         ),
         "caption": (
-            "Ter tropeçado ontem não apaga o seu valor. Tentar consertar no desespero é o que drena sua paz.\n\n"
-            "O Script #16 do Código Zero foi criado para quem já mandou textão para ex e precisa virar a chave hoje com dignidade e silêncio real.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#superartermino #contatozero #dignidade #autoestima #codigozero"
-        ),
-    },
-    {
-        "topic": "O perigo da Zona Morta (22h às 02h)",
-        "badge": "ZONA MORTA • 22H ÀS 02H",
-        "emotion_direction": "Tom noturno, próximo e direto, alertando sobre o cansaço do cérebro à noite.",
-        "visual_type": "timer",
-        "hook_label": "ALERTA NOTURNO",
-        "hook_big": "70%",
-        "hook_sub": "das mensagens de recaída acontecem na cama à noite",
-        "scene2_type": "wave",
-        "scene2_title": "Queda do freio racional à noite",
-        "scene2_a_label": "22H ÀS 02H • ZONA MORTA",
-        "scene2_a_text": "Cansaço desliga o racional e dobra a saudade",
-        "scene2_b_label": "COM TRAVA FÍSICA",
-        "scene2_b_text": "Ambiente blindado impede recaídas na cama",
-        "scene2_metric": "Força de vontade falha; ambiente vence",
-        "steps": [
-            {"title": "Carregador fora do quarto", "desc": "Às 22h30 o aparelho dorme longe da cama."},
-            {"title": "Áudio neutro com timer", "desc": "Evite o silêncio pesado que puxa memórias."},
-            {"title": "Cartão SOS visível", "desc": "Deixe a trava da Central SOS na tela de bloqueio."},
-        ],
-        "narration": (
-            "Setenta por cento das recaídas de término acontecem entre dez da noite e duas da manhã. "
-            "Não é coincidência. Com o cérebro exausto na horizontal, o córtex racional desliga e a saudade dobra de tamanho. "
-            "Força de vontade falha às onze da noite. Só trava física protege você. "
-            "Hoje às dez e meia, coloca o carregador fora do alcance da cama e bota um áudio neutro de fundo com timer. "
-            "Manda pra quem sempre recai na madrugada. Quer o Protocolo da Madrugada e os seis Cartões SOS? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Nenhuma decisão amorosa tomada deitado na cama às 23h é lúcida.\n\n"
-            "Se a saudade do ex aperta toda madrugada, você precisa de travas físicas de ambiente e do Protocolo da Madrugada do Código Zero.\n\n"
+            "Não confunda provocação de ego no story com vontade real de resolver o término.\n\n"
+            "Quem controla onde coloca a atenção controla o próprio respeito depois da separação.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#superartermino #insonia #dependenciaemocional #contatozero #codigozero"
+            "#jogodeego #contatozero #homens #redesociais #codigozero"
         ),
     },
     {
-        "topic": "Ele mandou 'Sonhei com você' (Script #08)",
-        "badge": "SCRIPT #08 • NOSTALGIA",
-        "emotion_direction": "Voz calma, empática e elegante, desarmando o apelo nostálgico com classe.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 22:18",
-        "hook_msg": "\"Sonhei com você ontem... passei lá e lembrei da gente\"",
-        "hook_alert": "TESTE DE EGO DETECTADO",
-        "scene2_type": "bars",
-        "scene2_title": "Nostalgia vaga vs Intenção real",
-        "scene2_a_label": "DERRETER NA RESPOSTA",
-        "scene2_a_text": "Mostra porta aberta sem compromisso real de volta",
-        "scene2_b_label": "RESPOSTA DO SCRIPT #08",
-        "scene2_b_text": "Impõe limite gentil e testa se há atitude real",
-        "scene2_metric": "Quem quer voltar fala claro, não usa charada",
+        "topic": "Ela disse podemos continuar amigos (Masculino #05)",
+        "audience": "masculino",
+        "music_bed": "thriller",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["46448", "28901", "52079"],
+        "case_tag": "HOMENS • SCRIPT #11",
+        "emotion_direction": "Sério, objetivo e protetor da dignidade masculina.",
+        "hook_headline": "NÃO ACEITA SER SÓ AMIGO.",
+        "hook_highlight": "SÓ AMIGO.",
+        "hook_card": {"sender": "Ex • Agora", "msg": "\"Você é especial... quero manter sua amizade.\"", "stamp": "ZONA DE CONFORTO DELA"},
+        "beat1_kicker": "VERDADE DURA",
+        "beat1_big": "AMIZADE AMORTECE A PERDA DELA.",
+        "beat1_sub": "Você continua lá sem ela assumir nenhum compromisso.",
+        "board_type": "strike_stat",
+        "board_title": "O preço oculto do 'amigo'",
+        "board_big": "2X",
+        "board_wrong_lbl": "SE VOCÊ ACEITAR O PAPEL",
+        "board_wrong": "Ela supera em paz usando seu apoio enquanto segue livre",
+        "board_right_lbl": "LIMITE CÓDIGO ZERO",
+        "board_right": "Recuse a migalha e retire sua presença por inteiro",
+        "board_source": "SCRIPT #11 • LIMITE CLARO",
+        "beat3_kicker": "CONSEQUÊNCIA",
+        "beat3_big": "SEM VOCÊ POR PERTO ELA PENSA.",
+        "beat3_sub": "É a única chance real de existir respeito ou superação.",
+        "rehook_text": "Mas dá pra recusar sem ser grosso nem infantil.",
+        "rehook_sub": "Uma única frase elegante muda como ela te enxerga.",
         "steps": [
-            {"title": "Respire antes de ler de novo", "desc": "Saudade vaga não significa pedido de volta."},
-            {"title": "Use resposta curta e serena", "desc": "Agradeça as boas lembranças e foque em você."},
-            {"title": "Observe o movimento real", "desc": "Se era só ego, ele desaparece sem insistir."},
+            {"title": "Não discuta o término", "desc": "Zero ataque emocional ou tentativa de cobrança."},
+            {"title": "Mande a trava limpa", "desc": "'Não faz sentido amizade agora. Se cuida.'"},
+            {"title": "Desapareça de verdade", "desc": "Deixe ela sentir 100% da sua ausência."},
         ],
+        "cue_words": ["amortece", "preço", "chances", "grosso", "discuta", "ZERO"],
         "narration": (
-            "Ele mandou 'sonhei com você' ou 'passei naquele lugar e lembrei da gente'? Respira antes de derreter. "
-            "Nostalgia vaga não é pedido de volta nem assunção de erro. Ele só tá testando se a porta ainda tá destrancada. "
-            "Se você responder 'eu também tô morrendo de saudade', o poder some. "
-            "Responde curto e sereno: 'Fico feliz que tenham ficado boas lembranças. Hoje tô focada na minha rotina e prefiro manter meu espaço. Se cuida.' "
-            "Manda pra quem ia derreter nessa mensagem. Quer os dezesseis scripts? Comenta ZERO ou chama no WhatsApp da bio."
+            "Se ela terminou com você e pediu pra continuar sendo amigo... recuse na hora. "
+            "Amizade pós-término só amortece a culpa dela enquanto você assiste de camarote ela seguir a vida. "
+            "Você paga o preço emocional em dobro: continua disponível, sem exclusividade e sem paz. "
+            "Só existe respeito quando você recusa o lugar de reserva. "
+            "Mas dá pra recusar sem ser grosso nem infantil. "
+            "Não discuta, diga que não vê sentido em amizade agora e desapareça com dignidade. "
+            "Comenta ZERO pra pegar os dezesseis scripts prontos do Código Zero."
         ),
         "caption": (
-            "Quem quer construir de novo fala com clareza, não com charada nostálgica.\n\n"
-            "Essa resposta do Script #08 desarma mensagens vagas de ex mantendo sua classe intacta. Se era apenas ego, acaba ali na hora.\n\n"
-            "Quer os 16 Scripts e a Central SOS? Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#exmandoumensagem #contatozero #limitesemocionais #superartermino #codigozero"
-        ),
-    },
-    {
-        "topic": "Por que o Dia 3 do Contato Zero dói mais forte (Pico de Extinção)",
-        "badge": "DIA 03 • PICO DE EXTINÇÃO",
-        "emotion_direction": "Voz serena e encorajadora para quem está no terceiro dia pensando em desistir.",
-        "visual_type": "timer",
-        "hook_label": "CURVA DE 14 DIAS",
-        "hook_big": "DIA 03",
-        "hook_sub": "O ponto em que 80% desistem bem antes da virada",
-        "scene2_type": "wave",
-        "scene2_title": "O Pico de Extinção no Dia 3",
-        "scene2_a_label": "DIAS 3 A 4 • GRITO DO HÁBITO",
-        "scene2_a_text": "Cérebro eleva a dor ao máximo por falta de dopamina",
-        "scene2_b_label": "DIA 5 EM DIANTE",
-        "scene2_b_text": "Quando você não cede, a curva despenca rápido",
-        "scene2_metric": "Dor no Dia 3 prova que o desmame funciona",
-        "steps": [
-            {"title": "Não interprete como regressão", "desc": "Piorar no Dia 3 é resposta normal do cérebro."},
-            {"title": "Sobreviva só às próximas 24h", "desc": "Não pense em 'para sempre', vença só hoje."},
-            {"title": "Registre no Diário 14 Dias", "desc": "Acompanhe a queda real da dor dia após dia."},
-        ],
-        "narration": (
-            "Se você tá no terceiro dia sem falar com seu ex e hoje doeu o dobro de ontem, calma. Você não regrediu. "
-            "Na psicologia comportamental isso se chama pico de extinção. "
-            "Sempre que você corta um vício, o cérebro grita mais alto no terceiro dia pra ver se você cede e entrega a dose. "
-            "A maioria desiste exatamente horas antes da curva começar a despencar. "
-            "Salva pra reler quando o Dia Três bater. Quer o mapa dos catorze dias com gráfico da dor? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Se hoje a vontade doeu mais forte, é sinal biológico de que o desmame está funcionando.\n\n"
-            "No Diário de 14 Dias e no gráfico ao vivo da Central SOS do Código Zero, você atravessa o pico de extinção sabendo exatamente o que fazer.\n\n"
+            "Aceitar amizade quando você ainda sente algo é assinar o próprio desgaste.\n\n"
+            "No Script #11 do Código Zero você tem a resposta exata, curta e madura pra fechar essa porta sem cena.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#contatozero #dependenciaemocional #superartermino #psicologiapratica #codigozero"
+            "#amizadecomex #posturamasculina #contatozero #superacao #codigozero"
         ),
     },
     {
-        "topic": "Amnésia Seletiva: você sente falta de uma fantasia",
-        "badge": "FASE R • AUTÓPSIA",
-        "emotion_direction": "Voz lúcida, firme e empática, trazendo pés no chão sem julgamento.",
-        "visual_type": "contrast",
-        "hook_left_tag": "O QUE A SAUDADE EDITA",
-        "hook_left_text": "Só os abraços, viagens e promessas bonitas",
-        "hook_right_tag": "O QUE ELA APAGA",
-        "hook_right_text": "As noites de ansiedade, frieza e pisar em ovos",
-        "scene2_type": "bars",
-        "scene2_title": "Memória editada vs Fatos reais",
-        "scene2_a_label": "FILTRO DA ABSTINÊNCIA",
-        "scene2_a_text": "Exagera os momentos raros para forçar seu retorno",
-        "scene2_b_label": "AUTÓPSIA DOS 8 PILARES",
-        "scene2_b_text": "Mede paz, respeito e reciprocidade sem fantasia",
-        "scene2_metric": "Você sofre pela edição, não pela pessoa real",
+        "topic": "Ela mandou 'oi, como você tá?' depois do gelo (Masculino #06)",
+        "audience": "masculino",
+        "music_bed": "enquete",
+        "theme_start": "noir",
+        "hook_mode": "cinema",
+        "broll_ids": ["4808", "4915", "40746"],
+        "case_tag": "HOMENS • SCRIPT #02",
+        "emotion_direction": "Voz grave e segura, cortando ansiedade no segundo em que a notificação chega.",
+        "hook_headline": "ELA SUMIU E VOLTOU DO NADA?",
+        "hook_highlight": "DO NADA?",
+        "hook_card": {"sender": "Ex • 00:52", "msg": "\"Oi sumido... sonhei com você hoje.\"", "stamp": "RADAR DE ATENÇÃO"},
+        "beat1_kicker": "CUIDADO AGORA",
+        "beat1_big": "ESFORÇO MÍNIMO NÃO É VOLTA.",
+        "beat1_sub": "Uma frase vaga não apaga semanas de indiferença.",
+        "board_type": "msg_deconstruct",
+        "board_title": "O que o 'oi' testa",
+        "board_msg": "\"Oi... como você anda? Tudo bem por aí?\"",
+        "board_decode": "TRADUÇÃO: 'Só checando se a porta ainda abre com zero esforço meu.'",
+        "board_source": "ESCUDO #02 • FILTRO DE ESFORÇO",
+        "beat3_kicker": "REGRA DE OURO",
+        "beat3_big": "RESPONDA AO ESFORÇO, NÃO À SAUDADE.",
+        "beat3_sub": "Se não houve atitude real, mantenha a guarda alta.",
+        "rehook_text": "Mas responder rápido destrói tudo que você construiu.",
+        "rehook_sub": "Calma de ferro nos primeiros 15 minutos salva semanas.",
         "steps": [
-            {"title": "Liste os momentos difíceis", "desc": "Escreva 5 situações reais que machucaram você."},
-            {"title": "Dê nota nos 8 Pilares", "desc": "Veja a nota fria de 0 a 80 na Central SOS."},
-            {"title": "Leia antes de idealizar", "desc": "Fatos reais curam a fantasia em minutos."},
+            {"title": "Espere a adrenalina cair", "desc": "Deixe o celular virado por no mínimo 2 horas."},
+            {"title": "Curto, educado e seco", "desc": "Se responder, zero pergunta aberta nem emoji."},
+            {"title": "Devolva o silêncio", "desc": "Não puxe assunto; quem quebrou que sustente."},
         ],
+        "cue_words": ["apaga", "checando", "esforço", "rápido", "adrenalina", "ZERO"],
         "narration": (
-            "Já reparou que depois do término seu ex parece perfeito na sua cabeça? Isso tem nome: amnésia seletiva. "
-            "Na abstinência, seu cérebro edita um trailer só com os melhores abraços e apaga todas as vezes que você dormiu chorando ou pisando em ovos. "
-            "Você não tá sofrendo pela pessoa real. Tá sofrendo por uma versão editada. "
-            "Quer quebrar isso em cinco minutos? Faz a Autópsia dos Oito Pilares e vê a nota real da relação de zero a oitenta. "
-            "Quer a calculadora pronta no celular? Comenta ZERO ou chama no WhatsApp da bio."
+            "Ela sumiu por semanas e mandou 'oi, como você tá?' na madrugada? Trave agora. "
+            "Uma mensagem vaga não apaga o desrespeito nem prova que ela quer reconstruir nada. "
+            "Na maioria das vezes ela só tá checando se você continua disponível com zero esforço. "
+            "Regra simples de postura: responda ao tamanho do esforço dela, nunca ao tamanho da sua saudade. "
+            "Mas responder rápido demais destrói tudo que você construiu no silêncio. "
+            "Deixe a adrenalina cair, responda curto ou fique em silêncio e nunca puxe conversa. "
+            "Comenta ZERO que eu libero os dezesseis scripts escudo no seu WhatsApp."
         ),
         "caption": (
-            "Toda vez que a saudade sussurrar 'a gente era perfeito junto', lembre dos fatos.\n\n"
-            "A Calculadora dos 8 Pilares na Central SOS do Código Zero mostra em números se você perdeu um amor ou sobreviveu a uma montanha-russa emocional.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#dependenciaemocional #relacionamentoabusivo #superartermino #amorproprio #codigozero"
-        ),
-    },
-    {
-        "topic": "Suspiro Duplo: desligue o aperto no peito em 120s (Balban 2023)",
-        "badge": "RESET SOMÁTICO • 120s",
-        "emotion_direction": "Voz tranquila, acolhedora e cadenciada, como quem guia uma respiração real.",
-        "visual_type": "timer",
-        "hook_label": "PROTOCOLO DE STANFORD",
-        "hook_big": "120 SEG",
-        "hook_sub": "Como frear o aperto físico no peito na hora",
-        "scene2_type": "flow",
-        "scene2_title": "Ordem certa para desligar a crise",
-        "scene2_a_label": "REFLEXO DE MERGULHO",
-        "scene2_a_text": "Água bem fria no rosto ativa o nervo vago na hora",
-        "scene2_b_label": "SUSPIRO DUPLO",
-        "scene2_b_text": "2 puxadas pelo nariz + soltura longa pela boca",
-        "scene2_metric": "Batimento cai antes mesmo de você pensar",
-        "steps": [
-            {"title": "Água fria por 30 segundos", "desc": "Lave o rosto e a nuca para acalmar o nervo vago."},
-            {"title": "5 ciclos de Suspiro Duplo", "desc": "Puxe longo, dê uma puxadinha no topo e solte lento."},
-            {"title": "Só decida depois do corpo", "desc": "Com batimento baixo, o impulso de mandar oi some."},
-        ],
-        "narration": (
-            "Quando o peito aperta e a mão treme de saudade, tentar pensar positivo não adianta nada porque seu sistema nervoso tá em alerta. "
-            "Faz o Reset de Cento e Vinte Segundos: primeiro, água bem fria no rosto por trinta segundos pra ativar o nervo vago. "
-            "Depois, cinco ciclos do Suspiro Duplo validado em Stanford: puxa longo pelo nariz, dá mais uma puxadinha curta no topo e solta bem devagar pela boca. "
-            "Em dois minutos seu batimento cai. Salva esse vídeo pra hora do aperto. Quer o guia animado na Central SOS? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Primeiro você acalma o corpo; só depois você decide qualquer coisa.\n\n"
-            "A respiração do Suspiro Duplo (estudo de Balban & Huberman, 2023) está integrada ao vivo na Central SOS do Código Zero para os minutos em que a crise aperta.\n\n"
+            "Isca de esforço mínimo serve pra medir o quanto você ainda é acessível.\n\n"
+            "Mantenha a calma nos primeiros minutos e use o filtro do Escudo #02 antes de digitar uma letra.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#ansiedade #superartermino #saudemental #dependenciaemocional #codigozero"
+            "#exmandoumensagem #homem #contatozero #dignidade #codigozero"
         ),
     },
     {
-        "topic": "Ele pediu para 'continuarem amigos' (Script #11)",
-        "badge": "SCRIPT #11 • LIMITES",
-        "emotion_direction": "Voz clara, direta e segura, transmitindo amor-próprio inegociável.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 19:15",
-        "hook_msg": "\"Não quero te perder... a gente pode continuar sendo amigo, né?\"",
-        "hook_alert": "NÃO ACEITE ESSE ACORDO",
-        "scene2_type": "bars",
-        "scene2_title": "O custo escondido da 'amizade'",
-        "scene2_a_label": "ACEITAR AMIZADE AGORA",
-        "scene2_a_text": "Você segura a mão dele enquanto ele segue em frente",
-        "scene2_b_label": "LIMITE DO SCRIPT #11",
-        "scene2_b_text": "Protege seu coração e encerra falsas esperanças",
-        "scene2_metric": "Proteger seu espaço é respeito próprio",
+        "topic": "O erro silencioso depois das 23h que destrói seu foco (Masculino #07)",
+        "audience": "masculino",
+        "music_bed": "compte-a-rebours",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["4701", "28897", "49878"],
+        "case_tag": "HOMENS • MADRUGADA",
+        "emotion_direction": "Firme, intenso e direto, estilo filme noturno de disciplina.",
+        "hook_headline": "DEPOIS DAS 23H SEU EIXO CAI.",
+        "hook_highlight": "23H",
+        "hook_card": {"sender": "RELÓGIO • 23:47", "msg": "Cansaço + silêncio = dedo procurando o perfil dela", "stamp": "HORA CRÍTICA"},
+        "beat1_kicker": "QUEDA BIOLÓGICA",
+        "beat1_big": "SUA DEFESA DESLIGA À NOITE.",
+        "beat1_sub": "Córtex cansado perde o freio e chama carência de urgência.",
+        "board_type": "neuro_curve",
+        "board_title": "Janela de maior recaída",
+        "board_a_label": "08H ÀS 18H • FOCO",
+        "board_a_text": "Rotina ocupa a mente e mantém o controle lógico",
+        "board_b_label": "23H ÀS 02H • QUEDA",
+        "board_b_text": "Solidão noturna dispara impulsividade no celular",
+        "board_source": "PROTOCOLO NOTURNO • CENTRAL SOS",
+        "beat3_kicker": "PROTEÇÃO PRÁTICA",
+        "beat3_big": "NÃO CONFIE NA FORÇA BRUTA.",
+        "beat3_sub": "Ambiente vence vontade quando o dia acaba.",
+        "rehook_text": "Se o celular dormir do seu lado, você vai olhar.",
+        "rehook_sub": "Trava mecânica bate força de vontade todo santo dia.",
         "steps": [
-            {"title": "Recuse sem fazer barraco", "desc": "Elegância corta muito mais que discussão."},
-            {"title": "Use a frase do Script #11", "desc": "Diga que precisa de distância real neste momento."},
-            {"title": "Feche acesso emocional", "desc": "Quem escolheu sair não fica com seus benefícios."},
+            {"title": "Celular fora do quarto", "desc": "Carregue na sala ou longe da cama às 22h30."},
+            {"title": "Bloqueie gatilhos fáceis", "desc": "Apague conversas antigas e silencie alertas."},
+            {"title": "Acione a Central SOS", "desc": "Use os 15 minutos guiados se o aperto bater."},
         ],
+        "cue_words": ["córtex", "janela", "confie", "dormir", "quarto", "ZERO"],
         "narration": (
-            "Ele terminou mas perguntou se vocês podem continuar amigos? Abre o olho. "
-            "Amizade logo após o término é o jeito mais confortável de manter o seu apoio emocional enquanto fica livre pra sair com outras pessoas sem culpa. "
-            "Você não precisa fazer barraco. Responde firme: 'Agradeço, mas agora preciso de distância real pra seguir em paz. Hoje não faz sentido pra mim.' "
-            "Proteger seu coração não é imaturidade. É respeito próprio. "
-            "Manda pra quem quase aceitou ser 'amiga' do ex. Quer os dezesseis scripts? Comenta ZERO ou chama no WhatsApp da bio."
+            "Você passa o dia firme no trabalho e depois das onze da noite quase recai? Entenda o porquê. "
+            "À noite o seu córtex cansado desliga o freio lógico e transforma carência em urgência falsa. "
+            "Entre vinte e três e duas da manhã acontecem quase todas as mensagens que os homens se arrependem depois. "
+            "Não confie só em força bruta quando você já tá esgotado. "
+            "Se o celular dormir do lado da cama, você vai abrir o perfil dela. "
+            "Carregue o aparelho fora do quarto, corte gatilhos e dispare os quinze minutos da Central SOS. "
+            "Comenta ZERO aqui pra ativar o protocolo noturno de catorze dias."
         ),
         "caption": (
-            "Quem escolheu sair da sua vida não pode continuar usando seus benefícios emocionais.\n\n"
-            "Dizer não sem rancor impõe respeito imediato e acelera sua cura emocional após o término. Esse é o Script #11 do Código Zero.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#limitesemocionais #superartermino #contatozero #amorproprio #codigozero"
-        ),
-    },
-    {
-        "topic": "Cada olhada no perfil reinicia sua dor para o Dia 0",
-        "badge": "SOS #04 • STALKEAR",
-        "emotion_direction": "Voz direta e acolhedora, confrontando com carinho quem não larga a lupa.",
-        "visual_type": "contrast",
-        "hook_left_tag": "SE ESTIVER BEM",
-        "hook_left_text": "Vai doer como um soco no estômago",
-        "hook_right_tag": "SE PARECER TRISTE",
-        "hook_right_text": "Vai te iludir e fazer você mandar 'oi'",
-        "scene2_type": "flow",
-        "scene2_title": "Por que stalkear nunca termina em paz",
-        "scene2_a_label": "ESPIADA RÁPIDA DE 10S",
-        "scene2_a_text": "Injeta nova dose visual no circuito de abstinência",
-        "scene2_b_label": "REGRESSÃO AO DIA 0",
-        "scene2_b_text": "Apaga dias de progresso silencioso na mesma hora",
-        "scene2_metric": "Silenciar stories não notifica e devolve paz",
-        "steps": [
-            {"title": "Silencie stories e posts hoje", "desc": "A pessoa não recebe nenhuma notificação disso."},
-            {"title": "Tire da barra de buscas", "desc": "Limpe o histórico da lupa no Instagram agora."},
-            {"title": "Troque pelo Botão SOS #04", "desc": "Muda o hábito antes da curiosidade vencer."},
-        ],
-        "narration": (
-            "Antes de abrir a lupa pra olhar o perfil do seu ex hoje, me responde uma coisa: o que você ganha com isso? "
-            "Se a pessoa parecer feliz sem você, seu dia acaba na hora. Se postar indireta triste, você se ilude e quase manda mensagem. "
-            "Não existe cenário em que stalkear traz paz. Cada espiada zera o seu progresso pro Dia Zero. "
-            "Silencia stories e publicações hoje mesmo. A pessoa nem recebe notificação. "
-            "Manda pra amiga que prometeu parar de stalkear. Quer o protocolo Código Zero completo? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Olhar o perfil do ex nunca trouxe paz. Só entrega mais uma dose para o ciclo da abstinência.\n\n"
-            "No Código Zero você aprende a Auditoria dos 7 Gatilhos Invisíveis e recebe 6 Cartões SOS para cortar o impulso em 10 segundos.\n\n"
+            "Não é falta de caráter perder a cabeça de madrugada: é fadiga mental + gatilho fácil.\n\n"
+            "Mude o ambiente às 22h30 e tenha uma trava objetiva pronta antes que o impulso apareça.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#parardestalkear #contatozero #superartermino #dependenciaemocional #codigozero"
+            "#disciplina #homens #madrugada #superartermino #codigozero"
         ),
     },
     {
-        "topic": "Ele apareceu com outra pessoa nas redes (Script #13)",
-        "badge": "EMERGÊNCIA • SCRIPT #13",
-        "emotion_direction": "Voz profundamente empática no choque inicial e protetora na orientação imediata.",
-        "visual_type": "timer",
-        "hook_label": "PROTOCOLO DE CHOQUE",
-        "hook_big": "ZERO REAÇÃO",
-        "hook_sub": "A única postura que mantém seu valor intacto",
-        "scene2_type": "bars",
-        "scene2_title": "O impacto nos próximos 10 minutos",
-        "scene2_a_label": "INDIRETA OU MENSAGEM",
-        "scene2_a_text": "Expõe sua dor e prolonga o sofrimento por semanas",
-        "scene2_b_label": "SILÊNCIO ESTRATÉGICO",
-        "scene2_b_text": "Preserva 100% da sua dignidade intacta",
-        "scene2_metric": "Nenhuma reação visível é sua maior força",
+        "topic": "Como um homem recupera o controle em 14 dias (Masculino #08)",
+        "audience": "masculino",
+        "music_bed": "arpege",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["52079", "40746", "35426"],
+        "case_tag": "HOMENS • PROTOCOLO 14D",
+        "emotion_direction": "Motivador sem gritaria, sólido, ritmo crescente de documentário.",
+        "hook_headline": "14 DIAS PRA VIRAR A CHAVE.",
+        "hook_highlight": "14 DIAS",
+        "hook_card": {"sender": "META DE FOCO", "msg": "Sem stalkear, sem implorar, sem viver em função dela", "stamp": "RECONSTRUÇÃO REAL"},
+        "beat1_kicker": "VERDADE SIMPLES",
+        "beat1_big": "SUPERAR NÃO É ESQUECER FORÇADO.",
+        "beat1_sub": "É limpar dopamina falsa e reconstruir seu padrão diário.",
+        "board_type": "strike_stat",
+        "board_title": "O plano que tira você do buraco",
+        "board_big": "14D",
+        "board_wrong_lbl": "ESPERAR O TEMPO CURAR SOZINHO",
+        "board_wrong": "Meses rodando em círculo olhando foto antiga todo dia",
+        "board_right_lbl": "CÓDIGO ZERO ESTRUTURADO",
+        "board_right": "Corte de gatilhos + trava 90-15 + treino e clareza",
+        "board_source": "MÉTODO COMPLETO • WHATSAPP NA BIO",
+        "beat3_kicker": "RESULTADO PRÁTICO",
+        "beat3_big": "A VOZ NA SUA CABEÇA BAIXA.",
+        "beat3_sub": "Em duas semanas você volta a dormir e pensar limpo.",
+        "rehook_text": "O segredo tá nos primeiros quatro dias.",
+        "rehook_sub": "Sobreviveu ao corte químico inicial, o jogo começa a virar.",
         "steps": [
-            {"title": "Não entre no perfil da pessoa", "desc": "Comparação só alimenta dor e obsessão mental."},
-            {"title": "Silencie amigos que postam", "desc": "Corte o fluxo de imagens na hora sem brigar."},
-            {"title": "Faça o Reset Somático", "desc": "Deixe o pico físico baixar antes de dormir."},
+            {"title": "Dias 1–4: Desintoxicação", "desc": "Silêncio absoluto em chat, stories e memórias."},
+            {"title": "Dias 5–9: Corpo em ação", "desc": "Treino pesado e meta diária fora de casa."},
+            {"title": "Dias 10–14: Blindagem", "desc": "Respostas prontas caso ela reapareça testando."},
         ],
+        "cue_words": ["limpar", "plano", "semanas", "quatro", "desintoxicação", "ZERO"],
         "narration": (
-            "Abriu o Instagram e viu o seu ex assumindo outra pessoa? Eu sei que parece um soco no estômago. "
-            "Mas escuta bem o que vai salvar sua dignidade nos próximos dez minutos: "
-            "Não manda mensagem com raiva, não posta indireta e não entra no perfil da pessoa nova pra se comparar. "
-            "A única reação que preserva o seu valor cem por cento intacto é nenhuma reação visível. "
-            "Silencia até amigos em comum que postam o casal e faz o Reset agora. Salva esse vídeo. Quer a Central SOS completa? Comenta ZERO ou chama no WhatsApp da bio."
+            "Você não precisa de seis meses sofrendo escondido. Precisa de catorze dias com método firme. "
+            "Superar não é fingir que não doeu, é limpar o vício químico que prende sua mente nela. "
+            "Sem plano, o homem fica rodando em círculo por meses checando o último visto. "
+            "Com corte limpo, em duas semanas o barulho mental baixa e você volta a respirar inteiro. "
+            "O segredo tá em atravessar os primeiros quatro dias sem recair. "
+            "Desintoxicação no início, corpo em movimento no meio e blindagem pronta pro dia que ela testar voltar. "
+            "Comenta ZERO aqui que eu te mando o Código Zero completo agora."
         ),
         "caption": (
-            "Não deixe cinco minutos de choque custarem semanas da sua dignidade.\n\n"
-            "Quando o ex aparece com outra pessoa, reagir com raiva ou indiretas só prolonga sua ferida. O Código Zero traz o plano exato de contenção.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#superartermino #amorproprio #contatozero #saudeemocional #codigozero"
-        ),
-    },
-    {
-        "topic": "Ele disse 'Pelo visto você superou rápido' (Script #10)",
-        "badge": "SCRIPT #10 • PROVOCAÇÃO",
-        "emotion_direction": "Voz firme, serena e segura, desmascarando a provocação com elegância.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 21:08",
-        "hook_msg": "\"Pelo visto já me esqueceu, né? Superou bem rápido\"",
-        "hook_alert": "INVERSÃO DE CULPA",
-        "scene2_type": "flow",
-        "scene2_title": "O jogo oculto da provocação",
-        "scene2_a_label": "PROVOCAÇÃO DE EGO",
-        "scene2_a_text": "Quer arrancar uma confissão de que você ainda sofre",
-        "scene2_b_label": "JUSTIFICATIVA LONGA",
-        "scene2_b_text": "Prova que ele ainda comanda suas emoções",
-        "scene2_metric": "1 frase serena encerra a provocação na hora",
-        "steps": [
-            {"title": "Não caia na armadilha", "desc": "Evite responder com textão ou deboche emocional."},
-            {"title": "Use a linha seca do Script #10", "desc": "Diga que respeita o fim do ciclo e deseje bem."},
-            {"title": "Retome sua rotina calma", "desc": "Não alongue conversa depois dessa resposta."},
-        ],
-        "narration": (
-            "Quando você finalmente para de correr atrás, ele manda: 'pelo visto você já me esqueceu, superou rápido'. "
-            "Não cai nessa. Isso é inversão de culpa pra fazer você correr se justificando e provando que ainda sofre. "
-            "Se você explicar seus sentimentos, devolve o controle pra ele. "
-            "Responde numa linha seca e elegante: 'Não guardo mágoa. Tô apenas respeitando o fim do nosso ciclo. Tudo de bom aí.' "
-            "Salva essa frase agora. Quer os dezesseis scripts prontos no celular? Comenta ZERO ou chama no WhatsApp da bio."
-        ),
-        "caption": (
-            "Deboche e justificativa longa provam que ainda dói. Serenidade curta devolve o respeito na hora.\n\n"
-            "Tenha o Fluxograma de Decisão e os 16 Scripts Escudo de Diamante prontos no bolso com o Código Zero.\n\n"
+            "Sem estrutura você sofre meses no automático; com método você vira a chave em duas semanas.\n\n"
+            "O Código Zero funciona para homens que querem parar de sangrar em silêncio e retomar o respeito próprio.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#exmandoumensagem #limitesemocionais #contatozero #relacionamentosaudavel #codigozero"
+            "#protocolo14dias #homens #superacao #contatozero #codigozero"
         ),
     },
+    # ── FEMININO (09..15) ─────────────────────────────────────────────────────
     {
-        "topic": "Silêncio Digital de 7 Dias: pare o teatro nos stories",
-        "badge": "FASE E • 7 DIAS",
-        "emotion_direction": "Tom honesto de amiga madura, ajudando a desligar a espera compulsiva no celular.",
-        "visual_type": "contrast",
-        "hook_left_tag": "TEATRO NOS STORIES",
-        "hook_left_text": "Indireta, música triste ou festa forçada pra ele ver",
-        "hook_right_tag": "SILÊNCIO DIGNO",
-        "hook_right_text": "7 dias sem palco. Sua ansiedade cai pela metade",
-        "scene2_type": "wave",
-        "scene2_title": "Queda da ansiedade em 7 dias",
-        "scene2_a_label": "DIA 1 • CHECAGEM CONSTANTE",
-        "scene2_a_text": "Abrir visualizações a cada 10 minutos drena energia",
-        "scene2_b_label": "DIA 7 • MENTE LIVRE",
-        "scene2_b_text": "Sem esperar reação dele, o foco volta para você",
-        "scene2_metric": "Quem não tem palco, não entra em disputa",
+        "topic": "Ele mandou 'oi, tudo bem?' do nada às 1h da manhã (Feminino #09)",
+        "audience": "feminino",
+        "music_bed": "thriller",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["8739", "4915", "46702"],
+        "case_tag": "MULHERES • SCRIPT #01",
+        "emotion_direction": "Firme, protetora e lúcida, cortando o impulso no segundo zero.",
+        "hook_headline": "ELE MANDOU 'OI SUMIDA'?",
+        "hook_highlight": "OI SUMIDA",
+        "hook_card": {"sender": "Ex • 01:42", "msg": "\"Oi... tudo bem por aí? Lembrei de você.\"", "stamp": "NÃO É SAUDADE REAL"},
+        "beat1_kicker": "ACORDE AGORA",
+        "beat1_big": "ISCA DE ESFORÇO ZERO.",
+        "beat1_sub": "Ele não voltou arrependido. Só checou se você ainda abre.",
+        "board_type": "strike_stat",
+        "board_title": "O efeito da sua resposta",
+        "board_big": "01:42",
+        "board_wrong_lbl": "SE RESPONDER COM EMOÇÃO",
+        "board_wrong": "Você enche o ego dele e volta pro banco de reservas",
+        "board_right_lbl": "ESCUDO #01 • SILÊNCIO",
+        "board_right": "Você quebra o teste e devolve seu valor na hora",
+        "board_source": "16 SCRIPTS ESCUDO • CÓDIGO ZERO",
+        "beat3_kicker": "REGRA DE OURO",
+        "beat3_big": "VALOR NÃO SE MENDIGA.",
+        "beat3_sub": "Quem quer voltar assume erros, não manda oi vazio.",
+        "rehook_text": "Mas quase todo mundo cai num detalhe bobo.",
+        "rehook_sub": "Abriu sem querer? Não compensa com mensagem educada.",
         "steps": [
-            {"title": "Zero stories por 7 dias", "desc": "Desative a busca por validação externa agora."},
-            {"title": "Sem indiretas ou recados", "desc": "Todo mundo percebe quando o post tem alvo."},
-            {"title": "Volte no oitavo dia leve", "desc": "Poste sua vida real, não uma encenação."},
+            {"title": "Trave o dedo por 15 min", "desc": "Afaste o celular do rosto antes de responder."},
+            {"title": "Zero compensação", "desc": "Visualizou por acidente? Apenas feche e silencie."},
+            {"title": "Exija atitude concreta", "desc": "Esforço zero só merece resposta zero."},
         ],
+        "cue_words": ["esforço", "efeito", "erros", "detalhe", "trave", "ZERO"],
         "narration": (
-            "Postar frase indireta, música triste ou forçar balada só pra ver se o nome dele aparece nas visualizações é a forma mais rápida de se destruir em silêncio. "
-            "Todo mundo percebe quando o story tem destinatário. "
-            "Faz sete dias de Silêncio Digital absoluto: zero stories, zero indireta, zero checagem de quem viu. "
-            "No oitavo dia você volta leve, vivendo a sua vida real. "
-            "Manda pra amiga que fica olhando quem visualizou o story. Quer o protocolo dos catorze dias? Comenta ZERO ou chama no WhatsApp da bio."
+            "Seu ex mandou 'oi, tudo bem?' depois de semanas sumido? Trava o dedo agora. "
+            "Isso não é arrependimento. É isca de esforço zero pra testar se você ainda tá esperando no banco de reservas. "
+            "Se você responder na hora emocionada, o efeito é imediato: o ego dele infla e amanhã ele esfria de novo. "
+            "Quem quer voltar de verdade assume os próprios erros, não joga oi vazio às duas da manhã. "
+            "Mas quase todo mundo cai num detalhe bobo: abre sem querer e responde por educação. "
+            "Trave o dedo quinze minutos, não compense visualização e responda só a esforço real. "
+            "Comenta ZERO aqui que eu te envio os dezesseis scripts do Código Zero."
         ),
         "caption": (
-            "Quando você para de postar esperando uma única visualização, sua paz volta quase na mesma hora.\n\n"
-            "O Silêncio Digital de 7 Dias faz parte da Fase E do Código Zero para desligar a espera compulsiva no celular.\n\n"
+            "Não confunda checagem de ego na madrugada com vontade real de mudar.\n\n"
+            "No Escudo #01 do Código Zero você sabe exatamente como agir quando ele tenta reaparecer com esforço mínimo.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#contatozero #superartermino #autoestima #dependenciaemocional #codigozero"
+            "#contatozero #mulheres #superartermino #exmandoumensagem #codigozero"
         ),
     },
     {
-        "topic": "Ele quer voltar? Os 5 Critérios Inegociáveis (Pág. 16)",
-        "badge": "FASE O • 5 CRITÉRIOS",
-        "emotion_direction": "Voz madura, protetora e racional, evitando uma recaída disfarçada de reconciliação.",
-        "visual_type": "contrast",
-        "hook_left_tag": "VOLTA POR EGO",
-        "hook_left_text": "Some de novo em 48h e propõe 'ver no que dá'",
-        "hook_right_tag": "MUDANÇA REAL",
-        "hook_right_text": "Assume erros sóbrio e mantém coerência por semanas",
-        "scene2_type": "flow",
-        "scene2_title": "O Radar Anti-Migalha em ação",
-        "scene2_a_label": "FILTRO 1 • CLAREZA ADULTA",
-        "scene2_a_text": "Ele nomeou o próprio erro sem você arrancar?",
-        "scene2_b_label": "FILTRO 2 • CONSISTÊNCIA",
-        "scene2_b_text": "Sustentou atitudes reais por semanas seguidas?",
-        "scene2_metric": "Nunca decida reatar nos 14 dias de abstinência",
+        "topic": "Ele pediu pra continuar amigos pra te deixar na reserva (Feminino #10)",
+        "audience": "feminino",
+        "music_bed": "enquete",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["25586", "28897", "46702"],
+        "case_tag": "MULHERES • SCRIPT #11",
+        "emotion_direction": "Clara, acolhedora e incisiva, devolvendo lucidez sem dureza gratuita.",
+        "hook_headline": "ELE PEDIU AMIZADE?",
+        "hook_highlight": "AMIZADE?",
+        "hook_card": {"sender": "Ex • 21:15", "msg": "\"Você é incrível... vamos continuar amigos.\"", "stamp": "DESPEDIDA PARCELADA"},
+        "beat1_kicker": "VERDADE REAL",
+        "beat1_big": "ELE QUER CARINHO SEM ÔNUS.",
+        "beat1_sub": "Quer seu apoio enquanto se desconecta sem culpa.",
+        "board_type": "msg_deconstruct",
+        "board_title": "O subtexto do pedido",
+        "board_msg": "\"Não quero perder sua amizade na minha vida.\"",
+        "board_decode": "TRADUÇÃO: 'Quero manter o acesso sem obrigação nenhuma de ficar.'",
+        "board_source": "SCRIPT #11 • LIMITE DE OURO",
+        "beat3_kicker": "VIRADA",
+        "beat3_big": "MIGALHA PRENDE VOCÊ NO PASSADO.",
+        "beat3_sub": "Enquanto ele segue em frente apoiado no seu afeto.",
+        "rehook_text": "E recusar não precisa virar briga.",
+        "rehook_sub": "Uma única mensagem seca fecha a porta com classe.",
         "steps": [
-            {"title": "Exija clareza na conversa", "desc": "Recuse convites vagos de 'vamos ver no que dá'."},
-            {"title": "Peça tempo de lucidez", "desc": "Complete os 14 dias antes de dar resposta final."},
-            {"title": "Passe nos 5 Critérios", "desc": "Química não resolve falhas repetidas de caráter."},
+            {"title": "Recuse a amizade já", "desc": "Não aceite migalha para mantê-lo por perto."},
+            {"title": "Mande a trava limpa", "desc": "'Preciso de distância pra seguir bem. Fica bem.'"},
+            {"title": "Tire seu acesso", "desc": "Só quem sente falta real valoriza presença."},
         ],
+        "cue_words": ["apoio", "tradução", "passado", "briga", "recuse", "ZERO"],
         "narration": (
-            "O ex reapareceu pedindo pra conversar e seu coração disparou? Calma. "
-            "Nunca decida reatar antes de completar catorze dias de lucidez. Uma escolha feita no pico da abstinência quase nunca resiste a trinta dias de realidade. "
-            "Passa a volta por três filtros mínimos: ele nomeou os próprios erros sem você arrancar? Propôs mudança concreta ou só 'ver no que dá'? Manteve coerência por semanas? "
-            "Salva antes de abrir a porta de novo. Quer o checklist completo dos cinco critérios? Comenta ZERO ou chama no WhatsApp da bio."
+            "Ele terminou e pediu pra vocês continuarem amigos? Escuta isso antes de aceitar. "
+            "Ele quer manter seu apoio emocional sem precisar assumir você. É o jeito mais cômodo de ir embora sem culpa. "
+            "Traduzindo: ele usa sua presença como anestesia pra superar você, enquanto você fica presa nas migalhas. "
+            "Amizade falsa só segura você no passado. "
+            "E recusar não precisa virar briga nem drama. "
+            "Recuse com elegância em uma linha, corte acesso total e devolva o silêncio inteiro. "
+            "Comenta ZERO que eu te mando o Script onze pronto no WhatsApp."
         ),
         "caption": (
-            "Saudade e química não provam que o motivo do término foi resolvido.\n\n"
-            "Na Página 16 do Código Zero você usa o Radar Anti-Migalha com os 5 Critérios Inegociáveis para decidir com lucidez adulta.\n\n"
+            "Aceitar ser 'amiga' de quem acabou de partir seu coração é prolongar a dor em parcelas.\n\n"
+            "Veja no Script #11 como cortar com elegância e proteger sua saúde emocional.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#voltarcomoex #relacionamentosaudavel #superartermino #amorproprio #codigozero"
+            "#amorproprio #dependenciaemocional #superartermino #mulheres #codigozero"
         ),
     },
     {
-        "topic": "Devolver coisas em casa é a maior porta de recaída (Script #05)",
-        "badge": "SCRIPT #05 • LOGÍSTICA",
-        "emotion_direction": "Voz prática, elegante e protetora, evitando encontros perigosos a sós.",
-        "visual_type": "whatsapp",
-        "hook_sender": "Ex • 16:40",
-        "hook_msg": "\"Minhas coisas ficaram aí, quando posso passar pra pegar?\"",
-        "hook_alert": "EVITE ENCONTRO A SÓS",
-        "scene2_type": "bars",
-        "scene2_title": "Entrega a sós vs Logística segura",
-        "scene2_a_label": "RECEBER EM CASA A SÓS",
-        "scene2_a_text": "Conversa longa vira recaída emocional imediata",
-        "scene2_b_label": "SCRIPT #05 • PORTARIA/ENVIO",
-        "scene2_b_text": "Educação firme sem jogar semanas de paz fora",
-        "scene2_metric": "Cortesia não exige abrir a porta de casa",
+        "topic": "Esta mensagem foi apagada na madrugada (Feminino #11)",
+        "audience": "feminino",
+        "music_bed": "thriller",
+        "theme_start": "noir",
+        "hook_mode": "cinema",
+        "broll_ids": ["43270", "4915", "2846"],
+        "case_tag": "MULHERES • SCRIPT #04",
+        "emotion_direction": "Direto, lúcido e atento ao pico de curiosidade ansiosa.",
+        "hook_headline": "ELE APAGOU A MENSAGEM?",
+        "hook_highlight": "APAGOU",
+        "hook_card": {"sender": "Ex • 23:54", "msg": "🚫 Esta mensagem foi apagada", "stamp": "GATILHO DE ANSIEDADE"},
+        "beat1_kicker": "ARMADILHA CLÁSSICA",
+        "beat1_big": "NÃO PERGUNTE O QUE ERA.",
+        "beat1_sub": "Perguntar 'que foi?' entrega exatamente o controle que ele queria.",
+        "board_type": "strike_stat",
+        "board_title": "O jogo da mensagem apagada",
+        "board_big": "100%",
+        "board_wrong_lbl": "SE VOCÊ PERGUNTAR 'O QUE ERA?'",
+        "board_wrong": "Mostra ansiedade na hora e vira conversa de validação",
+        "board_right_lbl": "CONTROLE SCRIPT #04",
+        "board_right": "Ignore como se nem tivesse notado no celular",
+        "board_source": "BLINDAGEM EMOCIONAL • SCRIPT #04",
+        "beat3_kicker": "LÓGICA PURA",
+        "beat3_big": "SE FOSSE IMPORTANTE, REENVIAVA.",
+        "beat3_sub": "Adultos interessados sabem falar claro sem enigma.",
+        "rehook_text": "Mas a curiosidade coça em menos de um minuto.",
+        "rehook_sub": "Respire fundo: não morder o anzol devolve sua paz.",
         "steps": [
-            {"title": "Separe tudo hoje numa caixa", "desc": "Deixe pronto sem bilhetes ou objetos emocionais."},
-            {"title": "Proponha portaria ou envio", "desc": "Elimine clima pesado com praticidade executiva."},
-            {"title": "Encerre com educação breve", "desc": "Sem estender assunto quando o item chegar lá."},
+            {"title": "Deixe no silêncio", "desc": "Zero '?' ou 'tá tudo bem?' por impulso."},
+            {"title": "Feche o aplicativo", "desc": "Saia do chat imediatamente sem ficar olhando."},
+            {"title": "Espere postura adulta", "desc": "Quem realmente quer dizer algo, diz inteiro."},
         ],
+        "cue_words": ["entregar", "jogo", "claro", "coça", "silêncio", "ZERO"],
         "narration": (
-            "Ele mandou mensagem perguntando quando pode passar aí pra pegar as coisas dele? Cuidado. "
-            "Transformar uma entrega simples num encontro a sós dentro de casa é a maior porta de recaída pós-término. "
-            "Seja adulta, cortês e objetiva: 'Já deixei tudo separado. Posso deixar na portaria ou enviar por entregador amanhã às três, fica mais prático pra nós dois.' "
-            "Sem drama, sem clima pesado e sem jogar semanas de paz no lixo. "
-            "Salva pra usar se precisar. Quer todos os dezesseis scripts? Comenta ZERO ou chama no WhatsApp da bio."
+            "Viu 'esta mensagem foi apagada' no chat dele? Não pergunta o que era. "
+            "Se você mandar um 'oi, o que você ia dizer?', acaba de entregar ansiedade na bandeja pro ego dele. "
+            "Esse jogo funciona porque a curiosidade gera pico de dopamina e faz você correr atrás da resposta. "
+            "Adultos com intenção real falam claro, não ficam mandando enigma pra te testar. "
+            "Mas a curiosidade coça em segundos. "
+            "Deixe no silêncio absoluto, feche a conversa e espere postura de verdade, nunca isca. "
+            "Comenta ZERO aqui pra receber os dezesseis scripts escudo."
         ),
         "caption": (
-            "Educação não exige abrir a porta de casa para reabrir uma ferida.\n\n"
-            "O Script #05 resolve devolução de pertences pós término com postura executiva e zero espaço para recaída.\n\n"
+            "Mensagem apagada às 23h raramente é acidente: quase sempre vira teste de atenção.\n\n"
+            "Não pergunte, não justifique, siga sua noite inteira.\n\n"
             "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#superartermino #contatozero #limitesemocionais #exmandoumensagem #codigozero"
+            "#contatozero #ansiedade #relacionamento #superartermino #codigozero"
         ),
     },
     {
-        "topic": "Por que tentar 'parar de pensar' faz pensar o dobro (Janela Controlada)",
-        "badge": "FASE Z • JANELA 15 MIN",
-        "emotion_direction": "Tom compreensivo, gentil e claro, ensinando uma técnica prática de alívio.",
-        "visual_type": "timer",
-        "hook_label": "TÉCNICA DE BORKOVEC",
-        "hook_big": "18:30",
-        "hook_sub": "Não proíba o pensamento: marque 15 minutos pra ele",
-        "scene2_type": "flow",
-        "scene2_title": "Como desligar a ruminação no trabalho",
-        "scene2_a_label": "PROIBIR O PENSAMENTO",
-        "scene2_a_text": "Cérebro vigia o tempo todo se você ainda lembra",
-        "scene2_b_label": "JANELA DE 15 MINUTOS",
-        "scene2_b_text": "Adiar para as 18h30 devolve foco ao seu dia",
-        "scene2_metric": "Confinar o pensamento funciona melhor que proibir",
+        "topic": "Mais um áudio chorando não faz ele voltar (Feminino #12)",
+        "audience": "feminino",
+        "music_bed": "enquete",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["8739", "28893", "46702"],
+        "case_tag": "MULHERES • RECAÍDA",
+        "emotion_direction": "Acolhedora no tom, mas implacavelmente honesta no diagnóstico.",
+        "hook_headline": "MAIS UM ÁUDIO NÃO MUDA NADA.",
+        "hook_highlight": "ÁUDIO",
+        "hook_card": {"sender": "Você • 4:12 min", "msg": "Gravando áudio tentando explicar tudo de novo...", "stamp": "DESGASTE CERTO"},
+        "beat1_kicker": "DURA VERDADE",
+        "beat1_big": "QUEM NÃO QUER OUVIR NÃO SENTE.",
+        "beat1_sub": "Áudio longo implorando transforma amor em peso.",
+        "board_type": "strike_stat",
+        "board_title": "O custo do apelo emocional",
+        "board_big": "4m",
+        "board_wrong_lbl": "MAIS DE 1 MINUTO DE DESABAFO",
+        "board_wrong": "Ele ouve em 2x sentindo alívio por ter terminado",
+        "board_right_lbl": "RETIRADA DE RESPEITO",
+        "board_right": "Você guarda suas lágrimas pra quem te acolhe de verdade",
+        "board_source": "PROTOCOLO DE RETOMADA • 14 DIAS",
+        "beat3_kicker": "AUTORESPEITO",
+        "beat3_big": "ELE JÁ ENTENDEU SUA DOR.",
+        "beat3_sub": "O problema nunca foi falta de explicação.",
+        "rehook_text": "Você não precisa gritar pra ser vista.",
+        "rehook_sub": "Sua ausência educa muito mais que qualquer desabafo.",
         "steps": [
-            {"title": "Escolha um horário fixo", "desc": "Separe só 15 minutos no fim da tarde (ex: 18h30)."},
-            {"title": "Adie invasões no trabalho", "desc": "Diga mentalmente: 'anotado, penso nisso às 18h30'."},
-            {"title": "Descarregue e feche o caderno", "desc": "Passados os 15 minutos, troque de ambiente."},
+            {"title": "Desmarque o microfone", "desc": "Solte o botão e escreva só no seu caderno."},
+            {"title": "Chame uma amiga real", "desc": "Desabafe fora da conversa do ex."},
+            {"title": "Inicie os 14 dias", "desc": "Use a Central SOS nas horas de aperto forte."},
         ],
+        "cue_words": ["peso", "custo", "explicação", "vista", "microfone", "ZERO"],
         "narration": (
-            "Quanto mais você manda sua cabeça parar de pensar no seu ex, mais a imagem dele aparece, né? "
-            "Na psicologia isso é o efeito rebote. Proibir o pensamento faz o cérebro checar a cada minuto se você parou. "
-            "Usa a Janela Controlada: marca quinze minutos fixos do dia, tipo seis e meia da tarde. "
-            "Pensamento invadiu no trabalho? Fala: anotado, penso nisso às seis e meia. E volta pro que tava fazendo. "
-            "Manda pra quem não consegue focar no dia. Quer o protocolo completo? Comenta ZERO ou chama no WhatsApp da bio."
+            "Segura esse botão do microfone antes de gravar mais um áudio de quatro minutos pra ele. "
+            "Quem escolheu partir não precisa de mais uma explicação do quanto você tá doendo. "
+            "O custo desse desabafo é cruel: ele ouve em velocidade dois e sente alívio por ter saído fora. "
+            "Entenda de uma vez: o problema nunca foi você não ter se explicado direito. "
+            "Você não precisa gritar pra ser valorizada. "
+            "Solta o microfone, chora no ombro de quem merece e entra hoje no protocolo de catorze dias. "
+            "Comenta ZERO aqui pra eu enviar o acesso completo."
         ),
         "caption": (
-            "A saída contra a ruminação pós término não é brigar com a própria mente, é confinar o pensamento.\n\n"
-            "Inspirada na técnica clínica de Borkovec, a Janela Controlada do Código Zero devolve seu foco já na primeira semana.\n\n"
-            "Comenta ZERO ou chama direto no WhatsApp da bio: (12) 99659-3222.\n\n"
-            "#dependenciaemocional #ansiedade #superartermino #saudemental #codigozero"
+            "Áudio longo tentando convencer quem já foi embora só machuca a sua própria autoestima.\n\n"
+            "Desabafe no lugar certo e preserve a sua dignidade intacta.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#superartermino #autoestima #mulheres #contatozero #codigozero"
+        ),
+    },
+    {
+        "topic": "Ele sumiu sem explicação? O silêncio é a resposta (Feminino #13)",
+        "audience": "feminino",
+        "music_bed": "arpege",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["46702", "2846", "40746"],
+        "case_tag": "MULHERES • CLAREZA",
+        "emotion_direction": "Calma e resoluta, quebrando a espera angustiante pela resposta.",
+        "hook_headline": "ELE SUMIU DO NADA?",
+        "hook_highlight": "SUMIU",
+        "hook_card": {"sender": "Visto por último • Ontem", "msg": "3 dias esperando uma resposta que não vem", "stamp": "RESPOSTA DADA"},
+        "beat1_kicker": "SEM ILUSÃO",
+        "beat1_big": "O SILÊNCIO DELE É A RESPOSTA.",
+        "beat1_sub": "Ninguém fica ocupado 48 horas pra responder quem importa.",
+        "board_type": "msg_deconstruct",
+        "board_title": "O mito da 'falta de tempo'",
+        "board_msg": "\"Será que aconteceu alguma coisa séria no trabalho dele?\"",
+        "board_decode": "REALIDADE: Desinteresse silencioso evita o desconforto da conversa.",
+        "board_source": "CLAREZA RADICAL • CÓDIGO ZERO",
+        "beat3_kicker": "CORTE NECESSÁRIO",
+        "beat3_big": "PARE DE MANDAR COBRANÇA.",
+        "beat3_sub": "Cobrar atenção de quem some humilha sua paz.",
+        "rehook_text": "Você merece escolha inteira, não resto de hora.",
+        "rehook_sub": "Aceitar a mensagem oculta poupa meses de espera.",
+        "steps": [
+            {"title": "Leia o vácuo como 'não'", "desc": "Encerre a expectativa hoje sem insistir."},
+            {"title": "Apague o chat fixado", "desc": "Tire o nome dele do topo da sua tela."},
+            {"title": "Recupere seu centro", "desc": "Volte a investir em quem olha pra você."},
+        ],
+        "cue_words": ["ocupado", "mito", "atenção", "inteira", "vácuo", "ZERO"],
+        "narration": (
+            "Ele sumiu sem dar explicação e você tá há dias olhando o celular? Ouve isso. "
+            "Ninguém passa quarenta e oito horas ocupado demais pra mandar duas palavras pra quem realmente importa. "
+            "Enquanto você inventa desculpas pro trabalho dele, o vácuo já disse tudo que faltava coragem de falar. "
+            "Ficar cobrando resposta só te diminui diante de quem já escolheu se afastar. "
+            "Você merece presença inteira, nunca resto de atenção. "
+            "Leia o vácuo como um não definitivo, tire o chat do topo e reconstrua seu centro. "
+            "Comenta ZERO pra baixar os passos do Código Zero hoje."
+        ),
+        "caption": (
+            "Quando alguém quer falar com você, encontra 15 segundos no meio do dia mais corrido.\n\n"
+            "Pare de criar justificativa pro desaparecimento de quem já te deu a resposta.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#ghosting #relacionamento #valor #mulheres #codigozero"
+        ),
+    },
+    {
+        "topic": "Pare de tentar provar seu valor pra quem já saiu (Feminino #14)",
+        "audience": "feminino",
+        "music_bed": "enquete",
+        "theme_start": "paper",
+        "hook_mode": "cinema",
+        "broll_ids": ["25586", "49878", "43270"],
+        "case_tag": "MULHERES • EIXO",
+        "emotion_direction": "Forte, elegante, resgatando a postura feminina sem vitimismo.",
+        "hook_headline": "PARE DE TENTAR PROVAR.",
+        "hook_highlight": "PROVAR.",
+        "hook_card": {"sender": "ALERTA INTERNO", "msg": "Postando pra ele ver o que perdeu?", "stamp": "ARMADILHA INVERSA"},
+        "beat1_kicker": "VERDADE SILENCIOSA",
+        "beat1_big": "ATUAÇÃO PRO EX É PRISÃO.",
+        "beat1_sub": "Se cada foto sua pensa nele, ele ainda manda na sua rotina.",
+        "board_type": "strike_stat",
+        "board_title": "Supere de verdade vs Teatro",
+        "board_big": "14D",
+        "board_wrong_lbl": "VIVER PRO STORY DE INVEJA",
+        "board_wrong": "Sorrir na foto e chorar quando fecha o Instagram",
+        "board_right_lbl": "SILÊNCIO AUTÊNTICO",
+        "board_right": "Mudar pra si mesma longe da vitrine e recuperar paz",
+        "board_source": "LIBERDADE REAL • PROTOCOLO 14 DIAS",
+        "beat3_kicker": "RESULTADO",
+        "beat3_big": "QUEM TÁ LIVRE NÃO PRECISA PLATEIA.",
+        "beat3_sub": "A paz verdadeira não depende da visualização dele.",
+        "rehook_text": "O corte real acontece quando ninguém tá olhando.",
+        "rehook_sub": "Tire o ex de diretor da sua vida agora mesmo.",
+        "steps": [
+            {"title": "Pare de checar visualizações", "desc": "Bloqueie ou silencie sem teatro de vingança."},
+            {"title": "Cuide da rotina invisível", "desc": "Sono, corpo e amigas fora das redes."},
+            {"title": "Siga o método diário", "desc": "14 dias até a dependência perder força."},
+        ],
+        "cue_words": ["rotina", "teatro", "plateia", "olhando", "checar", "ZERO"],
+        "narration": (
+            "Você tá se arrumando só pra postar foto e esperar ele ver o que perdeu? Para agora. "
+            "Se cada passo seu ainda tem o objetivo de provocar reação nele, ele continua comandando sua rotina. "
+            "Viver num teatro de superação cansa o dobro: você sorri na tela e desaba sozinha em casa. "
+            "Quem realmente superou não precisa provar nada na vitrine pra plateia errada. "
+            "O corte verdadeiro acontece longe do celular, quando ninguém tá olhando. "
+            "Pare de checar quem viu seus stories e cuide da sua vida real por catorze dias. "
+            "Comenta ZERO que eu te mando o protocolo completo no WhatsApp."
+        ),
+        "caption": (
+            "Superar de verdade é tirar o ex do papel de espectador da sua vida.\n\n"
+            "Sem teatro de vingança, só paz real construída em 14 dias.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#superacao #autoestima #contatozero #mulheres #codigozero"
+        ),
+    },
+    {
+        "topic": "Quando ele volta testando se você ainda tá no bolso (Feminino #15)",
+        "audience": "feminino",
+        "music_bed": "compte-a-rebours",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["43270", "28897", "8739"],
+        "case_tag": "MULHERES • SCRIPT #14",
+        "emotion_direction": "Precisa e afiada, blindando contra falsas reaproximações.",
+        "hook_headline": "ELE VOLTOU DOCE DO NADA?",
+        "hook_highlight": "DOCE",
+        "hook_card": {"sender": "Ex • 19:20", "msg": "\"Saudade da nossa conversa... vamo sair?\"", "stamp": "TESTE DE DISPONIBILIDADE"},
+        "beat1_kicker": "NÃO CAIA RÁPIDO",
+        "beat1_big": "SAUDADE NÃO É MUDANÇA.",
+        "beat1_sub": "Sentir falta do conforto não muda quem não assumiu erro.",
+        "board_type": "msg_deconstruct",
+        "board_title": "O filtro dos 3 sinais",
+        "board_msg": "\"Lembrei daquele nosso lugar hoje... tô com saudade\"",
+        "board_decode": "PERGUNTE: Ele pediu perdão concreto ou só tá com carência?",
+        "board_source": "SCRIPT #14 • FILTRO DE VOLTA",
+        "beat3_kicker": "SEU PODER",
+        "beat3_big": "ACESSO FÁCIL REPETE O CICLO.",
+        "beat3_sub": "Abrir a porta no primeiro elogio reinicia a dor.",
+        "rehook_text": "Mas dá pra testar a intenção dele em uma frase.",
+        "rehook_sub": "Quem não aguenta esperar 48 horas nunca quis ficar.",
+        "steps": [
+            {"title": "Não marque na hora", "desc": "Recuse convite de última hora à noite."},
+            {"title": "Exija clareza adulta", "desc": "Não misture nostalgia com falta de respeito."},
+            {"title": "Proteja seu avanço", "desc": "Nunca jogue 14 dias fora por carência."},
+        ],
+        "cue_words": ["conforto", "sinais", "ciclo", "frase", "marque", "ZERO"],
+        "narration": (
+            "Ele voltou mandando saudade e elogio depois de te machucar? Calma antes de ceder. "
+            "Saudade do conforto que você dava não significa que ele mudou ou assumiu o que quebrou. "
+            "A pergunta seca é uma só: ele trouxe mudança concreta ou só nostalgia barata às oito da noite? "
+            "Dar acesso fácil no primeiro elogio só garante a repetição exata da mesma dor. "
+            "Mas dá pra testar a intenção real dele sem brigar. "
+            "Recuse encontros de última hora, exija clareza adulta e proteja seu avanço de catorze dias. "
+            "Comenta ZERO aqui pra receber os scripts de resposta pronta."
+        ),
+        "caption": (
+            "Elogio vazio e nostalgia não pagam respeito nem garantem mudança real.\n\n"
+            "Use o filtro do Script #14 antes de abrir a porta de novo.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#relacionamento #reconciliacao #contatozero #mulheres #codigozero"
+        ),
+    },
+    # ── AMBOS / NEUROCIÊNCIA & REGRAS UNIVERSAIS (16..20) ────────────────────
+    {
+        "topic": "Rejeição dói no corpo como queimadura física (Kross 2011) (Ambos #16)",
+        "audience": "ambos",
+        "music_bed": "arpege",
+        "theme_start": "noir",
+        "hook_mode": "split",
+        "broll_ids": ["28897", "4701", "49878"],
+        "case_tag": "NEUROCIÊNCIA • MICHIGAN",
+        "emotion_direction": "Documental, empático e seguro, válido tanto para homens quanto mulheres.",
+        "hook_headline": "SAUDADE DÓI COMO QUEIMADURA.",
+        "hook_highlight": "QUEIMADURA.",
+        "hook_card": {"sender": "KROSS ET AL. (2011)", "msg": "Ressonância magnética cerebral pós-rejeição amorosa", "stamp": "EVIDÊNCIA CLÍNICA"},
+        "beat1_kicker": "NÃO É DRAMA",
+        "beat1_big": "SEU CÉREBRO ACENDE DOR REAL.",
+        "beat1_sub": "A mesma área da queimadura física ativa no término.",
+        "board_type": "neuro_curve",
+        "board_title": "Abstinência afetiva em 14 dias",
+        "board_a_label": "DIAS 1–4 • CORTE QUÍMICO",
+        "board_a_text": "Falta de dopamina dispara alarme físico no peito",
+        "board_b_label": "DIA 14 • REORGANIZAÇÃO",
+        "board_b_text": "Rotina estruturada reduz o ciclo de fissura",
+        "board_source": "ESTUDO KROSS ET AL., UNIV. DE MICHIGAN (2011)",
+        "beat3_kicker": "LIBERAÇÃO DE CULPA",
+        "beat3_big": "ISSO NÃO É FRAQUEZA SUA.",
+        "beat3_sub": "Homem e mulher sofrem o mesmo choque neurológico.",
+        "rehook_text": "Por isso 'só esquece' nunca funcionou.",
+        "rehook_sub": "Você não trata dor química com frase motivacional.",
+        "steps": [
+            {"title": "Pare de se culpar hoje", "desc": "Seu corpo atravessa um desmame neuroquímico real."},
+            {"title": "Corte estímulos visuais", "desc": "Cada foto vista reinicia o pico da crise."},
+            {"title": "Siga o protocolo 14 dias", "desc": "Método passo a passo no lugar da força bruta."},
+        ],
+        "cue_words": ["mesma", "dias", "fraqueza", "esquece", "culpar", "ZERO"],
+        "narration": (
+            "Você sente um aperto físico real no peito e acha que perdeu a razão? Escuta isso. "
+            "Um estudo da Universidade de Michigan mostrou em ressonância que a rejeição acende a mesma rede cerebral de uma queimadura física. "
+            "Nos primeiros dias após o corte, o cérebro entra em fissura química real procurando dopamina. "
+            "Isso não é fraqueza sua. Acontece igual em homens e mulheres depois de um vínculo quebrado. "
+            "Por isso conselho raso de 'só segue em frente' nunca funcionou. "
+            "Pare de se culpar, corte os gatilhos visuais e siga catorze dias de método prático. "
+            "Comenta ZERO aqui pra receber o protocolo completo no WhatsApp."
+        ),
+        "caption": (
+            "Dor de término não é frescura: a neurociência mostra que o cérebro processa rejeição na mesma rede da dor física.\n\n"
+            "Homens e mulheres passam pela mesma abstinência. Trate com método real de 14 dias.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#neurociencia #superartermino #saudemental #contatozero #codigozero"
+        ),
+    },
+    {
+        "topic": "A Regra 90-15 antes de mandar mensagem no impulso (Ambos #17)",
+        "audience": "ambos",
+        "music_bed": "compte-a-rebours",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["28893", "4915", "2846"],
+        "case_tag": "CENTRAL SOS • 90–15",
+        "emotion_direction": "Firme e urgente como um salva-vidas emocional às 23h.",
+        "hook_headline": "O PICO DURA SÓ 90 SEGUNDOS.",
+        "hook_highlight": "90 SEGUNDOS.",
+        "hook_card": {"sender": "CRONÔMETRO SOS", "msg": "Vontade aguda de mandar mensagem agora?", "stamp": "TRAVA ANTI-RECAÍDA"},
+        "beat1_kicker": "FATO QUÍMICO",
+        "beat1_big": "A ONDA PASSA EM UM MINUTO E MEIO.",
+        "beat1_sub": "Só vira noite inteira se você ficar encarando o chat.",
+        "board_type": "neuro_curve",
+        "board_title": "O ciclo químico da recaída",
+        "board_a_label": "0 A 90 SEGUNDOS",
+        "board_a_text": "Adrenalina sobe no teto e simula urgência fatal",
+        "board_b_label": "APÓS 15 MINUTOS",
+        "board_b_text": "Onda esvazia e a sua razão volta pro volante",
+        "board_source": "REGRA 90–15 • CENTRAL SOS",
+        "beat3_kicker": "PERGUNTA DECISIVA",
+        "beat3_big": "AMANHÃ ÀS 9H: ORGULHO OU VERGONHA?",
+        "beat3_sub": "Nenhuma mensagem no pânico trouxe paz no café da manhã.",
+        "rehook_text": "Mas ninguém consegue pensar com o aparelho na mão.",
+        "rehook_sub": "A trava precisa ser física antes de ser mental.",
+        "steps": [
+            {"title": "Largue o celular longe", "desc": "Deixe o aparelho em outro cômodo imediatamente."},
+            {"title": "Dispare 15 minutos", "desc": "Escreva tudo num papel sem mandar nenhuma letra."},
+            {"title": "Decida só frio", "desc": "Ao fim do alarme, você já venceu a crise."},
+        ],
+        "cue_words": ["encarando", "ciclo", "manhã", "aparelho", "largue", "ZERO"],
+        "narration": (
+            "Tá com o dedo pronto pra mandar mensagem agora? Faz a Regra Noventa Quinze antes. "
+            "A descarga química da crise dura cerca de noventa segundos. Ela só destrói sua noite se você ficar encarando a conversa. "
+            "Esse é o ciclo real: noventa segundos de pânico falso que derretem depois de quinze minutos sem tela. "
+            "Pergunta pra si mesmo: amanhã às nove da manhã eu vou sentir orgulho ou vergonha do que mandei? "
+            "Mas ninguém raciocina bem com o aparelho brilhando na mão. "
+            "Largue o celular em outro cômodo, dispare quinze minutos e decida só com a cabeça fria. "
+            "Comenta ZERO que eu mando a Central SOS com cronômetro pro seu WhatsApp."
+        ),
+        "caption": (
+            "Toda recaída mora num pico rápido de ansiedade que passa se você segurar 15 minutos.\n\n"
+            "Salva esse vídeo pra hora que o impulso apertar de noite.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#contatozero #ansiedade #autocontrole #termino #codigozero"
+        ),
+    },
+    {
+        "topic": "Cada olhada nos stories zera seu desmame de dopamina (Ambos #18)",
+        "audience": "ambos",
+        "music_bed": "thriller",
+        "theme_start": "noir",
+        "hook_mode": "cinema",
+        "broll_ids": ["4915", "28901", "40746"],
+        "case_tag": "DESMAME • RECAÍDA OCULTA",
+        "emotion_direction": "Direto e revelador, mostrando o vício da micro-dose digital.",
+        "hook_headline": "UMA ESPIADA ZERA TUDO.",
+        "hook_highlight": "ZERA TUDO.",
+        "hook_card": {"sender": "10 SEGUNDOS", "msg": "'Só vou olhar rapidinho pra ver se tá tudo bem...'", "stamp": "MICRO-DOSE DE DOPAMINA"},
+        "beat1_kicker": "O ERRO INVISÍVEL",
+        "beat1_big": "ESPIAR É NÃO SAIR DO LUGAR.",
+        "beat1_sub": "Você acha que não mandou oi, mas reabasteceu a fissura.",
+        "board_type": "strike_stat",
+        "board_title": "Sem mandar oi vs Sem espiar",
+        "board_big": "ZERO",
+        "board_wrong_lbl": "NÃO MANDA MENSAGEM, MAS OLHA TODO DIA",
+        "board_wrong": "Mantém o cérebro em alerta eterno e não cura em meses",
+        "board_right_lbl": "CORTE DE ESTÍMULO REAL",
+        "board_right": "14 dias sem imagem nem perfil aceleram a liberdade",
+        "board_source": "FISIOLOGIA DO HÁBITO • CÓDIGO ZERO",
+        "beat3_kicker": "VERDADE DURA",
+        "beat3_big": "PERFIL DO EX É VITRINE EDITADA.",
+        "beat3_sub": "Você compara seus piores dias com um recorte ensaiado.",
+        "rehook_text": "Silenciar não é fraqueza, é higiene mental.",
+        "rehook_sub": "Quem quer respirar livre tira o veneno da própria mesa.",
+        "steps": [
+            {"title": "Silencie ou bloqueie", "desc": "Tire stories, curtidas e últimas visualizações."},
+            {"title": "Zere o contador", "desc": "Se espiar hoje, recomece o dia 1 honesto."},
+            {"title": "Troque o hábito noturno", "desc": "Substitua a checagem por ação física real."},
+        ],
+        "cue_words": ["reabasteceu", "manda", "vitrine", "higiene", "silencie", "ZERO"],
+        "narration": (
+            "Você jura que tá em contato zero porque não mandou oi... mas olha o perfil todo dia? Para. "
+            "Uma espiada de cinco segundos zera o relógio e reabastece a fissura no seu cérebro. "
+            "Ficar sem falar, mas olhando tudo, mantém sua mente presa no loop como um viciado olhando a vitrine. "
+            "E você ainda compara seu pior momento com uma foto ensaiada na rede social. "
+            "Silenciar não é fraqueza nenhuma, é pura higiene mental. "
+            "Corte stories hoje, pare de checar sinais e proteja seus catorze dias reais. "
+            "Comenta ZERO que eu te envio o plano completo."
+        ),
+        "caption": (
+            "Contato zero não vale se você passa a noite vigiando stories e status.\n\n"
+            "Cada olhada renova a dor por mais uma semana inteira.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#stalkear #contatozero #superartermino #saudemental #codigozero"
+        ),
+    },
+    {
+        "topic": "O paradoxo de correr atrás: perseguição ativa fuga (Ambos #19)",
+        "audience": "ambos",
+        "music_bed": "enquete",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["35426", "28897", "8739"],
+        "case_tag": "PSICOLOGIA • PARADOXO",
+        "emotion_direction": "Lúcido, incisivo e revelador sobre dinâmica humana.",
+        "hook_headline": "CORRER ATRÁS EMPURRA PRA LONGE.",
+        "hook_highlight": "EMPURRA",
+        "hook_card": {"sender": "LEI HUMANA", "msg": "Quanto mais você insiste, menos espaço existe pro retorno", "stamp": "EFEITO REPULSÃO"},
+        "beat1_kicker": "DINÂMICA INVISÍVEL",
+        "beat1_big": "PRESSÃO GERA RESISTÊNCIA.",
+        "beat1_sub": "Ninguém sente falta de quem nunca saiu da porta.",
+        "board_type": "strike_stat",
+        "board_title": "O paradoxo do espaço",
+        "board_big": "180°",
+        "board_wrong_lbl": "INSISTIR, EXPLICAR E COBRAR",
+        "board_wrong": "Sufoca a outra pessoa e confirma que ir embora foi alívio",
+        "board_right_lbl": "RETIRADA AUTÊNTICA",
+        "board_right": "Devolve ar, restaura respeito e cura sua dependência",
+        "board_source": "BASE PSICOLÓGICA • CÓDIGO ZERO",
+        "beat3_kicker": "LIÇÃO REAL",
+        "beat3_big": "AUSÊNCIA É O ÚNICO ESPELHO.",
+        "beat3_sub": "Seja pra virar a página ou pra ganhar respeito real.",
+        "rehook_text": "Mas quase ninguém aguenta o silêncio dos primeiros dias.",
+        "rehook_sub": "É aqui que o medo faz você quebrar tudo.",
+        "steps": [
+            {"title": "Recolha sua presença", "desc": "Devolva o espaço que a pessoa escolheu ter."},
+            {"title": "Mude o foco pra você", "desc": "O único território que você controla hoje."},
+            {"title": "Sustente 14 dias firmes", "desc": "A clareza sempre vence o desespero."},
+        ],
+        "cue_words": ["porta", "paradoxo", "espelho", "aguenta", "recolha", "ZERO"],
+        "narration": (
+            "Quanto mais você corre atrás tentando salvar a relação, mais rápido empurra a outra pessoa pra longe. "
+            "É simples: pressão constante cria alívio de fugir, nunca saudade. Ninguém sente falta de quem não sai da porta. "
+            "No paradoxo emocional, insistir confirma pro outro que ir embora foi a decisão certa. "
+            "Sua ausência inteira é o único espelho que funciona, tanto pra respeito quanto pra sua cura. "
+            "Mas quase ninguém aguenta o silêncio dos primeiros dias sem recair. "
+            "Recolha sua presença agora, redirecione sua energia pra si e sustente catorze dias. "
+            "Comenta ZERO que eu libero o Código Zero pra você hoje."
+        ),
+        "caption": (
+            "Insistir onde não há abertura nunca cria atração: só confirma sufoco.\n\n"
+            "Quando você se retira com dignidade, vence das duas formas: ou ganha respeito real, ou ganha sua paz de volta.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#contatozero #psicologia #relacionamento #superacao #codigozero"
+        ),
+    },
+    {
+        "topic": "A Janela Controlada de 15 min pra parar de ruminar (Ambos #20)",
+        "audience": "ambos",
+        "music_bed": "arpege",
+        "theme_start": "paper",
+        "hook_mode": "split",
+        "broll_ids": ["41638", "28901", "2846"],
+        "case_tag": "TÉCNICA BORKOVEC • FOCO",
+        "emotion_direction": "Prático, direto e reconfortante, devolvendo produtividade no dia.",
+        "hook_headline": "PARE DE BRIGAR COM A MENTE.",
+        "hook_highlight": "BRIGAR",
+        "hook_card": {"sender": "EFEITO REBOTE", "msg": "'Não quero pensar nisso' faz você pensar em dobro", "stamp": "TÉCNICA CLÍNICA"},
+        "beat1_kicker": "CIÊNCIA DO FOCO",
+        "beat1_big": "PROIBIR PENSAMENTO MULTIPLICA.",
+        "beat1_sub": "O cérebro testa todo minuto se você já esqueceu.",
+        "board_type": "neuro_curve",
+        "board_title": "Janela Controlada de 15 min",
+        "board_a_label": "DIA INTEIRO SOLTO",
+        "board_a_text": "Invasões roubam trabalho, treino e energia a cada hora",
+        "board_b_label": "18H30 • 15 MINUTOS",
+        "board_b_text": "Você confina a ruminação num único horário fixo",
+        "board_source": "CONTROLE DE ESTÍMULOS • BORKOVEC",
+        "beat3_kicker": "RESULTADO PRÁTICO",
+        "beat3_big": "SEU DIA VOLTA A RENDER.",
+        "beat3_sub": "Em 5 dias o cérebro aprende a esperar o horário.",
+        "rehook_text": "O truque não é apagar a memória à força.",
+        "rehook_sub": "É dar hora marcada pra dor sem perder sua semana.",
+        "steps": [
+            {"title": "Marque 18h30 todo dia", "desc": "Separe exatamente 15 min num lugar neutro."},
+            {"title": "Adie durante o trabalho", "desc": "Pensamento veio às 10h? 'Penso nisso às 18h30.'"},
+            {"title": "Escreva e encerre", "desc": "Deu 15 min, feche o caderno e mude de cômodo."},
+        ],
+        "cue_words": ["esqueceu", "janela", "render", "truque", "marque", "ZERO"],
+        "narration": (
+            "Quanto mais você se obriga a não pensar no seu ex ou na sua ex, mais a imagem invade seu dia? "
+            "Na psicologia, tentar proibir um pensamento faz o cérebro checar cada minuto se você já esqueceu. "
+            "A saída clínica se chama Janela Controlada: confine a dor em quinze minutos fixos do dia. "
+            "Em menos de uma semana, sua atenção volta a render no trabalho e no treino. "
+            "O truque não é apagar a memória na marra. "
+            "Marque seis e meia da tarde, adie qualquer invasão pro horário marcado e feche o caderno ao fim. "
+            "Comenta ZERO que eu mando o método completo no seu WhatsApp."
+        ),
+        "caption": (
+            "Tentar 'não pensar' após o término só alimenta o efeito rebote na sua cabeça.\n\n"
+            "Use a Janela Controlada de 15 minutos e retome seu foco já nessa semana.\n\n"
+            "Comenta ZERO ou chama no WhatsApp da bio: (12) 99659-3222.\n\n"
+            "#ansiedade #foco #psicologia #superartermino #codigozero"
         ),
     },
 ]
@@ -669,61 +1070,92 @@ def save_history(data: dict) -> None:
     HISTORY_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _validate_script(parsed: dict) -> bool:
-    vt = parsed.get("visual_type")
-    s2t = parsed.get("scene2_type")
-    base_ok = all(
-        parsed.get(k)
-        for k in (
-            "topic", "badge", "visual_type", "narration", "caption", "emotion_direction",
-            "scene2_type", "scene2_title", "scene2_a_label", "scene2_a_text",
-            "scene2_b_label", "scene2_b_text", "scene2_metric",
-        )
-    )
-    steps = parsed.get("steps")
-    steps_ok = (
-        isinstance(steps, list)
-        and len(steps) == 3
-        and all(isinstance(s, dict) and s.get("title") and s.get("desc") for s in steps)
-    )
-    type_ok = (
-        (vt == "whatsapp" and all(parsed.get(k) for k in ("hook_sender", "hook_msg", "hook_alert")))
-        or (vt == "timer" and all(parsed.get(k) for k in ("hook_label", "hook_big", "hook_sub")))
-        or (vt == "contrast" and all(parsed.get(k) for k in ("hook_left_tag", "hook_left_text", "hook_right_tag", "hook_right_text")))
-    )
-    return base_ok and steps_ok and type_ok and s2t in ("wave", "bars", "flow")
+def choose_next_audience(history: dict, forced: str = "auto") -> str:
+    if forced in ("masculino", "feminino", "ambos"):
+        return forced
+    posted = history.get("posted", [])
+    audiences = [p.get("audience") for p in posted[-6:] if p.get("audience")]
+    if not audiences:
+        return "masculino"
+    last = audiences[-1]
+    m_cnt = audiences.count("masculino")
+    f_cnt = audiences.count("feminino")
+    if last == "feminino":
+        return "masculino"
+    if last == "masculino":
+        return "feminino" if f_cnt <= m_cnt else "ambos"
+    return "masculino" if m_cnt <= f_cnt else "feminino"
 
 
-def generate_script(posted_topics: list[str]) -> dict:
-    """Gera roteiro estruturado v3 (4 atos visuais + direção emocional) ou seleciona acervo curado."""
-    if GEMINI_API_KEY:
-        recent = posted_topics[-30:]
+def resolve_voice_gender(script: dict, history: dict) -> str:
+    aud = script.get("audience", "ambos")
+    if aud in ("masculino", "feminino"):
+        return aud
+    last_vg = next((p.get("voice_gender") for p in reversed(history.get("posted", [])) if p.get("voice_gender")), "feminino")
+    return "masculino" if last_vg == "feminino" else "feminino"
+
+
+def _validate_v4_script(parsed: dict) -> bool:
+    req = (
+        "topic", "audience", "music_bed", "theme_start", "hook_mode", "broll_ids",
+        "case_tag", "emotion_direction", "hook_headline", "hook_highlight", "hook_card",
+        "beat1_kicker", "beat1_big", "beat1_sub", "board_type", "board_title",
+        "beat3_kicker", "beat3_big", "beat3_sub", "rehook_text", "rehook_sub",
+        "steps", "cue_words", "narration", "caption",
+    )
+    if not all(parsed.get(k) for k in req):
+        return False
+    if parsed.get("audience") not in ("masculino", "feminino", "ambos"):
+        return False
+    if parsed.get("board_type") not in ("strike_stat", "neuro_curve", "msg_deconstruct"):
+        return False
+    if not isinstance(parsed.get("broll_ids"), list) or len(parsed["broll_ids"]) < 3:
+        return False
+    if not isinstance(parsed.get("steps"), list) or len(parsed["steps"]) != 3:
+        return False
+    if not isinstance(parsed.get("cue_words"), list) or len(parsed["cue_words"]) != 6:
+        return False
+    return True
+
+
+def generate_script(history: dict, forced_audience: str = "auto") -> dict:
+    """Seleciona ou gera roteiro Studio v4 balanceado (masculino / feminino / ambos)."""
+    target_audience = choose_next_audience(history, forced_audience)
+    posted_topics = [item.get("topic") or item.get("verse", "") for item in history.get("posted", [])]
+
+    if GEMINI_API_KEY and os.environ.get("USE_CURATED_ONLY") != "1":
+        recent = posted_topics[-25:]
+        aud_guide = {
+            "masculino": "FOCO EXCLUSIVO NO PÚBLICO MASCULINO (ela terminou, pediu tempo, testou ego; linguagem direta de homem para homem, postura, sem melodrama).",
+            "feminino": "FOCO EXCLUSIVO NO PÚBLICO FEMININO (ele sumiu, mandou oi de madrugada, pediu amizade; lucidez e amor-próprio direto).",
+            "ambos": "PÚBLICO AMBOS OS GÊNEROS (use 'você' e 'essa pessoa' / 'ex' de forma neutra, focado em neurociência e psicologia aplicada a homens e mulheres).",
+        }[target_audience]
+        pool_summary = json.dumps(BROLL_POOL, ensure_ascii=False)
         prompt = f"""
-Você é diretora criativa especialista em Reels virais de retenção feminina (compartilhamentos na DM e retenção nos 3s) do produto CÓDIGO ZERO (Protocolo Imersivo de 14 Dias pós-término, 16 Scripts Escudo de Diamante, Central SOS Web e 6 Cartões SOS).
-Venda feita via WhatsApp {WHATSAPP_DISPLAY} na bio (NUNCA diga "clique no link da bio"; diga "comenta ZERO ou chama no WhatsApp da bio"!).
+Você é diretor criativo e editor-chefe de estúdio do projeto CÓDIGO ZERO (Protocolo 14 Dias, Central SOS e 16 Scripts anti-recaída pós-término). WhatsApp na bio: {WHATSAPP_DISPLAY}.
+Missão deste vídeo: {aud_guide}
 
-Crie um roteiro de 20 a 26 segundos sobre um ângulo DIFERENTE destes: {recent}.
-Regras obrigatórias:
-- Fale como uma mulher lúcida e acolhedora conversando olho no olho em português do Brasil natural ("tá", "pra", pausas reais com "..." antes de verdades fortes).
-- ZERO clichês de IA, ZERO travessões "—", ZERO "pare de rolar", ZERO propaganda nos primeiros 16 segundos.
-- Cena 1 (`visual_type`): "whatsapp", "timer", ou "contrast":
-  * whatsapp: hook_sender (ex "Ex • 01:42"), hook_msg (<=52 chars), hook_alert (<=26 chars CAPS).
-  * timer: hook_label (<=24 chars), hook_big (1-2 palavras, ex "90 SEG"), hook_sub (<=52 chars).
-  * contrast: hook_left_tag, hook_left_text (<=44 chars), hook_right_tag, hook_right_text (<=44 chars).
-- Cena 2 (`scene2_type`): "wave", "bars", ou "flow":
-  * scene2_title (<=38 chars), scene2_a_label (<=26 chars), scene2_a_text (<=54 chars), scene2_b_label (<=26 chars), scene2_b_text (<=54 chars), scene2_metric (<=42 chars).
-- Cena 3 (`steps`): lista de EXATAMENTE 3 objetos {{"title": <=28 chars, "desc": <=52 chars}}.
-- `emotion_direction`: instrução curta de atuação em português (ex: "Acolhedora no início, firme nos passos").
-- `caption`: Linha 1 (<=115 chars) sem saudação/emoji inicial, 2 parágrafos curtos SEO ("superar término", "contato zero", "dependência emocional"), CTA "Comenta ZERO ou chama no WhatsApp da bio: {WHATSAPP_DISPLAY}.", e 4-5 hashtags específicas.
+Crie um roteiro editorial estilo documentário moderno de 24 a 32 segundos (70 a 95 palavras na narração), completamente DIFERENTE destes temas: {recent}.
+Regras duras de estúdio:
+- Gancho nos primeiros 2s: frase de abertura <= 11 palavras com tensão real. Zero "pare de rolar", zero travessões "—", zero clichês de IA.
+- Português brasileiro falado natural ("tá", "pra"). Re-hook obrigatório perto da metade do roteiro.
+- Última frase: "Comenta ZERO aqui que eu te envio o acesso completo." ou similar citando ZERO.
+- Escolha exatamente 3 IDs de B-roll do catálogo válido {pool_summary} para `broll_ids`.
+- `music_bed`: um de ["enquete", "thriller", "arpege", "compte-a-rebours"].
+- `theme_start`: "noir" ou "paper"; `hook_mode`: "split" ou "cinema".
+- `board_type`: "strike_stat" (com board_big, board_wrong_lbl, board_wrong, board_right_lbl, board_right, board_source), OR "neuro_curve" (com board_a_label, board_a_text, board_b_label, board_b_text, board_source), OR "msg_deconstruct" (com board_msg, board_decode, board_source).
+- `hook_card`: {{"sender": ..., "msg": <=48 chars, "stamp": <=22 chars CAPS}}.
+- `steps`: 3 itens {{"title": <=24 chars, "desc": <=46 chars}}.
+- `cue_words`: EXATAMENTE 6 palavras/termos isolados QUE APARECEM EM ORDEM na `narration` marcando: [fim do gancho / Beat1, início Board / Beat2, Beat3, Re-hook / Beat4, Passos / Beat5, CTA "ZERO" / Beat6].
 
-Retorne APENAS JSON válido com todas as chaves acima.
+Retorne APENAS JSON válido seguindo todas as chaves de Studio v4.
 """
         body = json.dumps({
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {"responseMimeType": "application/json", "temperature": 0.9},
         }).encode("utf-8")
 
-        for model in ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]:
+        for model in ["gemini-2.5-flash", "gemini-2.5-flash-lite"]:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
             for attempt in range(2):
                 try:
@@ -733,47 +1165,50 @@ Retorne APENAS JSON válido com todas as chaves acima.
                     raw = res["candidates"][0]["content"]["parts"][0]["text"].strip()
                     raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw, flags=re.I)
                     parsed = json.loads(raw)
-                    if _validate_script(parsed):
+                    if _validate_v4_script(parsed):
                         parsed["caption"] = parsed["caption"].replace("—", "-").replace("link da bio", "WhatsApp da bio")
                         parsed["narration"] = parsed["narration"].replace("—", ",").replace("link da bio", "WhatsApp da bio")
-                        print(f"Roteiro v3 gerado via Gemini ({model})!")
+                        print(f"Roteiro v4 ({target_audience}) gerado via Gemini ({model})!")
                         return parsed
                 except Exception as exc:
-                    print(f"Tentativa {attempt + 1} roteiro em {model} falhou: {exc}")
-                    time.sleep(2)
+                    print(f"Tentativa {attempt + 1} Gemini v4 em {model}: {exc}")
+                    time.sleep(1.5)
 
-    print("Usando roteiro v3 curado do acervo Código Zero...")
-    available = [s for s in CURATED_SCRIPTS if s["topic"] not in posted_topics]
-    if not available:
-        last_topics = set(posted_topics[-12:])
-        available = [s for s in CURATED_SCRIPTS if s["topic"] not in last_topics] or CURATED_SCRIPTS
-    return random.choice(available)
+    print(f"Selecionando roteiro v4 curado para público={target_audience}...")
+    pool = [s for s in CURATED_SCRIPTS if s["audience"] == target_audience and s["topic"] not in posted_topics]
+    if not pool:
+        pool = [s for s in CURATED_SCRIPTS if s["audience"] == target_audience] or CURATED_SCRIPTS
+    recent_set = set(posted_topics[-12:])
+    fresh = [s for s in pool if s["topic"] not in recent_set] or pool
+    return random.choice(fresh)
 
 
-def synthesize_emotional_female_voice(narration: str, emotion: str, out_mp3: Path) -> tuple[float, list[dict], dict]:
-    """
-    Gera voz feminina brasileira com emoção real via Gemini 2.5 Flash TTS (grátis no tier gratuito).
-    Faz fallback limpo para pt-BR-FranciscaNeural em ritmo natural caso Gemini falhe.
-    """
-    tts_info = {"tts_engine": "", "tts_voice": "", "tts_error": None}
+def synthesize_studio_voice(narration: str, emotion: str, voice_gender: str, out_mp3: Path, local_voice: str = "") -> tuple[float, list[dict], dict]:
+    """Gera locução estúdio masculina ou feminina (Gemini 2.5 Flash TTS -> Edge TTS fallback)."""
+    profile = VOICE_PROFILES.get(voice_gender, VOICE_PROFILES["feminino"])
+    tts_info = {"tts_engine": "", "tts_voice": "", "tts_gender": voice_gender, "tts_error": None}
+
+    if local_voice and Path(local_voice).exists():
+        shutil.copyfile(local_voice, out_mp3)
+        dur = float(subprocess.check_output([
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1", str(out_mp3),
+        ]).decode().strip())
+        tts_info.update({"tts_engine": "local-override", "tts_voice": Path(local_voice).name})
+        return dur, [], tts_info
+
     pcm_path = BUILD_DIR / "voz_raw.pcm"
-
     tts_prompt = (
-        "AUDIO PROFILE: Mulher brasileira de 30 anos, acolhedora, calma, verdadeira e segura, "
-        "dando um conselho íntimo e direto para quem está sofrendo após um término.\n"
-        "## THE SCENE: Conversa reservada tarde da noite em sala silenciosa, voz próxima do microfone.\n\n"
-        "### DIRECTOR'S NOTES\n"
-        f"Style: {emotion}\n"
-        "Pacing: Fala humana e fluida em português do Brasil, sem parecer robô nem locução apressada de comercial. "
-        "Respire suavemente nas vírgulas e faça pausas breves antes de frases de impacto.\n"
-        "Accent: Português brasileiro natural (pt-BR), dicção limpa e expressiva.\n\n"
-        "## TRANSCRIPT\n"
-        f"{narration}"
+        f"{profile['audio_profile']}\n"
+        f"## SCENE DIRECTION\nStyle: {emotion}\n"
+        "Pacing: Fala humana envolvente em português brasileiro natural, dicção limpa de estúdio, sem soar robô.\n\n"
+        f"## TRANSCRIPT\n{narration}"
     )
 
     if GEMINI_API_KEY:
         models = ["gemini-2.5-flash-preview-tts", "gemini-2.5-flash-tts"]
-        voices = [GEMINI_TTS_VOICE, "Despina"] if GEMINI_TTS_VOICE != "Despina" else ["Despina", "Aoede"]
+        voices = profile["gemini_voices"][:]
+        random.shuffle(voices[:2])  # Alterna timbre principal mantendo consistência
         for model in models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
             for vname in voices:
@@ -781,11 +1216,7 @@ def synthesize_emotional_female_voice(narration: str, emotion: str, out_mp3: Pat
                     "contents": [{"parts": [{"text": tts_prompt}]}],
                     "generationConfig": {
                         "responseModalities": ["AUDIO"],
-                        "speechConfig": {
-                            "voiceConfig": {
-                                "prebuiltVoiceConfig": {"voiceName": vname}
-                            }
-                        },
+                        "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": vname}}},
                     },
                 }).encode("utf-8")
                 try:
@@ -793,35 +1224,31 @@ def synthesize_emotional_female_voice(narration: str, emotion: str, out_mp3: Pat
                     with urllib.request.urlopen(req, timeout=45) as resp:
                         res = json.loads(resp.read().decode("utf-8"))
                     parts = res["candidates"][0]["content"]["parts"]
-                    inline = next(
-                        (p.get("inlineData") or p.get("inline_data") for p in parts if p.get("inlineData") or p.get("inline_data")),
-                        None,
-                    )
+                    inline = next((p.get("inlineData") or p.get("inline_data") for p in parts if p.get("inlineData") or p.get("inline_data")), None)
                     if not inline or not inline.get("data"):
-                        raise RuntimeError("Resposta Gemini TTS sem inlineData de áudio")
+                        raise RuntimeError("Resposta sem inlineData de áudio")
                     audio_bytes = base64.b64decode(inline["data"])
                     if len(audio_bytes) < 8_000:
-                        raise RuntimeError(f"Áudio retornado curto demais ({len(audio_bytes)} bytes)")
+                        raise RuntimeError("Áudio curto demais")
                     mime = inline.get("mimeType") or inline.get("mime_type") or "audio/L16;rate=24000"
                     rate_m = re.search(r"rate=(\d+)", mime)
                     sample_rate = int(rate_m.group(1)) if rate_m else 24000
                     pcm_path.write_bytes(audio_bytes)
                     subprocess.check_call([
-                        "ffmpeg", "-y", "-f", "s16le", "-ar", str(sample_rate), "-ac", "1",
-                        "-i", str(pcm_path), "-c:a", "libmp3lame", "-q:a", "2", "-ar", "44100", "-ac", "2",
-                        str(out_mp3),
+                        "ffmpeg", "-y", "-v", "error", "-f", "s16le", "-ar", str(sample_rate), "-ac", "1",
+                        "-i", str(pcm_path), "-c:a", "libmp3lame", "-q:a", "2", "-ar", "44100", "-ac", "2", str(out_mp3),
                     ])
                     dur = float(subprocess.check_output([
                         "ffprobe", "-v", "error", "-show_entries", "format=duration",
                         "-of", "default=noprint_wrappers=1:nokey=1", str(out_mp3),
                     ]).decode().strip())
-                    if dur < 6.0 or dur > 65.0:
+                    if dur < 8.0 or dur > 70.0:
                         raise RuntimeError(f"Duração anômala Gemini TTS: {dur:.2f}s")
                     tts_info.update({"tts_engine": f"gemini:{model}", "tts_voice": vname, "tts_error": None})
-                    print(f"TTS_ENGINE=gemini ({model}, voice={vname}, dur={dur:.2f}s, rate={sample_rate})")
+                    print(f"TTS_ENGINE=gemini ({model}, gender={voice_gender}, voice={vname}, dur={dur:.2f}s)")
                     return dur, [], tts_info
                 except urllib.error.HTTPError as err:
-                    err_body = err.read().decode("utf-8", errors="ignore")[:260]
+                    err_body = err.read().decode("utf-8", errors="ignore")[:220]
                     tts_info["tts_error"] = f"{model}/{vname} HTTP {err.code}: {err_body}"
                     print(f"Aviso Gemini TTS: {tts_info['tts_error']}")
                     if err.code in (429, 500, 503):
@@ -830,40 +1257,40 @@ def synthesize_emotional_female_voice(narration: str, emotion: str, out_mp3: Pat
                     tts_info["tts_error"] = f"{model}/{vname}: {exc}"
                     print(f"Aviso Gemini TTS: {tts_info['tts_error']}")
 
-    # Fallback para FranciscaNeural em ritmo natural (-3%)
+    # Edge TTS neural fallback (Antonio/Fabio para masculino, Thalita/Francisca para feminino)
     words: list[dict] = []
     tts_text = narration.replace("...", ",")
-    try:
-        import edge_tts
+    chosen_edge = profile["edge_voices"][0]
+    for ev in profile["edge_voices"]:
+        try:
+            import edge_tts
 
-        async def _run() -> None:
-            comm = edge_tts.Communicate(
-                text=tts_text,
-                voice=EDGE_FALLBACK_VOICE,
-                rate="-3%",
-                pitch="+0Hz",
-                boundary="WordBoundary",
-            )
-            with out_mp3.open("wb") as f:
-                async for chunk in comm.stream():
-                    ctype = chunk.get("type")
-                    if ctype == "audio":
-                        f.write(chunk["data"])
-                    elif ctype == "WordBoundary":
-                        start_s = chunk["offset"] / 10_000_000.0
-                        dur_s = chunk["duration"] / 10_000_000.0
-                        words.append({
-                            "text": chunk["text"],
-                            "start": round(start_s, 3),
-                            "end": round(start_s + max(0.08, dur_s), 3),
-                        })
+            async def _run(v=ev) -> None:
+                comm = edge_tts.Communicate(
+                    text=tts_text, voice=v, rate=profile["edge_rate"],
+                    pitch=profile["edge_pitch"], boundary="WordBoundary",
+                )
+                with out_mp3.open("wb") as f:
+                    async for chunk in comm.stream():
+                        if chunk.get("type") == "audio":
+                            f.write(chunk["data"])
+                        elif chunk.get("type") == "WordBoundary":
+                            st = chunk["offset"] / 10_000_000.0
+                            dr = chunk["duration"] / 10_000_000.0
+                            words.append({"text": chunk["text"], "start": round(st, 3), "end": round(st + max(0.08, dr), 3)})
 
-        asyncio.run(_run())
-    except Exception as exc:
-        print(f"edge_tts Python API fallback ({exc}); usando CLI...")
+            asyncio.run(_run())
+            chosen_edge = ev
+            if out_mp3.exists() and out_mp3.stat().st_size > 8_000:
+                break
+        except Exception as exc:
+            print(f"Aviso edge_tts ({ev}): {exc}")
+            words.clear()
+
+    if not out_mp3.exists() or out_mp3.stat().st_size < 4_000:
         tts_prefix = ["edge-tts"] if shutil.which("edge-tts") else ["uvx", "edge-tts"]
         subprocess.check_call(tts_prefix + [
-            "--voice", EDGE_FALLBACK_VOICE, "--rate=-3%", "--pitch=+0Hz",
+            "--voice", chosen_edge, f"--rate={profile['edge_rate']}",
             "--text", tts_text, "--write-media", str(out_mp3),
         ])
 
@@ -871,8 +1298,8 @@ def synthesize_emotional_female_voice(narration: str, emotion: str, out_mp3: Pat
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1", str(out_mp3),
     ]).decode().strip())
-    tts_info.update({"tts_engine": "edge-tts-fallback", "tts_voice": EDGE_FALLBACK_VOICE})
-    print(f"TTS_ENGINE=edge-tts ({EDGE_FALLBACK_VOICE}, dur={dur:.2f}s)")
+    tts_info.update({"tts_engine": "edge-tts-fallback", "tts_voice": chosen_edge})
+    print(f"TTS_ENGINE=edge-tts ({chosen_edge}, dur={dur:.2f}s)")
     return dur, words, tts_info
 
 
@@ -881,11 +1308,6 @@ def _normalize_tok(t: str) -> str:
 
 
 def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: list[dict]) -> tuple[list[dict], str, str]:
-    """
-    Sincroniza exatamente as palavras do roteiro original com o áudio falado.
-    Usa WordBoundary se já existir; senão alinha via faster-whisper + SequenceMatcher;
-    em último caso usa ffmpeg silencedetect + distribuição ponderada por sílabas.
-    """
     if pre_words:
         return pre_words, "edge-wordboundary", " ".join(w["text"] for w in pre_words[:18])
 
@@ -893,7 +1315,6 @@ def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: 
     if not script_tokens:
         return [], "empty", ""
 
-    # Tentativa 1: faster-whisper tiny via PCM float32 NumPy (evita av.open metadata_errors)
     try:
         import numpy as np
         from faster_whisper import WhisperModel
@@ -935,7 +1356,6 @@ def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: 
                         timings[idx] = (cur_t, cur_t + max(0.08, part))
                         cur_t += part
 
-            # Preencher tokens não casados interpolando entre vizinhos casados
             idx = 0
             while idx < len(timings):
                 if timings[idx] is not None:
@@ -961,56 +1381,10 @@ def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: 
                 {"text": tok, "start": round(st, 3), "end": round(max(st + 0.08, en), 3)}
                 for tok, (st, en) in zip(script_tokens, timings)  # type: ignore[misc]
             ]
-            preview = " ".join(w["text"] for w in raw_words[:20])
-            print(f"Word alignment via faster-whisper OK ({len(raw_words)} -> {len(aligned)} tokens)")
-            return aligned, "faster-whisper-tiny", preview
+            return aligned, "faster-whisper-tiny", " ".join(w["text"] for w in raw_words[:18])
     except Exception as exc:
-        print(f"Aviso faster-whisper fallback ({exc}); usando silencedetect...")
+        print(f"Aviso faster-whisper fallback ({exc}); usando distribuição ponderada...")
 
-    # Tentativa 2: FFmpeg silencedetect + distribuição ponderada por tamanho de palavra
-    try:
-        log = subprocess.check_output(
-            ["ffmpeg", "-i", str(mp3_path), "-af", "silencedetect=noise=-32dB:d=0.16", "-f", "null", "-"],
-            stderr=subprocess.STDOUT,
-        ).decode("utf-8", errors="ignore")
-        starts = [float(x) for x in re.findall(r"silence_start:\s*([0-9.]+)", log)]
-        ends = [float(x) for x in re.findall(r"silence_end:\s*([0-9.]+)", log)]
-        speech_segs: list[tuple[float, float]] = []
-        cursor = 0.05
-        for s_t, e_t in zip(starts, ends):
-            if s_t - cursor > 0.12:
-                speech_segs.append((cursor, s_t))
-            cursor = e_t
-        if dur - cursor > 0.12:
-            speech_segs.append((cursor, dur - 0.04))
-        total_speech = sum(e - s for s, e in speech_segs)
-        if speech_segs and total_speech > 2.0:
-            weights = [max(2, len(_normalize_tok(t)) + (2 if re.search(r"[.!?,]$", t) else 0)) for t in script_tokens]
-            tot_w = sum(weights)
-            aligned: list[dict] = []
-            seg_i = 0
-            seg_pos = speech_segs[0][0]
-            for tok, wt in zip(script_tokens, weights):
-                span = total_speech * (wt / tot_w)
-                w_start = seg_pos
-                rem = span
-                while rem > 0 and seg_i < len(speech_segs):
-                    avail = speech_segs[seg_i][1] - seg_pos
-                    if rem <= avail:
-                        seg_pos += rem
-                        rem = 0
-                    else:
-                        rem -= avail
-                        seg_i += 1
-                        if seg_i < len(speech_segs):
-                            seg_pos = speech_segs[seg_i][0]
-                w_end = max(w_start + 0.08, seg_pos)
-                aligned.append({"text": tok, "start": round(w_start, 3), "end": round(w_end, 3)})
-            return aligned, "ffmpeg-silencedetect", ""
-    except Exception as exc:
-        print(f"Aviso silencedetect fallback ({exc})")
-
-    # Tentativa 3: Proporcional por caracteres
     weights = [max(2, len(_normalize_tok(t)) + (2 if re.search(r"[.!?,]$", t) else 0)) for t in script_tokens]
     tot_w = sum(weights)
     aligned = []
@@ -1023,8 +1397,50 @@ def align_words_to_audio(narration: str, mp3_path: Path, dur: float, pre_words: 
     return aligned, "weighted-char-fallback", ""
 
 
+def compute_beat_times(words: list[dict], cue_words: list[str], voice_dur: float, delay: float = 0.18) -> tuple[list[float], float]:
+    """Sincroniza os 7 cortes visuais exatamente com as palavras-âncora da fala."""
+    total_dur = max(21.0, round(voice_dur + delay + 2.2, 1))
+    defaults = [
+        round(voice_dur * 0.14, 2),
+        round(voice_dur * 0.28, 2),
+        round(voice_dur * 0.44, 2),
+        round(voice_dur * 0.56, 2),
+        round(voice_dur * 0.69, 2),
+        round(voice_dur * 0.88, 2),
+        round(min(total_dur - 2.0, voice_dur + delay + 0.15), 2),
+    ]
+    if not words or len(cue_words) != 6:
+        return defaults, total_dur
+
+    found: list[float] = []
+    search_idx = 0
+    for i, cue in enumerate(cue_words):
+        norm_cue = _normalize_tok(cue)
+        hit = None
+        for wi in range(search_idx, len(words)):
+            if _normalize_tok(words[wi]["text"]) == norm_cue or norm_cue in _normalize_tok(words[wi]["text"]):
+                hit = words[wi]["start"] + delay
+                search_idx = wi + 1
+                break
+        if hit is None:
+            hit = defaults[i]
+        found.append(round(hit, 2))
+
+    # Garante ritmo dinâmico (entre 2.0s e 3.8s por batida, sem estancar) e tempo suficiente pros passos
+    t1 = max(1.8, min(found[0], 3.2))
+    t2 = max(t1 + 2.2, min(found[1], t1 + 3.6))
+    t3 = max(t2 + 2.8, min(found[2], t2 + 4.2))
+    t4 = max(t3 + 2.0, min(found[3], t3 + 3.2))
+    t5 = max(t4 + 2.2, min(found[4], t4 + 3.2))
+    t6 = max(t5 + 4.2, min(found[5], total_dur - 4.4))
+    t7 = max(t6 + 2.1, round(total_dur - 2.1, 2))
+    if t7 > total_dur - 1.5:
+        total_dur = round(t7 + 2.0, 1)
+    return [round(x, 2) for x in (t1, t2, t3, t4, t5, t6, t7)], total_dur
+
+
 def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple[list[dict], str]:
-    """Agrupa palavras em blocos naturais (2-4 palavras) respeitando pausas e início de frases."""
+    """Blocos curtos 1–3 palavras estilo Studio (legível em qualquer fundo)."""
     chunks: list[dict] = []
     cur: list[dict] = []
     cur_len = 0
@@ -1044,16 +1460,11 @@ def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple
         starts_new_sentence = (
             bool(cur)
             and raw_txt[0].isupper()
-            and clean not in {"zero", "whatsapp", "instagram", "sos", "stanford", "código", "codigo", "dia", "michigan", "borkovec"}
+            and clean not in {"zero", "whatsapp", "instagram", "sos", "michigan", "borkovec", "kross"}
             and prev_gap >= 0.12
         )
         ends_sentence = bool(re.search(r"[.!?]$", raw_txt))
-        if cur and (
-            len(cur) >= 4
-            or cur_len + len(raw_txt) > 22
-            or prev_gap >= 0.24
-            or starts_new_sentence
-        ):
+        if cur and (len(cur) >= 3 or cur_len + len(raw_txt) > 18 or prev_gap >= 0.22 or starts_new_sentence):
             chunks.append({"start": cur[0]["start"], "end": cur[-1]["end"], "words": cur})
             cur = []
             cur_len = 0
@@ -1065,280 +1476,304 @@ def build_caption_chunks(words: list[dict], delay_offset: float = 0.18) -> tuple
             cur_len = 0
 
     if cur:
-        if len(cur) == 1 and chunks and len(chunks[-1]["words"]) <= 4:
-            chunks[-1]["words"].append(cur[0])
-            chunks[-1]["end"] = cur[0]["end"]
-        else:
-            chunks.append({"start": cur[0]["start"], "end": cur[-1]["end"], "words": cur})
+        chunks.append({"start": cur[0]["start"], "end": cur[-1]["end"], "words": cur})
 
     for i in range(len(chunks) - 1):
         next_start = chunks[i + 1]["start"]
-        if next_start - chunks[i]["end"] < 0.45:
+        if next_start - chunks[i]["end"] < 0.35:
             chunks[i]["end"] = max(chunks[i]["end"], round(next_start - 0.02, 3))
 
     html_parts: list[str] = []
     for ci, ch in enumerate(chunks):
-        spans = "".join(
-            f'<span class="w" id="w-{ci}-{wi}">{html.escape(w["text"])}</span>'
-            for wi, w in enumerate(ch["words"])
-        )
+        spans = "".join(f'<span class="w" id="w-{ci}-{wi}">{html.escape(w["text"])}</span>' for wi, w in enumerate(ch["words"]))
         html_parts.append(f'<div class="cap-chunk" id="chunk-{ci}">{spans}</div>')
     return chunks, "\n".join(html_parts)
 
 
-def build_scene1_html(script: dict) -> str:
-    vt = script["visual_type"]
-    if vt == "whatsapp":
+def prep_broll_clip(clip_id: str, dur_needed: float, out_mp4: Path, fallback_ids: list[str]) -> str:
+    """Baixa (com cache), corta, grada estilo cinema e pré-reencoda com GOP curto (-g 10) para seek rápido."""
+    curl_bin = shutil.which("curl.exe") or shutil.which("curl") or "curl"
+    candidates = [clip_id] + [x for x in fallback_ids if x != clip_id]
+    raw_file = None
+    used_id = clip_id
+
+    for cid in candidates:
+        cached = BROLL_CACHE_DIR / f"{cid}-720.mp4"
+        if cached.exists() and cached.stat().st_size > 120_000:
+            raw_file = cached
+            used_id = cid
+            break
+        url = f"https://assets.mixkit.co/videos/{cid}/{cid}-720.mp4"
+        try:
+            subprocess.check_call([curl_bin, "-fsSL", "--max-time", "22", "-A", "Mozilla/5.0", "-o", str(cached), url])
+            if cached.exists() and cached.stat().st_size > 120_000:
+                raw_file = cached
+                used_id = cid
+                print(f"B-roll Mixkit baixado: {cid}")
+                break
+        except Exception as exc:
+            print(f"Aviso download B-roll {cid}: {exc}")
+
+    clip_dur = round(max(3.0, dur_needed + 0.35), 2)
+    if raw_file and raw_file.exists():
+        # Cinema grade uniforme + crop vertical 1080x1920 + fast GOP-10 para Chromium/HyperFrames
+        subprocess.check_call([
+            "ffmpeg", "-y", "-v", "error",
+            "-stream_loop", "-1", "-i", str(raw_file),
+            "-t", str(clip_dur),
+            "-vf", (
+                "fps=30,"
+                "scale=1080:1920:force_original_aspect_ratio=increase,"
+                "crop=1080:1920,"
+                "eq=contrast=1.12:saturation=0.70:brightness=-0.04,"
+                "vignette=PI/4"
+            ),
+            "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-g", "10",
+            "-pix_fmt", "yuv420p", "-an", "-movflags", "+faststart", str(out_mp4),
+        ])
+        return used_id
+
+    # Fallback cinematográfico escuro se offline
+    subprocess.check_call([
+        "ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+        "-i", f"color=c=#121318:s=1080x1920:r=30:d={clip_dur}",
+        "-vf", "noise=alls=8:allf=t+u,vignette=PI/3",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-g", "10", "-pix_fmt", "yuv420p", str(out_mp4),
+    ])
+    return "fallback-noir"
+
+
+def resolve_bgm(bed_name: str) -> Path:
+    local_bed = ASSETS_DIR / "music" / f"{bed_name}.mp3"
+    if local_bed.exists() and local_bed.stat().st_size > 25_000:
+        return local_bed
+    enq = ASSETS_DIR / "music" / "enquete.mp3"
+    if enq.exists():
+        return enq
+    out = BUILD_DIR / "bgm_fallback.mp3"
+    subprocess.check_call([
+        "ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+        "-i", "aevalsrc=0.10*sin(2*PI*146.83*t)+0.06*sin(2*PI*220*t):s=44100:d=50",
+        "-af", "lowpass=f=420", str(out),
+    ])
+    return out
+
+
+def build_beat0_html(script: dict) -> str:
+    hl = script["hook_headline"]
+    kw = script["hook_highlight"]
+    marker_svg = (
+        '<svg class="marker-svg" viewBox="0 0 200 18" preserveAspectRatio="none">'
+        '<path id="hookMarker" d="M 3 12 Q 95 2 196 10" fill="none" stroke="#d92b4b" '
+        'stroke-width="6" stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="105"/></svg>'
+    )
+    if kw in hl:
+        idx = hl.index(kw)
+        marked = (
+            html.escape(hl[:idx])
+            + f'<span class="marker-wrap">{html.escape(kw)}{marker_svg}</span>'
+            + html.escape(hl[idx + len(kw):])
+        )
+    else:
+        marked = html.escape(hl)
+
+    hc = script["hook_card"]
+    return f"""
+      <div class="arch-meta">
+        <span>{html.escape(script["case_tag"])}</span>
+        <span class="arch-tag">MÉTODO Z.E.R.O.</span>
+      </div>
+      <div class="hero-headline">{marked}</div>
+      <div class="ios-notif" id="hookCard">
+        <div class="ios-row" data-layout-ignore="true"><span>MENSAGEM / CONTEXTO</span><span>AGORA</span></div>
+        <div class="ios-sender">{html.escape(hc["sender"])}</div>
+        <div class="ios-msg">{html.escape(hc["msg"])}</div>
+        <div class="stamp-badge" id="hookStamp">{html.escape(hc["stamp"])}</div>
+      </div>
+    """
+
+
+def build_cinema_callout_html(kicker: str, big: str, sub: str, marker_id: str = "") -> str:
+    m_line = ""
+    if marker_id:
+        m_line = (
+            f'<svg style="width:260px;height:14px;margin-top:4px;" viewBox="0 0 260 14">'
+            f'<path id="{marker_id}" d="M 4 9 Q 130 2 256 9" fill="none" stroke="#e2a43b" stroke-width="5" '
+            f'stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="105"/></svg>'
+        )
+    return f"""
+      <div class="cinema-kicker">{html.escape(kicker)}</div>
+      <div class="cinema-big">{html.escape(big)}</div>
+      {m_line}
+      <div class="cinema-sub">{html.escape(sub)}</div>
+    """
+
+
+def build_beat2_html(script: dict) -> str:
+    bt = script["board_type"]
+    head = (
+        '<div class="arch-meta"><span>02 // PROVA EDITORIAL</span>'
+        f'<span class="arch-tag">{html.escape(script["audience"].upper())}</span></div>'
+        f'<div class="board-title">{html.escape(script["board_title"])}</div>'
+    )
+    if bt == "strike_stat":
         return f"""
-        <div id="s1Primary">
-          <div class="wa-card">
-            <div class="wa-head">
-              <div class="wa-app"><span class="wa-icon">W</span><span>WHATSAPP</span></div>
-              <div class="wa-time">agora</div>
+          {head}
+          <div class="stat-hero">{html.escape(script["board_big"])}</div>
+          <div class="strike-card" id="statWrong">
+            <div class="strike-lbl" style="color:#d92b4b;">✕ {html.escape(script["board_wrong_lbl"])}</div>
+            <div class="strike-txt" style="position:relative;">
+              {html.escape(script["board_wrong"])}
+              <svg class="strike-line-svg" viewBox="0 0 400 70" preserveAspectRatio="none">
+                <path id="strikeSlash" d="M 4 42 L 396 26" fill="none" stroke="#d92b4b" stroke-width="6"
+                  stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="105"/>
+              </svg>
             </div>
-            <div class="wa-sender">{html.escape(script["hook_sender"])}</div>
-            <div class="wa-body-wrap">
-              <div class="wa-typing" id="waTyping">
-                <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
-              </div>
-              <div class="wa-msg" id="waMsg">{html.escape(script["hook_msg"])}</div>
-            </div>
-            <div><span class="alert-strip" id="waAlert">{html.escape(script["hook_alert"])}</span></div>
           </div>
-          <div class="s1-wave-box">
-            <span class="s1-wave-tag">PICO DE DOPAMINA</span>
-            <svg viewBox="0 0 380 48" width="380" height="48">
-              <path id="s1WavePath" d="M 4 24 L 60 24 L 82 24 L 98 6 L 116 42 L 134 10 L 152 38 L 170 24 L 245 24 L 265 8 L 285 40 L 304 24 L 376 24"
-                fill="none" stroke="#ff5c77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
+          <div class="strike-card truth" id="statRight">
+            <div class="strike-lbl" style="color:#2e9e73;">✓ {html.escape(script["board_right_lbl"])}</div>
+            <div class="strike-txt">{html.escape(script["board_right"])}</div>
+          </div>
+          <div class="source-foot">{html.escape(script["board_source"])}</div>
+        """
+    if bt == "neuro_curve":
+        return f"""
+          {head}
+          <div class="chart-box">
+            <svg viewBox="0 0 740 230" width="100%" height="220">
+              <line x1="30" y1="55" x2="710" y2="55" stroke="rgba(130,125,115,0.22)" stroke-dasharray="6 6"/>
+              <line x1="30" y1="130" x2="710" y2="130" stroke="rgba(130,125,115,0.22)" stroke-dasharray="6 6"/>
+              <line x1="30" y1="205" x2="710" y2="205" stroke="rgba(130,125,115,0.4)"/>
+              <path id="neuroCurve" d="M 40 200 C 120 200, 170 46, 260 55 C 370 65, 440 185, 680 190"
+                fill="none" stroke="#d92b4b" stroke-width="8" stroke-linecap="round"
+                pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="105"/>
+              <circle id="neuroDot" cx="40" cy="200" r="12" fill="#e2a43b" stroke="#121318" stroke-width="4"/>
             </svg>
           </div>
-        </div>
-        """
-    if vt == "contrast":
-        return f"""
-        <div class="contrast-wrap" id="s1Primary">
-          <div class="contrast-grid">
-            <div class="c-panel left" id="cLeft">
-              <span class="c-pill red">{html.escape(script["hook_left_tag"])}</span>
-              <div class="c-text">{html.escape(script["hook_left_text"])}</div>
-            </div>
-            <div class="c-panel right" id="cRight">
-              <span class="c-pill gold">{html.escape(script["hook_right_tag"])}</span>
-              <div class="c-text">{html.escape(script["hook_right_text"])}</div>
-            </div>
+          <div class="strike-card" style="margin-bottom:14px;">
+            <div class="strike-lbl" style="color:#d92b4b;">{html.escape(script["board_a_label"])}</div>
+            <div class="strike-txt" style="font-size:28px;">{html.escape(script["board_a_text"])}</div>
           </div>
-          <div class="vs-badge" id="vsBadge">REALIDADE VS ARMADILHA</div>
-        </div>
+          <div class="strike-card truth">
+            <div class="strike-lbl" style="color:#2e9e73;">{html.escape(script["board_b_label"])}</div>
+            <div class="strike-txt" style="font-size:28px;">{html.escape(script["board_b_text"])}</div>
+          </div>
+          <div class="source-foot">{html.escape(script["board_source"])}</div>
         """
     return f"""
-    <div class="timer-wrap" id="s1Primary">
-      <div class="gauge-box">
-        <svg class="gauge-svg" viewBox="0 0 320 320">
-          <defs>
-            <linearGradient id="gArc" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ff5c77"/>
-              <stop offset="55%" stop-color="#d4af6a"/>
-              <stop offset="100%" stop-color="#5cd3a6"/>
-            </linearGradient>
-          </defs>
-          <g id="orbitRing">
-            <circle cx="160" cy="160" r="146" fill="none" stroke="rgba(212,175,106,0.35)" stroke-width="2" stroke-dasharray="10 10"/>
-          </g>
-          <circle cx="160" cy="160" r="126" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="14"/>
-          <circle id="timerArc" cx="160" cy="160" r="126" fill="none" stroke="url(#gArc)" stroke-width="14" stroke-linecap="round"
-            transform="rotate(-90 160 160)" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
+      {head}
+      <div class="ios-notif" style="margin-bottom:24px;">
+        <div class="ios-row"><span>MENSAGEM ORIGINAL</span><span>ANÁLISE</span></div>
+        <div class="ios-msg" style="font-size:36px;">{html.escape(script["board_msg"])}</div>
+        <svg style="width:100%;height:14px;margin-top:8px;" viewBox="0 0 400 14" preserveAspectRatio="none">
+          <path id="msgUnder" d="M 4 8 Q 200 2 396 8" fill="none" stroke="#e2a43b" stroke-width="6"
+            stroke-linecap="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="105"/>
         </svg>
-        <div class="gauge-center">
-          <div class="timer-label">{html.escape(script["hook_label"])}</div>
-          <div class="timer-big">{html.escape(script["hook_big"])}</div>
-        </div>
       </div>
-      <div class="timer-sub-card" id="timerSubCard">{html.escape(script["hook_sub"])}</div>
-    </div>
+      <div class="strike-card truth" id="msgDecode" style="border-color:#d92b4b;background:rgba(217,43,75,0.12);">
+        <div class="strike-lbl" style="color:#d92b4b;">DECODIFICAÇÃO REAL</div>
+        <div class="strike-txt" style="font-size:34px;">{html.escape(script["board_decode"])}</div>
+      </div>
+      <div class="source-foot">{html.escape(script["board_source"])}</div>
     """
 
 
-def build_scene2_html(script: dict) -> str:
-    s2t = script["scene2_type"]
-    head = f'<div class="scene-kicker">ANÁLISE DO PADRÃO</div><div class="scene-h2">{html.escape(script["scene2_title"])}</div>'
-    if s2t == "wave":
-        return f"""
-        {head}
-        <div class="chart-panel">
-          <svg viewBox="0 0 740 240" width="100%" height="225">
-            <defs>
-              <linearGradient id="wStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#ff5c77"/>
-                <stop offset="45%" stop-color="#d4af6a"/>
-                <stop offset="100%" stop-color="#5cd3a6"/>
-              </linearGradient>
-              <linearGradient id="wFill" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="rgba(255,92,119,0.32)"/>
-                <stop offset="100%" stop-color="rgba(92,211,166,0.0)"/>
-              </linearGradient>
-            </defs>
-            <line x1="30" y1="60" x2="710" y2="60" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6 6"/>
-            <line x1="30" y1="135" x2="710" y2="135" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6 6"/>
-            <line x1="30" y1="210" x2="710" y2="210" stroke="rgba(255,255,255,0.14)"/>
-            <path id="waveArea" d="M 40 215 C 120 215, 145 56, 225 56 C 325 56, 405 198, 690 210 L 690 215 L 40 215 Z" fill="url(#wFill)"/>
-            <path id="wavePath" d="M 40 215 C 120 215, 145 56, 225 56 C 325 56, 405 198, 690 210"
-              fill="none" stroke="url(#wStroke)" stroke-width="7" stroke-linecap="round"
-              pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
-            <circle id="waveDot" cx="40" cy="215" r="11" fill="#faf7f2" stroke="#d4af6a" stroke-width="5"/>
-          </svg>
-        </div>
-        <div class="two-col-mini">
-          <div class="mini-card warn" id="s2CardA">
-            <div class="mini-k red">{html.escape(script["scene2_a_label"])}</div>
-            <div class="mini-v">{html.escape(script["scene2_a_text"])}</div>
-          </div>
-          <div class="mini-card calm" id="s2CardB">
-            <div class="mini-k sage">{html.escape(script["scene2_b_label"])}</div>
-            <div class="mini-v">{html.escape(script["scene2_b_text"])}</div>
-          </div>
-        </div>
-        <div class="metric-banner" id="s2Metric">{html.escape(script["scene2_metric"])}</div>
-        """
-    if s2t == "bars":
-        return f"""
-        {head}
-        <div class="bar-stack">
-          <div class="bar-card warn" id="barCardA">
-            <div class="bar-top"><span class="bar-lbl red">{html.escape(script["scene2_a_label"])}</span></div>
-            <div class="bar-txt">{html.escape(script["scene2_a_text"])}</div>
-            <div class="cmp-track"><div class="cmp-fill red" id="barFillA"></div></div>
-          </div>
-          <div class="bar-card good" id="barCardB">
-            <div class="bar-top"><span class="bar-lbl sage">{html.escape(script["scene2_b_label"])}</span></div>
-            <div class="bar-txt">{html.escape(script["scene2_b_text"])}</div>
-            <div class="cmp-track"><div class="cmp-fill sage" id="barFillB"></div></div>
-          </div>
-        </div>
-        <div class="metric-banner" id="s2Metric">{html.escape(script["scene2_metric"])}</div>
-        """
+def build_beat4_html(script: dict) -> str:
     return f"""
-    {head}
-    <div class="flow-stack">
-      <div class="flow-node" id="flow0">
-        <div class="flow-idx">1</div>
-        <div><div class="flow-lbl">{html.escape(script["scene2_a_label"])}</div><div class="flow-txt">{html.escape(script["scene2_a_text"])}</div></div>
-      </div>
-      <svg width="36" height="34" viewBox="0 0 36 34">
-        <path id="flowArr0" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#d4af6a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
-      </svg>
-      <div class="flow-node" id="flow1">
-        <div class="flow-idx">2</div>
-        <div><div class="flow-lbl">{html.escape(script["scene2_b_label"])}</div><div class="flow-txt">{html.escape(script["scene2_b_text"])}</div></div>
-      </div>
-      <svg width="36" height="34" viewBox="0 0 36 34">
-        <path id="flowArr1" d="M18 2 L18 28 M10 20 L18 29 L26 20" fill="none" stroke="#5cd3a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
-      </svg>
-      <div class="flow-node" id="flow2" style="border-color:rgba(92,211,166,0.5);">
-        <div class="flow-idx" style="background:rgba(92,211,166,0.2);color:#9ef2d2;border-color:rgba(92,211,166,0.5);">✓</div>
-        <div><div class="flow-lbl" style="color:#5cd3a6;">QUEBRA DO CICLO</div><div class="flow-txt">{html.escape(script["scene2_metric"])}</div></div>
-      </div>
-    </div>
+      <div class="arch-meta"><span>04 // A VIRADA DE CHAVE</span><span class="arch-tag">ATENÇÃO</span></div>
+      <div class="rehook-quote">{html.escape(script["rehook_text"])}</div>
+      <div class="rehook-sub">{html.escape(script["rehook_sub"])}</div>
     """
 
 
-def build_scene3_html(script: dict) -> str:
-    cards: list[str] = []
+def build_beat5_html(script: dict) -> str:
+    blocks: list[str] = []
     for idx, st in enumerate(script["steps"][:3]):
-        cards.append(f"""
-        <div class="step-card" id="stepCard{idx}">
-          <div class="step-num">0{idx + 1}</div>
-          <div class="step-body">
-            <div class="step-title">{html.escape(st["title"])}</div>
-            <div class="step-desc">{html.escape(st["desc"])}</div>
+        pills = "".join(
+            f'<span class="step-pill{" active" if p == idx else ""}">0{p + 1}</span>'
+            for p in range(3)
+        )
+        blocks.append(f"""
+          <div class="step-single" id="stepSingle{idx}">
+            <div class="step-counter-row">{pills}</div>
+            <div class="step-big-title">{html.escape(st["title"])}</div>
+            <div class="step-big-desc">{html.escape(st["desc"])}</div>
           </div>
-          <svg class="step-chk" viewBox="0 0 42 42">
-            <circle cx="21" cy="21" r="18" fill="rgba(92,211,166,0.12)" stroke="rgba(92,211,166,0.45)" stroke-width="2"/>
-            <path id="chk{idx}" d="M13 21.5 L18.5 27 L29.5 15.5" fill="none" stroke="#5cd3a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"
-              pathLength="100" stroke-dasharray="100 120" stroke-dashoffset="110"/>
-          </svg>
-        </div>
         """)
     return (
-        '<div class="scene-kicker">SEU PLANO DE AÇÃO AGORA</div>'
-        '<div class="scene-h2">3 passos para cortar a recaída</div>'
-        f'<div class="steps-stack">{"".join(cards)}</div>'
+        '<div class="arch-meta"><span>05 // EXECUÇÃO EM 3 PASSOS</span>'
+        '<span class="arch-tag">PROTOCOLO</span></div>'
+        f'<div class="steps-viewport">{"".join(blocks)}</div>'
     )
-
-
-def fetch_bgm(out_path: Path) -> Path:
-    """Baixa 1 trilha piano/cinematográfica gratuita do Mixkit (com fallback sintético suave se offline)."""
-    curl_bin = shutil.which("curl.exe") or shutil.which("curl") or "curl"
-    topics = MUSIC_TOPICS[:]
-    random.shuffle(topics)
-    for topic in topics:
-        page_url = f"https://mixkit.co/free-stock-music/{topic}/"
-        try:
-            page_html = subprocess.check_output(
-                [curl_bin, "-sL", "--max-time", "18", "-A", "Mozilla/5.0", page_url]
-            ).decode("utf-8", errors="ignore")
-            matches = list(dict.fromkeys(re.findall(r"https://assets\.mixkit\.co/music/[^\s\"'<>]+\.mp3", page_html)))
-            if matches:
-                chosen = random.choice(matches[:20])
-                subprocess.check_call([curl_bin, "-sL", "--max-time", "40", "-o", str(out_path), chosen])
-                if out_path.exists() and out_path.stat().st_size > 25_000:
-                    print(f"Baixada trilha piano Mixkit: {chosen}")
-                    return out_path
-        except Exception as exc:
-            print(f"Aviso BGM em {page_url}: {exc}")
-
-    # Fallback pad cinematográfico limpo em Dm9 via FFmpeg
-    subprocess.check_call([
-        "ffmpeg", "-y", "-f", "lavfi",
-        "-i", "aevalsrc=0.12*sin(2*PI*146.83*t)+0.08*sin(2*PI*220*t)+0.06*sin(2*PI*261.63*t):s=44100:d=45",
-        "-af", "lowpass=f=480", str(out_path),
-    ])
-    return out_path
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Código Zero Studio Editorial v4 Generator")
+    parser.add_argument("--audience", default="auto", choices=["auto", "masculino", "feminino", "ambos"])
+    parser.add_argument("--local-voice", default="", help="MP3 local opcional para testar pipeline offline")
+    parser.add_argument("--render-only", action="store_true", help="Não grava history.json (modo QA)")
+    args = parser.parse_args()
+
     history = load_history()
-    posted_topics = [item.get("topic") or item.get("verse", "") for item in history.get("posted", [])]
+    print("1. Selecionando/gerando roteiro Studio v4 balanceado...")
+    script = generate_script(history, forced_audience=args.audience)
+    voice_gender = resolve_voice_gender(script, history)
+    print(f"Tema: {script['topic']} | Público={script['audience']} | Voz={voice_gender} | Board={script['board_type']}")
 
-    print("1. Selecionando/gerando roteiro estruturado v3 (CÓDIGO ZERO)...")
-    script = generate_script(posted_topics)
-    print(f"Tema: {script['topic']} | S1={script['visual_type']} | S2={script['scene2_type']}")
-
-    print("2. Sintetizando voz feminina brasileira com emoção real...")
+    print("2. Sintetizando locução estúdio...")
     voz_path = BUILD_DIR / "voz.mp3"
-    voice_dur, pre_words, tts_info = synthesize_emotional_female_voice(
-        script["narration"], script.get("emotion_direction", "Acolhedora e firme"), voz_path
+    voice_dur, pre_words, tts_info = synthesize_studio_voice(
+        script["narration"], script.get("emotion_direction", "Lúcida e firme"),
+        voice_gender, voz_path, local_voice=args.local_voice,
     )
 
-    print("3. Alinhando legenda palavra por palavra...")
-    words, sync_engine, transcribed_preview = align_words_to_audio(
-        script["narration"], voz_path, voice_dur, pre_words
-    )
-    total_dur = max(17.5, round(voice_dur + 1.2, 1))
-    t2 = round(total_dur * 0.25, 2)
-    t3 = round(total_dur * 0.56, 2)
-    t4 = round(max(t3 + 2.5, min(total_dur - 4.4, total_dur * 0.82)), 2)
-    print(f"Duração={total_dur}s | Cenas: 0 -> {t2} -> {t3} -> {t4} | Sync={sync_engine}")
+    print("3. Sincronizando palavras e 7 âncoras de corte...")
+    words, sync_engine, preview = align_words_to_audio(script["narration"], voz_path, voice_dur, pre_words)
+    times, total_dur = compute_beat_times(words, script["cue_words"], voice_dur, delay=0.18)
+    t1, t2, t3, t4, t5, t6, t7 = times
+    print(f"Duração={total_dur}s | Cortes={times} | Sync={sync_engine}")
 
-    print("4. Baixando trilha real piano/cinematográfica...")
-    bgm_path = fetch_bgm(BUILD_DIR / "bgm.mp3")
-
+    print("4. Preparando 3 clipes cinema B-roll Mixkit (crop vertical + grade)...")
     hf_dir = BUILD_DIR / "hf_proj"
-    hf_dir.mkdir(parents=True, exist_ok=True)
+    assets_hf = hf_dir / "assets"
+    assets_hf.mkdir(parents=True, exist_ok=True)
+
+    broll_ids = script["broll_ids"]
+    v0_dur = round(t3, 2)
+    v1_start = round(t3, 2)
+    v1_dur = round(max(1.5, t5 - t3), 2)
+    v2_start = round(t5, 2)
+    v2_dur = round(max(1.5, total_dur - t5), 2)
+    fb_key = f"{voice_gender}_dor" if f"{voice_gender}_dor" in BROLL_POOL else "mood"
+    used_brolls = [
+        prep_broll_clip(broll_ids[0], v0_dur, assets_hf / "clip0.mp4", BROLL_POOL[fb_key]),
+        prep_broll_clip(broll_ids[1], v1_dur, assets_hf / "clip1.mp4", BROLL_POOL["mood"]),
+        prep_broll_clip(broll_ids[2], v2_dur, assets_hf / "clip2.mp4", BROLL_POOL["mood"]),
+    ]
+
     chunks, captions_html = build_caption_chunks(words, delay_offset=0.18)
+    theme_start = script.get("theme_start", "noir")
+    theme_invert = "paper" if theme_start == "noir" else "noir"
 
     tpl = (ROOT / "template.html").read_text(encoding="utf-8")
     replacements = {
         "__DURATION__": str(total_dur),
-        "__T2__": str(t2),
-        "__T3__": str(t3),
-        "__T4__": str(t4),
-        "__S1_TYPE__": script["visual_type"],
-        "__S2_TYPE__": script["scene2_type"],
-        "__BADGE__": html.escape(script["badge"]),
-        "__SCENE1_HTML__": build_scene1_html(script),
-        "__SCENE2_HTML__": build_scene2_html(script),
-        "__SCENE3_HTML__": build_scene3_html(script),
+        "__V0_DUR__": str(v0_dur),
+        "__V1_START__": str(v1_start),
+        "__V1_DUR__": str(v1_dur),
+        "__V2_START__": str(v2_start),
+        "__V2_DUR__": str(v2_dur),
+        "__TIMES_JSON__": json.dumps(times),
+        "__THEME_START__": theme_start,
+        "__THEME_INVERT__": theme_invert,
+        "__HOOK_MODE__": script.get("hook_mode", "split"),
+        "__BOARD_TYPE__": script["board_type"],
+        "__BEAT0_HTML__": build_beat0_html(script),
+        "__BEAT1_HTML__": build_cinema_callout_html(script["beat1_kicker"], script["beat1_big"], script["beat1_sub"], "b1Marker"),
+        "__BEAT2_HTML__": build_beat2_html(script),
+        "__BEAT3_HTML__": build_cinema_callout_html(script["beat3_kicker"], script["beat3_big"], script["beat3_sub"]),
+        "__BEAT4_HTML__": build_beat4_html(script),
+        "__BEAT5_HTML__": build_beat5_html(script),
         "__CAPTIONS_HTML__": captions_html,
         "__CHUNKS_JSON__": json.dumps(chunks, ensure_ascii=False),
     }
@@ -1346,8 +1781,8 @@ def main() -> None:
         tpl = tpl.replace(k, v)
     (hf_dir / "index.html").write_text(tpl, encoding="utf-8")
 
-    print("5. Renderizando animação 1080x1920 via HyperFrames...")
-    video_no_audio = BUILD_DIR / "video_v3.mp4"
+    print("5. Renderizando vídeo 1080x1920 via HyperFrames...")
+    video_no_audio = BUILD_DIR / "video_v4.mp4"
     hf_cmd = (
         ["cmd", "/c", "npx", "--yes", "hyperframes", "render", ".", "--output", str(video_no_audio)]
         if os.name == "nt"
@@ -1355,73 +1790,90 @@ def main() -> None:
     )
     subprocess.check_call(hf_cmd, cwd=str(hf_dir))
 
-    print("6. Mixando áudio cinema (SFX nas 4 transições + voz quente + piano ducked) e codificação HQ...")
-    final_path = BUILD_DIR / "reel_final.mp4"
-    fade_out_start = max(1.0, total_dur - 2.4)
-    d2_ms = int(t2 * 1000)
-    d3_ms = int(t3 * 1000)
-    d4_ms = int(t4 * 1000)
-    hook_sfx = "sine=frequency=784:duration=0.11" if script["visual_type"] == "whatsapp" else "sine=frequency=98:duration=0.20"
+    print("6. Mixando trilha de cinema, SFX reais e masterização -14 LUFS...")
+    bgm_path = resolve_bgm(script.get("music_bed", "enquete"))
+    sfx_boom = ASSETS_DIR / "sfx" / "impact-boom.mp3"
+    sfx_zhhh = ASSETS_DIR / "sfx" / "zhhh.mp3"
+    sfx_pop = ASSETS_DIR / "sfx" / "pop-back.mp3"
 
-    subprocess.check_call([
-        "ffmpeg", "-y",
-        "-i", str(video_no_audio),
-        "-i", str(voz_path),
-        "-i", str(bgm_path),
-        "-f", "lavfi", "-i", hook_sfx,
-        "-f", "lavfi", "-i", "sine=frequency=165:duration=0.14",
-        "-f", "lavfi", "-i", "sine=frequency=185:duration=0.14",
-        "-f", "lavfi", "-i", "sine=frequency=220:duration=0.16",
-        "-filter_complex",
+    final_path = BUILD_DIR / "reel_final.mp4"
+    fade_out_start = max(1.0, total_dur - 2.3)
+
+    cmd_mix = ["ffmpeg", "-y", "-v", "error", "-i", str(video_no_audio), "-i", str(voz_path), "-i", str(bgm_path)]
+    extra_inputs: list[tuple[Path, int, float]] = []
+    if sfx_boom.exists():
+        extra_inputs.append((sfx_boom, max(50, int((t1 - 0.15) * 1000)), 0.24))
+    if sfx_zhhh.exists():
+        extra_inputs.append((sfx_zhhh, max(100, int((t4 - 0.20) * 1000)), 0.22))
+    if sfx_pop.exists():
+        extra_inputs.append((sfx_pop, max(150, int((t6 + 0.65) * 1000)), 0.28))
+
+    for p, _, _ in extra_inputs:
+        cmd_mix.extend(["-i", str(p)])
+
+    filters = [
         f"[1:a]aformat=sample_rates=44100:channel_layouts=stereo,adelay=180|180,"
-        f"highpass=f=75,equalizer=f=3000:t=q:w=1.4:g=2.5,"
-        f"acompressor=threshold=-18dB:ratio=2.8:attack=6:release=60,volume=1.55,asplit=2[vmain][vsc];"
+        f"highpass=f=80,equalizer=f=3000:t=q:w=1.4:g=2.0,"
+        f"acompressor=threshold=-18dB:ratio=2.5:attack=6:release=60,volume=1.52,"
+        f"apad=whole_dur={total_dur},asplit=2[vmain][vsc]",
         f"[2:a]aformat=sample_rates=44100:channel_layouts=stereo,atrim=0:{total_dur},asetpts=PTS-STARTPTS,"
-        f"afade=t=in:st=0:d=0.8,afade=t=out:st={fade_out_start}:d=2.4,volume=0.24[bgmraw];"
-        f"[bgmraw][vsc]sidechaincompress=threshold=0.04:ratio=4:attack=25:release=340[bgmduck];"
-        f"[3:a]aformat=sample_rates=44100:channel_layouts=stereo,afade=t=out:st=0.03:d=0.08,volume=0.18,adelay=60|60[sfx1];"
-        f"[4:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=700,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.09,volume=0.14,adelay={d2_ms}|{d2_ms}[sfx2];"
-        f"[5:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=750,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.09,volume=0.14,adelay={d3_ms}|{d3_ms}[sfx3];"
-        f"[6:a]aformat=sample_rates=44100:channel_layouts=stereo,lowpass=f=850,afade=t=in:st=0:d=0.02,afade=t=out:st=0.05:d=0.11,volume=0.16,adelay={d4_ms}|{d4_ms}[sfx4];"
-        f"[vmain][bgmduck][sfx1][sfx2][sfx3][sfx4]amix=inputs=6:duration=first:dropout_transition=2:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=7,alimiter=limit=0.95[aout]",
+        f"afade=t=in:st=0:d=0.6,afade=t=out:st={fade_out_start}:d=2.3,volume=0.25[bgmraw]",
+        "[bgmraw][vsc]sidechaincompress=threshold=0.035:ratio=4.5:attack=25:release=320[bgmduck]",
+    ]
+    mix_labels = ["[vmain]", "[bgmduck]"]
+    for idx, (_, ms, vol) in enumerate(extra_inputs, start=3):
+        lbl = f"[sfx{idx}]"
+        filters.append(f"[{idx}:a]aformat=sample_rates=44100:channel_layouts=stereo,volume={vol},adelay={ms}|{ms}{lbl}")
+        mix_labels.append(lbl)
+
+    filters.append(
+        f"{''.join(mix_labels)}amix=inputs={len(mix_labels)}:duration=first:dropout_transition=2:normalize=0,"
+        "loudnorm=I=-14:TP=-1.5:LRA=7,alimiter=limit=0.95[aout]"
+    )
+
+    cmd_mix.extend([
+        "-filter_complex", ";".join(filters),
         "-map", "0:v", "-map", "[aout]",
         "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
-        "-movflags", "+faststart",
+        "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-movflags", "+faststart",
         "-t", str(total_dur), str(final_path),
     ])
+    subprocess.check_call(cmd_mix)
 
     (BUILD_DIR / "caption.txt").write_text(script["caption"], encoding="utf-8")
     meta = {
-        "engine_version": "v3",
+        "engine_version": "v4-studio",
         "date_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "topic": script["topic"],
-        "visual_type": script["visual_type"],
-        "scene2_type": script["scene2_type"],
+        "audience": script["audience"],
+        "voice_gender": voice_gender,
         "tts_engine": tts_info["tts_engine"],
         "tts_voice": tts_info["tts_voice"],
         "tts_error": tts_info["tts_error"],
         "sync_engine": sync_engine,
+        "music_bed": bgm_path.name,
+        "theme_start": theme_start,
+        "broll_used": used_brolls,
         "duration": total_dur,
-        "t2": t2,
-        "t3": t3,
-        "t4": t4,
-        "words_count": len(words),
-        "chunks_count": len(chunks),
-        "transcribed_preview": transcribed_preview,
+        "beats": times,
+        "transcribed_preview": preview,
     }
     (BUILD_DIR / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    history["posted"].append({
-        "date": meta["date_utc"],
-        "topic": script["topic"],
-        "visual_type": script["visual_type"],
-        "scene2_type": script["scene2_type"],
-        "tts_engine": tts_info["tts_engine"],
-        "tts_voice": tts_info["tts_voice"],
-    })
-    save_history(history)
-    print("Vídeo v3 CÓDIGO ZERO, legenda e meta.json gerados em build/")
+    if not args.render_only:
+        history["posted"].append({
+            "date": meta["date_utc"],
+            "topic": script["topic"],
+            "audience": script["audience"],
+            "voice_gender": voice_gender,
+            "music_bed": bgm_path.name,
+            "theme_start": theme_start,
+            "broll_used": used_brolls,
+            "tts_engine": tts_info["tts_engine"],
+            "tts_voice": tts_info["tts_voice"],
+        })
+        save_history(history)
+    print(f"Vídeo Studio v4 gerado com sucesso: {final_path}")
 
 
 if __name__ == "__main__":
