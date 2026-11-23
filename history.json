@@ -97,6 +97,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Charon"
+    },
+    {
+      "date": "2026-11-23 15:02 UTC",
+      "topic": "Mais um áudio chorando não faz ele voltar (Feminino #12)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "enquete.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "8739",
+        "28893",
+        "46702"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
