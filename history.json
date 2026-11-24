@@ -157,6 +157,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Charon"
+    },
+    {
+      "date": "2026-11-24 03:03 UTC",
+      "topic": "Quando ele volta testando se você ainda tá no bolso (Feminino #15)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "compte-a-rebours.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "43270",
+        "28897",
+        "8739"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
