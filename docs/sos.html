@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CÓDIGO ZERO — Central SOS Interativa v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --bg-deep: #07090D;
+    --bg: #0B0D11;
+    --bg-glow: #13222F;
+    --bg-card: #121720;
+    --bg-card-2: #18202C;
+    --bg-accent-top: #16212C;
+    --bg-accent-bot: #10151D;
+    --bg-nav-mobile: rgba(11, 13, 17, 0.96);
+    --surface-well: rgba(7, 9, 13, 0.42);
+    --surface-subtle: rgba(244, 243, 239, 0.04);
+
+    --ink: #F4F3EF;
+    --ink-bright: #FDFBF7;
+    --ink-soft: #B5BDC9;
+    --ink-muted: #7D8797;
+    --ink-on-gold: #12100C;
+
+    --gold: #C69C4E;
+    --gold-deep: #A87E35;
+    --gold-light: #E5CD96;
+    --gold-tint: rgba(198, 156, 78, 0.13);
+
+    --terracotta: #9E3520;
+    --terracotta-deep: #7C2615;
+    --terracotta-light: #F0B8A6;
+    --terracotta-tint: rgba(158, 53, 32, 0.26);
+    --terracotta-border: rgba(158, 53, 32, 0.52);
+
+    --sage: #388B6E;
+    --sage-bright: #45C496;
+    --sage-light: #9CE4C8;
+    --sage-tint: rgba(56, 139, 110, 0.2);
+    --toast-bg: #1F5140;
+
+    --border: rgba(198, 156, 78, 0.24);
+    --border-soft: rgba(244, 243, 239, 0.09);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: clip; width: 100%; }
+  body {
+    font-family: var(--font-sans);
+    background: radial-gradient(circle at 15% 0%, var(--bg-glow) 0%, var(--bg) 48%, var(--bg-deep) 100%);
+    color: var(--ink);
+    min-height: 100dvh;
+    padding-bottom: 96px;
+    line-height: 1.55;
+    caret-color: var(--gold);
+  }
+  ::selection { background: var(--gold); color: var(--ink-on-gold); }
+
+  button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 2px;
+    transition: none;
+  }
+
+  .app-shell {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 22px 16px 44px;
+  }
+
+  /* Header */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brand-wrap h1 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 0.05em;
+    color: var(--ink-bright);
+    line-height: 1;
+  }
+  .brand-wrap span {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .status-cluster {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .streak-pill {
+    background: var(--gold-tint);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gold-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .streak-pill.emerald {
+    background: var(--sage-tint);
+    border-color: rgba(69, 196, 150, 0.35);
+    color: var(--sage-light);
+  }
+  .dot-live {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+  }
+
+  /* Navigation Tabs (6 Tabs) */
+  .nav-tabs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 720px) {
+    .nav-tabs {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 50;
+      margin: 0;
+      background: var(--bg-nav-mobile);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 7px 4px calc(7px + env(safe-area-inset-bottom));
+      gap: 3px;
+    }
+  }
+  .tab-btn {
+    min-width: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    color: var(--ink-soft);
+    border-radius: 10px;
+    padding: 10px 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 520px) {
+    .tab-btn { font-size: 9.5px; padding: 7px 2px; gap: 3px; }
+    .tab-btn svg { width: 15px; height: 15px; }
+  }
+  .tab-btn:hover { border-color: var(--border); color: var(--ink-bright); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--terracotta-tint), var(--gold-tint));
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+  .tab-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+  .panel { display: none; animation: fadeIn 0.22s ease-out; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Cards & Typography */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .card-dark-accent {
+    background: linear-gradient(160deg, var(--bg-accent-top) 0%, var(--bg-accent-bot) 100%);
+    border-color: var(--terracotta-border);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--ink-bright);
+    margin-bottom: 8px;
+    line-height: 1.12;
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--ink-bright);
+    line-height: 1.18;
+  }
+  .lead { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; }
+
+  /* Buttons */
+  .btn {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.16s ease, opacity 0.16s ease, border-color 0.2s ease, background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terracotta), var(--terracotta-deep));
+    color: var(--ink-bright);
+    box-shadow: 0 6px 20px rgba(124, 38, 21, 0.35);
+  }
+  .btn-primary:hover { opacity: 0.94; transform: translateY(-1px); }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--ink-on-gold);
+  }
+  .btn-gold:hover { opacity: 0.93; transform: translateY(-1px); }
+  .btn-ghost {
+    background: var(--surface-subtle);
+    border-color: var(--border-soft);
+    color: var(--ink-soft);
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--ink-bright); }
+  .btn-ghost.sound-on {
+    border-color: var(--sage-bright);
+    color: var(--sage-light);
+    background: var(--sage-tint);
+  }
+
+  /* Panic Timer + Breathing */
+  .sos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  @media (max-width: 700px) { .sos-grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .timer-display {
+    font-family: var(--font-mono);
+    font-size: 46px;
+    font-weight: 600;
+    color: var(--ink-bright);
+    text-align: center;
+    margin: 14px 0 8px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .phase-badge {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gold-light);
+    background: var(--gold-tint);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 12px;
+    margin: 0 auto 16px;
+    display: table;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border-soft);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--terracotta), var(--gold), var(--sage));
+    transition: transform 0.5s linear;
+  }
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* Breathing Visualizer */
+  .breath-stage {
+    height: 166px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .breath-ring {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: radial-gradient(circle, rgba(198,156,78,0.28), rgba(158,53,32,0.12));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 1.6s ease-in-out, border-color 0.6s ease;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+  .breath-ring.inhale1 { transform: scale(1.24); }
+  .breath-ring.inhale2 { transform: scale(1.4); transition-duration: 0.7s; }
+  .breath-ring.exhale { transform: scale(0.86); transition-duration: 3.8s; border-color: var(--sage-bright); color: var(--sage-light); }
+
+  /* Burn Unsent Message + Ember Canvas */
+  .vent-stage {
+    position: relative;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  textarea.vent-box {
+    width: 100%;
+    min-height: 124px;
+    background: var(--surface-well);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 14px;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    display: block;
+    transition: opacity 0.85s ease, transform 0.85s ease, border-color 0.2s ease, background-color 0.4s ease;
+  }
+  textarea.vent-box:focus { border-color: var(--gold); }
+  textarea.vent-box.burning {
+    opacity: 0;
+    transform: scale(0.97) translateY(-8px);
+    background: var(--terracotta-tint);
+    border-color: var(--gold);
+  }
+  #emberCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  /* Tab 2: Tradutor do Ex + Archetypes */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 700px) { .arch-grid { grid-template-columns: minmax(0, 1fr); } }
+  .arch-btn {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 11px;
+    padding: 14px;
+    text-align: left;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.16s ease;
+  }
+  .arch-btn:hover { border-color: var(--border); transform: translateY(-1px); }
+  .arch-btn.active {
+    border-color: var(--gold);
+    background: linear-gradient(150deg, var(--bg-accent-top), var(--bg-card-2));
+  }
+  .arch-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .arch-title { font-weight: 700; font-size: 14px; color: var(--ink-bright); margin-bottom: 4px; }
+  .arch-sub { font-size: 12px; color: var(--ink-soft); }
+
+  .arch-detail {
+    background: var(--surface-well);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .arch-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+  }
+  @media (max-width: 700px) { .arch-cols { grid-template-columns: minmax(0, 1fr); } }
+  .arch-box {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 11px 12px;
+    font-size: 12.5px;
+  }
+  .arch-box strong { display: block; color: var(--gold-light); margin-bottom: 4px; font-size: 11.5px; }
+
+  .trans-item {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .trans-item.open { border-color: var(--gold); }
+  .trans-head {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 15px 16px;
+    text-align: left;
+    color: var(--ink-bright);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .trans-toggle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .trans-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .trans-item.open .trans-body { display: block; }
+  .trans-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 640px) { .trans-grid { grid-template-columns: minmax(0, 1fr); } }
+  .trans-col {
+    background: var(--surface-well);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+  }
+  .trans-col.real { border-left: 3px solid var(--terracotta); }
+  .trans-col.antidote { border-left: 3px solid var(--sage-bright); }
+  .trans-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  /* Scripts */
+  .search-input {
+    width: 100%;
+    background: var(--surface-well);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-soft);
+    color: var(--ink-soft);
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .chip.active { background: var(--gold); color: var(--ink-on-gold); font-weight: 700; border-color: var(--gold); }
+
+  .script-item {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.3s ease;
+  }
+  .script-item.highlight-flash {
+    border-color: var(--gold-light);
+    box-shadow: 0 0 0 2px var(--gold-tint);
+  }
+  .script-item.reset-card { border-color: var(--gold); background: linear-gradient(145deg, var(--bg-accent-top), var(--bg-accent-bot)); }
+  .s-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .s-num { font-family: var(--font-mono); color: var(--gold); font-weight: 600; margin-right: 6px; }
+  .s-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--sage-tint);
+    color: var(--sage-light);
+  }
+  .s-badge.silence { background: var(--terracotta-tint); color: var(--terracotta-light); }
+  .s-trap { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 10px; }
+  .s-reply {
+    background: var(--surface-well);
+    border-left: 3px solid var(--gold);
+    padding: 11px 13px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    color: var(--ink-bright);
+    margin-bottom: 10px;
+  }
+  .s-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .s-why { font-size: 12px; color: var(--sage-light); flex: 1; }
+
+  /* Diagnostic & Autopsy */
+  .q-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  @media (max-width: 600px) { .q-row { flex-direction: column; align-items: flex-start; } }
+  .q-btns { display: flex; gap: 6px; flex-shrink: 0; }
+  .q-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.16s ease, color 0.16s ease;
+  }
+  .q-btn.selected { background: var(--gold); color: var(--ink-on-gold); border-color: var(--gold); }
+
+  .result-banner {
+    background: linear-gradient(135deg, var(--gold-tint), var(--terracotta-tint));
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 16px;
+  }
+  .result-score {
+    font-family: var(--font-display);
+    font-size: 36px;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .slider-row { margin-bottom: 14px; }
+  .slider-head { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 4px; }
+  .slider-val { font-family: var(--font-mono); color: var(--gold-light); font-weight: 600; }
+  input[type="range"] { width: 100%; accent-color: var(--gold); cursor: pointer; }
+
+  /* 14-Day Tracker */
+  .day-selector {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .day-pill {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border-soft);
+    color: var(--ink-soft);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  }
+  .day-pill.has-data { border-color: var(--sage); color: var(--sage-light); }
+  .day-pill.active { background: var(--gold); color: var(--ink-on-gold); font-weight: 700; border-color: var(--gold); }
+
+  .pain-picker { display: flex; gap: 5px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .pain-btn {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card-2);
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+  .pain-btn.selected { background: var(--terracotta); color: var(--ink-bright); border-color: var(--terracotta-light); font-weight: 700; }
+
+  .task-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 10px;
+    background: var(--surface-subtle);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+  }
+  .task-check input { margin-top: 3px; accent-color: var(--sage); width: 16px; height: 16px; }
+  .task-check.done span { text-decoration: line-through; color: var(--ink-muted); }
+
+  .toast {
+    position: fixed;
+    top: 20px; right: 20px;
+    background: var(--toast-bg);
+    border: 1px solid var(--sage-bright);
+    color: var(--ink-bright);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .ai-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 680px) {
+    .ai-inputs-grid { grid-template-columns: minmax(0, 1fr); }
+    textarea.vent-box, .search-input { font-size: 16px; }
+    .q-btn, .pain-btn { width: 38px; height: 38px; }
+    .card { padding: 18px 15px; }
+    h2 { font-size: 24px; }
+  }
+
+  .help-footer {
+    margin-top: 26px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--gold-tint);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .help-footer strong { color: var(--gold-light); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Copiado para a área de transferência!</div>
+
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand-wrap">
+      <span>CENTRAL INTERATIVA v3 • MÉTODO Z.E.R.O.</span>
+      <h1>CÓDIGO ZERO</h1>
+    </div>
+    <div class="status-cluster">
+      <div class="streak-pill emerald" title="Impulsos neutralizados na Central SOS">
+        <span class="dot-live" aria-hidden="true"></span>
+        <span id="wavesText">0 ondas vencidas</span>
+      </div>
+      <div class="streak-pill" id="streakDisplay">
+        <span class="dot-live" aria-hidden="true"></span>
+        <span id="streakText">0 / 14 dias</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-tabs" aria-label="Ferramentas do Código Zero">
+    <button class="tab-btn active" id="tabbtn-sos" onclick="switchTab('sos', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Crise SOS</span>
+    </button>
+    <button class="tab-btn" id="tabbtn-translator" onclick="switchTab('translator', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <span>Tradutor</span>
+    </button>
+    <button class="tab-btn" id="tabbtn-scripts" onclick="switchTab('scripts', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>16 Scripts</span>
+    </button>
+    <button class="tab-btn" id="tabbtn-diag" onclick="switchTab('diag', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      <span>Diagnóstico</span>
+    </button>
+    <button class="tab-btn" id="tabbtn-tracker" onclick="switchTab('tracker', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>14 Dias</span>
+    </button>
+    <button class="tab-btn" id="tabbtn-prompts" onclick="switchTab('prompts', this)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.9 5.8L20 10.7l-6.1 1.9L12 18.5l-1.9-5.9L4 10.7l6.1-1.9L12 3z"/></svg>
+      <span>IA 24h</span>
+    </button>
+  </nav>
+
+  <!-- ==================== TAB 1: CRISE SOS ==================== -->
+  <section class="panel active" id="panel-sos">
+    <div class="sos-grid">
+      <div class="card card-dark-accent">
+        <div class="eyebrow">Regra 90–15 • Trava de Impulso</div>
+        <h2>Cronômetro Anti-Recaída</h2>
+        <p class="lead">Quase mandando mensagem ou olhando redes? Dispare o relógio e não toque no WhatsApp até zerar.</p>
+        <div class="timer-display" id="timerDisplay">15:00</div>
+        <div class="phase-badge" id="timerPhase">PRONTO PARA ATIVAR A TRAVA</div>
+        <div class="progress-bar"><div class="progress-fill" id="timerBar"></div></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="startTimerBtn" onclick="toggleTimer()">Ativar Trava de 15 min</button>
+          <button class="btn btn-ghost" onclick="resetTimer()">Reiniciar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Reset Fisiológico • Balban et al. (2023)</div>
+        <h2>Suspiro Duplo Guiado</h2>
+        <p class="lead">Desarme o aperto no peito em 5 ciclos: 1ª puxada longa pelo nariz + 2ª curta no topo + solte devagar pela boca.</p>
+        <div class="breath-stage">
+          <div class="breath-ring" id="breathRing">Toque para<br>iniciar</div>
+        </div>
+        <div style="text-align:center; font-family:var(--font-mono); font-size:11.5px; color:var(--gold-light); margin-bottom:12px;" id="breathCount">Ciclos concluídos: 0 / 5</div>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="breathBtn" onclick="toggleBreath()">Iniciar Respiração (5x)</button>
+          <button class="btn btn-ghost" id="soundToggleBtn" onclick="toggleSound()">Som Guia: Desligado</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Descarrego Seguro • Zero Arrependimento</div>
+      <h2>Escreva Tudo Aqui e Queime Sem Enviar</h2>
+      <p class="lead">Tire do peito tudo o que você queria falar agora. Este texto fica 100% offline no seu aparelho, vira cinzas na tela e nunca é enviado.</p>
+      <div class="vent-stage">
+        <textarea class="vent-box" id="ventBox" placeholder="Escreva sem filtro tudo o que está entalado agora..."></textarea>
+        <canvas id="emberCanvas" aria-hidden="true"></canvas>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span style="font-size:12.5px; color:var(--gold-light); font-style:italic;">“Amanhã às 9h, vou agradecer por ter preservado minha postura.”</span>
+        <button class="btn btn-primary" onclick="burnMessage()">Queimar Mensagem (Não Enviar)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 2: TRADUTOR DO EX (NEW v3) ==================== -->
+  <section class="panel" id="panel-translator">
+    <div class="card">
+      <div class="eyebrow">Leitura Fria de Cenário • 3 Arquétipos</div>
+      <h2>Qual Padrão de Término Você Está Enfrentando?</h2>
+      <p class="lead">Toque no padrão mais próximo do seu caso para ver o mecanismo oculto, o erro que destrói sua postura e a manobra certa.</p>
+      <div class="arch-grid" id="archGrid"></div>
+      <div class="arch-detail" id="archDetail"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Decodificador de Subtexto • Página 15 do Protocolo</div>
+      <h2>Tradutor Cirúrgico de Mensagens do Ex</h2>
+      <p class="lead">Toque na frase ou atitude recebida para revelar a tradução real sem filtro romântico e ir direto ao script blindado.</p>
+      <div id="translatorList"></div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 3: 16 SCRIPTS ==================== -->
+  <section class="panel" id="panel-scripts">
+    <div class="card">
+      <div class="eyebrow">Fase E • Escudo de Diamante</div>
+      <h2>16 Scripts Prontos (Copie em 1 Clique)</h2>
+      <p class="lead">Responda ao tamanho exato do esforço da mensagem recebida — jamais ao tamanho da sua saudade.</p>
+      <input type="text" class="search-input" id="scriptSearch" placeholder="Buscar situação (ex.: oi, madrugada, coisas, amigos, desculpas, reinício)..." oninput="renderScripts()">
+      <div class="chip-row" id="scriptChips">
+        <button class="chip active" onclick="setScriptCat('all', this)">Todos (16)</button>
+        <button class="chip" onclick="setScriptCat('migalhas', this)">Migalhas &amp; Ego</button>
+        <button class="chip" onclick="setScriptCat('logistica', this)">Logística &amp; Amigos</button>
+        <button class="chip" onclick="setScriptCat('emocao', this)">Saudade &amp; Madrugada</button>
+        <button class="chip" onclick="setScriptCat('limites', this)">Limites &amp; Reinício</button>
+      </div>
+      <div id="scriptsContainer"></div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 4: DIAGNÓSTICO & AUTÓPSIA ==================== -->
+  <section class="panel" id="panel-diag">
+    <div class="card">
+      <div class="eyebrow">Passo Zero • Calculadora Instantânea</div>
+      <h2>Índice de Sequestro Emocional (0 a 30)</h2>
+      <p class="lead">Marque a frequência real nos últimos dias: <strong>0</strong> Nunca · <strong>1</strong> Às vezes · <strong>2</strong> Frequente · <strong>3</strong> Constante.</p>
+      <div id="diagQuestions"></div>
+      <div class="result-banner" id="diagResult">
+        <div class="result-score" id="diagScoreText">0 / 30 pontos</div>
+        <div id="diagVerdict" style="font-size:14px; color:var(--ink);">Responda às 10 frases acima para revelar seu nível atual e a rota recomendada.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Fase R • Clareza Matemática</div>
+      <h2>Autópsia Honesta dos 8 Pilares (Nota / 80)</h2>
+      <p class="lead">Avalie de 1 a 10 como a relação realmente funcionava nos últimos 6 meses — fatos concretos, sem a edição da abstinência:</p>
+      <div id="pillarsContainer"></div>
+      <div class="result-banner" id="autopsyResult">
+        <div class="result-score" id="autopsyScore">40 / 80 pontos</div>
+        <div id="autopsyVerdict" style="font-size:14px; color:var(--ink);">Ajuste os controles acima para calcular o diagnóstico real do vínculo.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 5: DIÁRIO 14 DIAS ==================== -->
+  <section class="panel" id="panel-tracker">
+    <div class="card">
+      <div class="eyebrow">Fase O • Progresso Salvo Neste Aparelho</div>
+      <h2>Sua Curva Real da Dor (Dia 01 ao Dia 14)</h2>
+      <p class="lead">Registre sua nota todas as noites. A linha tracejada dourada mostra a curva esperada; a linha verde mostra a <strong>sua</strong> recuperação.</p>
+      <div style="background: var(--surface-well); border: 1px solid var(--border-soft); border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+        <svg id="livePainChart" viewBox="0 0 680 185" width="100%" height="auto" role="img" aria-label="Gráfico evolutivo de 14 dias"></svg>
+      </div>
+
+      <div class="day-selector" id="daySelector"></div>
+      <div id="dayDetailCard" style="background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px;"></div>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 6: PROMPTS DE IA 24H ==================== -->
+  <section class="panel" id="panel-prompts">
+    <div class="card">
+      <div class="eyebrow">Apoio 24h • ChatGPT, Claude ou Gemini</div>
+      <h2>Gerador de Comandos Calibrados (1 Clique)</h2>
+      <p class="lead">Personalize opcionalmente os campos abaixo e copie o comando pronto para ter um conselheiro lúcido de madrugada.</p>
+      <div class="ai-inputs-grid">
+        <input type="text" class="search-input" style="margin:0;" id="aiMsg" placeholder="Mensagem recebida ou rascunho (opcional)" oninput="renderPrompts()">
+        <input type="text" class="search-input" style="margin:0;" id="aiCtx" placeholder="Contexto curto do término (opcional)" oninput="renderPrompts()">
+      </div>
+      <div id="promptsContainer"></div>
+    </div>
+  </section>
+
+  <div class="help-footer">
+    <strong>Apoio Profissional &amp; Emergência:</strong> Este material educativo não substitui psicoterapia ou avaliação médica. Em sofrimento agudo, ligue <strong>CVV 188</strong> (gratuito, 24h) ou acesse <strong>cvv.org.br</strong>. Em caso de violência ou ameaça: <strong>180</strong> ou <strong>190</strong>.
+  </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const ARCHETYPES = [
+  {
+    id: "abrupto",
+    tag: "Padrão 01",
+    title: "Término Abrupto (“Do Nada”)",
+    sub: "Estava tudo aparentemente normal e a pessoa cortou o vínculo de surpresa.",
+    neuro: "Quem termina geralmente elaborou o luto em silêncio semanas antes; você recebeu o impacto inteiro no minuto zero, gerando choque agudo de abstinência.",
+    mistake: "Exigir 'uma última conversa para entender tudo' ou enviar textos longos tentando convencer pela lógica.",
+    action: "Aceite o corte sem negociar migalha (Script #16 se já insistiu), blinde 14 dias de silêncio absoluto e descarregue perguntas sem resposta na Carta de Alforria (Dia 09)."
+  },
+  {
+    id: "ioio",
+    tag: "Padrão 02",
+    title: "Montanha-Russa Quente-e-Frio",
+    sub: "Idas e vindas, promessas intensas seguidas de sumiço, frieza ou confusão.",
+    neuro: "Reforço intermitente puro — o mesmo mecanismo neuroquímico das máquinas caça-níqueis. A imprevisibilidade vicia mais do que o afeto estável.",
+    mistake: "Interpretar uma recaída carente de madrugada como prova de mudança real e zerar seus limites.",
+    action: "Use o Tradutor abaixo sem romantizar, corte acesso fácil com os Scripts #08 e #09 e pontue friamente os 8 Pilares na aba Diagnóstico."
+  },
+  {
+    id: "rebote",
+    tag: "Padrão 03",
+    title: "Frieza Súbita ou Nova Pessoa",
+    sub: "A pessoa parece irreconhecível, postando rotina feliz ou já envolvida com alguém.",
+    neuro: "Ferida direta no ego combinada com rejeição social. A pressa do outro quase sempre é anestesia emocional para não encarar o próprio vazio.",
+    mistake: "Vigiar perfis da terceira pessoa, comparar-se obsessivamente ou postar indiretas tentando provar superação.",
+    action: "Bloqueie a vitrine digital hoje (silencie amigos-ponte), aplique o Script #13 (zero reação visível) e direcione toda a energia física para atravessar os Dias 01 a 05."
+  }
+];
+
+const TRANSLATIONS = [
+  {
+    said: "“Oi, sumido(a)... só passei pra saber como você tá.”",
+    real: "Teste de coleira emocional. Quer conferir em 5 segundos se você continua disponível no banco de reservas para aliviar a insegurança dele(a), sem oferecer absolutamente nada concreto.",
+    antidote: "Zero resposta. Quem quer reconstruir algo adulto não manda isca vaga; assume responsabilidade clara.",
+    scriptNum: "01"
+  },
+  {
+    said: "“Preciso de um tempo pra focar em mim, o problema não é você.”",
+    real: "Já decidiu encerrar o relacionamento, mas quer suavizar a própria culpa mantendo uma saída diplomática sem conflito.",
+    antidote: "Não espere sentado(a) nem peça prazo. Trate 'tempo' como término definitivo e inicie seu protocolo de 14 dias hoje.",
+    scriptNum: "11"
+  },
+  {
+    said: "“Você é muito importante pra mim, podemos continuar amigos?”",
+    real: "Quer manter o conforto do seu apoio emocional, validação e carinho gradual enquanto fica 100% livre do compromisso.",
+    antidote: "Recuse com elegância cirúrgica. Amizade pós-término imediato só anestesia quem partiu e sangra quem ficou.",
+    scriptNum: "11"
+  },
+  {
+    said: "“Sonhei com você essa noite / Passei naquele lugar e lembrei da gente.”",
+    real: "Pico momentâneo de nostalgia ou carência solitária. Quer sentir que ainda mexe com o seu emocional sem precisar voltar.",
+    antidote: "Resposta cordial, curta e que fecha a porta sem fazer pergunta de volta.",
+    scriptNum: "08"
+  },
+  {
+    said: "“Nossa, já me esqueceu rápido, né? Nem fala mais comigo.”",
+    real: "O seu silêncio digno quebrou a expectativa de que você ficaria correndo atrás. É uma isca de orgulho ferido para arrancar reação.",
+    antidote: "Jamais se justifique, jamais declare amor reprimido e jamais entre em discussão. Desarme em duas linhas neutras.",
+    scriptNum: "10"
+  },
+  {
+    said: "Visualiza todos os seus Stories em minutos ou curte foto antiga, mas não manda nada.",
+    real: "Migalha de esforço mínimo (1 clique). Quer ocupar espaço mental gratuito no seu dia fazendo você tomar a iniciativa.",
+    antidote: "Ignore como ruído irrelevante. Silencie o perfil para parar de checar quem visualizou seus stories.",
+    scriptNum: "02"
+  }
+];
+
+const SCRIPTS = [
+  { num:"01", cat:"migalhas", title:'"Oi" / "Tudo bem?" / "Oi sumido(a)" / Reação solta', badge:"SILÊNCIO ESTRATÉGICO", silence:true,
+    trap:"Isca de zero esforço para checar se você ainda está disponível no banco de reservas.",
+    reply:"Ação: não responda. Se já visualizou por acidente, deixe exatamente assim.",
+    why:"Mensagem vazia não merece sua energia. O silêncio encerra o acesso fácil sem drama." },
+  { num:"02", cat:"migalhas", title:"Curtida em foto antiga ou visualização rápida de Story", badge:"SILÊNCIO ESTRATÉGICO", silence:true,
+    trap:"Um toque de 1 segundo para entrar na sua cabeça e provocar iniciativa sua.",
+    reply:"Ação: ignore completamente. Não curta de volta, não olhe o story dele(a) e não poste indireta.",
+    why:"Curtida não é conversa nem proposta madura. Ignorar neutraliza o gatilho." },
+  { num:"03", cat:"migalhas", title:'Meme, vídeo ou "Lembrei de você vendo isso"', badge:"COPIE E COLE", silence:false,
+    trap:"Reabrir intimidade leve sem assumir responsabilidade pelo término.",
+    reply:"Haha, boa.",
+    why:"Educado, breve e sem pergunta de volta: a conversa encerra ali com postura." },
+  { num:"04", cat:"migalhas", title:'"Esta mensagem foi apagada"', badge:"SILÊNCIO ESTRATÉGICO", silence:true,
+    trap:"Disparar ansiedade para você perguntar 'o que você tinha mandado?'.",
+    reply:"Ação: não pergunte o que era. Se for adulto e relevante, a pessoa escreve de novo.",
+    why:"Quebra na hora o condicionamento de correr atrás de sinais ambíguos." },
+  { num:"05", cat:"logistica", title:'"Minhas coisas ficaram aí, quando posso buscar?"', badge:"COPIE E COLE", silence:false,
+    trap:"Transformar devolução de objetos em encontro presencial carregado de emoção.",
+    reply:"Oi, [Nome]. Já deixei tudo separado em uma sacola. Posso deixar na portaria ou enviar por entregador amanhã às [hora], fica mais prático para os dois.",
+    why:"Resolutivo e cortês, eliminando a maior porta de recaída presencial." },
+  { num:"06", cat:"logistica", title:"Contas, contrato, animal de estimação ou rotina com filhos", badge:"COPIE E COLE", silence:false,
+    trap:"Misturar logística obrigatória com desabafos ou sondagens emocionais.",
+    reply:"Oi, [Nome]. Sobre [assunto]: proponho [solução objetiva + data]. Se estiver de acordo, fechamos assim. Obrigado(a).",
+    why:"Comunicação executiva: fatos claros e zero brecha para desgaste." },
+  { num:"07", cat:"logistica", title:'Amigos em comum perguntando: "E aí, como você tá?"', badge:"COPIE E COLE", silence:false,
+    trap:"Desabafar no impulso e ver seu relato chegar distorcido ao ex na mesma noite.",
+    reply:"Estou bem, focado(a) no trabalho e organizando minha rotina. Prefiro preservar esse assunto por enquanto, mas obrigado(a) por perguntar.",
+    why:"Zero munição para fofoca e transmissão imediata de respeito próprio." },
+  { num:"08", cat:"emocao", title:'"Sonhei com você" / "Passei naquele lugar e lembrei da gente"', badge:"COPIE E COLE", silence:false,
+    trap:"Testar se você desmonta com nostalgia sem a pessoa oferecer nada real.",
+    reply:"Bom saber que ficaram boas lembranças. Espero que esteja tudo bem por aí. Hoje estou focado(a) na minha rotina e prefiro manter nosso espaço. Se cuida.",
+    why:"Se houver intenção séria, exigirá clareza; se era busca de ego, desarma na hora." },
+  { num:"09", cat:"emocao", title:"Mensagem de madrugada (carência ou bebida)", badge:"TRAVA 12 HORAS", silence:false,
+    trap:"Responder às 2h da manhã com o coração aberto e levar frieza às 10h.",
+    reply:"Vi sua mensagem hoje cedo. Espero que esteja bem. Se cuida.",
+    why:"Jamais responda de madrugada. Carência noturna nunca é decisão construída." },
+  { num:"10", cat:"emocao", title:'"Já me esqueceu, né?" / "Superou rápido"', badge:"COPIE E COLE", silence:false,
+    trap:"Provocar culpa ou ciúme para fazer você se declarar ou discutir.",
+    reply:"Sem mágoas, [Nome]. Só estou respeitando o encerramento do nosso ciclo. Tudo de bom por aí.",
+    why:"Retira toda a tensão dramática: você não ataca nem entrega validação." },
+  { num:"11", cat:"limites", title:'"Podemos continuar sendo amigos?"', badge:"COPIE E COLE", silence:false,
+    trap:"Manter seu suporte emocional disponível enquanto segue livre sem compromisso.",
+    reply:"Agradeço a consideração, [Nome], mas agora preciso de distância completa para seguir bem. Mais pra frente a gente vê, mas hoje prefiro manter assim.",
+    why:"Limite firme, adulto e sem demonstrar ressentimento." },
+  { num:"12", cat:"limites", title:"Aniversário, Natal, Ano-Novo ou datas marcantes", badge:"COPIE E COLE", silence:false,
+    trap:"Usar o calendário como pretexto nobre para quebrar o contato zero.",
+    reply:"Obrigado(a), [Nome]. Tudo de bom para você também.",
+    why:"Use apenas se receber mensagem no seu dia. No aniversário do ex, silêncio." },
+  { num:"13", cat:"limites", title:"Ex aparece com outra pessoa nas redes sociais", badge:"AÇÃO IMEDIATA", silence:true,
+    trap:"Tirar satisfação, stalkear o novo perfil ou postar indireta ferida.",
+    reply:"Ação: silencie imediatamente perfis em comum, faça 5 ciclos do Suspiro Duplo e acione sua Pessoa-Âncora.",
+    why:"A única resposta que mantém sua dignidade blindada é o silêncio absoluto." },
+  { num:"14", cat:"limites", title:"Encontro inesperado na rua, academia ou evento", badge:"ROTEIRO AO VIVO", silence:false,
+    trap:"Esticar conversa tensa de 20 minutos que derruba sua semana inteira.",
+    reply:"Oi, [Nome], tudo certo? Bom te ver bem. Estou no meio de um compromisso agora e preciso seguir, se cuida.",
+    why:"Cumprimento sereno e saída limpa em menos de 60 segundos." },
+  { num:"15", cat:"limites", title:"Pedido de desculpas maduro e específico", badge:"COPIE E COLE", silence:false,
+    trap:"Confundir o alívio imediato de ouvir desculpas com mudança sustentada.",
+    reply:"Obrigado(a) por reconhecer isso com clareza, [Nome]. Valorizo sua sinceridade. Ainda estou colocando minha cabeça em ordem e preciso do meu tempo antes de conversar.",
+    why:"Reconhece a maturidade sem entregar reconciliação apressada." },
+  { num:"16", cat:"limites", title:"BOTÃO DE REINÍCIO (Se você já implorou ou mandou textão)", badge:"USE 1 ÚNICA VEZ", silence:false, reset:true,
+    trap:"Mandar mais mensagens tentando explicar o desespero anterior.",
+    reply:"Oi, [Nome]. Agi no impulso nos últimos dias por conta do impacto do término. Com a cabeça fria agora, vejo que encerrar realmente foi a decisão certa para nós dois. Fique bem.",
+    why:"Recupera o respeito próprio em um único movimento e inicia o silêncio real." }
+];
+
+const DIAG_QS = [
+  "Acordo e meu primeiro reflexo é pegar o celular esperando mensagem ou sinal.",
+  "Olho perfil, stories, curtidas ou 'visto por último' sabendo que vai doer.",
+  "Sinto aperto físico no peito, nó na garganta ou estômago fechado ao lembrar.",
+  "Minha memória filtra só as cenas boas e apaga os motivos reais do desgaste.",
+  "Procuro pretextos práticos (objetos, boletos, dúvidas) para puxar assunto.",
+  "Entre 22h e 2h da manhã o impulso de mandar mensagem dispara forte.",
+  "Releio conversas antigas, escuto áudios salvos ou revisito fotos.",
+  "Meu humor do dia depende de achar que a pessoa sentiu minha falta.",
+  "Tenho receio de não sentir conexão parecida com mais ninguém.",
+  "Já quebrei o silêncio por impulso recentemente e me arrependi depois."
+];
+
+const PILLARS = [
+  "01 • Respeito mútuo durante conflitos",
+  "02 • Equilíbrio real de esforço e iniciativa",
+  "03 • Paz mental quando estavam longe",
+  "04 • Coerência entre promessa e atitude",
+  "05 • Espaço seguro para falar a verdade",
+  "06 • Admiração genuína no cotidiano",
+  "07 • Respeito aos seus limites inegociáveis",
+  "08 • Alinhamento prático de futuro"
+];
+
+const DAYS_PLAN = [
+  { d:1, title:"O Corte de Estímulos", phase:"Fase Z", tasks:["Responder o Índice de Sequestro Emocional na aba Diagnóstico.","Arquivar conversa, silenciar redes e guardar fotos fora da vista.","Definir palavra-código com uma Pessoa-Âncora de confiança."] },
+  { d:2, title:"A Manhã Blindada", phase:"Fase Z", tasks:["Primeiros 20 minutos acordado(a) longe de redes sociais.","Água, luz natural e banho antes de checar notificações.","25 a 30 minutos de treino ou caminhada acelerada."] },
+  { d:3, title:"A Travessia do Pico", phase:"Fase Z", tasks:["Acionar a Trava 15 min + Suspiro Duplo a cada onda aguda.","Zero postagens de indireta ou busca de visualização.","Deixar o celular carregando fora do alcance da cama às 22h30."] },
+  { d:4, title:"A Janela Controlada", phase:"Fase E", tasks:["Fixar 15 minutos exatos no dia para processar a saudade.","Anotar 'penso nisso no horário marcado' quando vier gatilho.","Revisar os Scripts #01 a #05 para não cair em isca curta."] },
+  { d:5, title:"Retomada de Território", phase:"Fase E", tasks:["Alterar a disposição do quarto, roupa de cama ou ambiente.","Montar uma trilha sonora nova sem gatilhos do casal.","Completar 5 dias limpos sem visitar o perfil do ex."] },
+  { d:6, title:"Corpo no Comando", phase:"Fase E", tasks:["Retomar um hábito ou cuidado pessoal deixado de lado.","Manter alimentação e hidratação completas mesmo sem fome.","Testar o Tradutor do Ex para blindar a leitura de subtexto."] },
+  { d:7, title:"A Autópsia Honesta", phase:"Fase R", tasks:["Pontuar os 8 Pilares na aba Diagnóstico com honestidade fria.","Comparar sua nota de dor de hoje com o pico dos primeiros dias.","Fazer um programa individual que recarregue sua energia."] },
+  { d:8, title:"Fato Acima da Fantasia", phase:"Fase R", tasks:["Listar 5 situações reais de desgaste que a saudade tentou apagar.","Reduzir a Janela Controlada para 10 minutos.","Zero perguntas sobre o ex para amigos em comum."] },
+  { d:9, title:"A Carta de Alforria", phase:"Fase R", tasks:["Escrever tudo o que ficou atravessado na caixa de descarrego.","Queimar a mensagem na Central SOS sem enviar uma linha.","Fazer 20 minutos de movimento físico para selar o alívio."] },
+  { d:10, title:"Círculo Forte", phase:"Fase O", tasks:["Conversar ou sair com amigos falando 80% de planos futuros.","Listar 3 pontos fortes seus que independem de namoro.","Manter o ritual noturno sem telas na cama."] },
+  { d:11, title:"Dopamina Construída", phase:"Fase O", tasks:["Resolver uma pendência financeira ou profissional adiada.","Treino físico completo de 40 minutos.","Perceber o primeiro bloco de horas sem lembrar do término."] },
+  { d:12, title:"Novas Referências", phase:"Fase O", tasks:["Conhecer um café, rota ou ambiente 100% inédito.","Registrar uma vitória concreta conquistada nesta semana.","12º dia consecutivo preservando silêncio e postura."] },
+  { d:13, title:"Direção de 30 Dias", phase:"Fase O", tasks:["Escolher 1 meta tangível (corpo, carreira ou estudo) para 30 dias.","Dedicar 45 minutos focados a esse projeto hoje.","Escrever 3 critérios inegociáveis para qualquer relação futura."] },
+  { d:14, title:"O Novo Padrão", phase:"Fase O", tasks:["Refazer o Índice de Sequestro Emocional e medir a queda real.","Analisar seu gráfico completo de 14 dias nesta aba.","Consolidar o compromisso de nunca mais negociar sua dignidade."] }
+];
+
+// ==================== STATE ====================
+let state = JSON.parse(localStorage.getItem('codigoZeroState') || '{}');
+if (!Array.isArray(state.diag) || state.diag.length !== 10) state.diag = Array(10).fill(null);
+if (!Array.isArray(state.pillars) || state.pillars.length !== 8) state.pillars = Array(8).fill(5);
+if (!state.days || typeof state.days !== 'object') state.days = {};
+if (!state.selectedDay) state.selectedDay = 1;
+if (typeof state.wavesWon !== 'number') state.wavesWon = 0;
+if (!state.selectedArch) state.selectedArch = 'abrupto';
+if (typeof state.soundEnabled !== 'boolean') state.soundEnabled = false;
+
+function saveState() {
+  localStorage.setItem('codigoZeroState', JSON.stringify(state));
+  updateStatusPills();
+}
+
+function recordWaveWon(toastMessage) {
+  state.wavesWon = (state.wavesWon || 0) + 1;
+  saveState();
+  if (toastMessage) showToast(toastMessage);
+}
+
+function updateStatusPills() {
+  const count = Object.values(state.days).filter(x => x && x.pain !== null && x.pain !== undefined).length;
+  document.getElementById('streakText').textContent = `${count} / 14 dias`;
+  const w = state.wavesWon || 0;
+  document.getElementById('wavesText').textContent = `${w} ${w === 1 ? 'onda vencida' : 'ondas vencidas'}`;
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function copyText(text, label = "Copiado!") {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast(label)).catch(() => fallbackCopy(text, label));
+  } else {
+    fallbackCopy(text, label);
+  }
+}
+function fallbackCopy(text, label) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  showToast(label);
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const targetBtn = btn || document.getElementById('tabbtn-' + id);
+  if (targetBtn) targetBtn.classList.add('active');
+  if (id === 'tracker') renderChart();
+}
+
+// ==================== TAB 1: TIMER, WEB AUDIO BREATHING & EMBER CANVAS ====================
+let timerTotal = 900, timerLeft = 900, timerInt = null;
+function updateTimerUI() {
+  const m = String(Math.floor(timerLeft / 60)).padStart(2, '0');
+  const s = String(timerLeft % 60).padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  const elapsed = timerTotal - timerLeft;
+  document.getElementById('timerBar').style.transform = `scaleX(${elapsed / timerTotal})`;
+  const phaseEl = document.getElementById('timerPhase');
+  if (timerLeft === 0) {
+    phaseEl.textContent = "ONDA VENCIDA! O CÓRTEX PRÉ-FRONTAL REASSUMIU.";
+  } else if (elapsed === 0) {
+    phaseEl.textContent = "PRONTO PARA ATIVAR A TRAVA";
+  } else if (elapsed <= 90) {
+    phaseEl.textContent = "FASE 1 (0–90s): PICO QUÍMICO — SÓ RESPIRE";
+  } else if (elapsed <= 600) {
+    phaseEl.textContent = "FASE 2: DESCARREGO — ESCREVA ABAIXO SEM ENVIAR";
+  } else {
+    phaseEl.textContent = "FASE 3: LUCIDEZ RETORNANDO — PENSE NAS 9H DE AMANHÃ";
+  }
+}
+function toggleTimer() {
+  const btn = document.getElementById('startTimerBtn');
+  if (timerInt) {
+    clearInterval(timerInt);
+    timerInt = null;
+    btn.textContent = "Retomar Trava";
+  } else {
+    if (timerLeft === 0) timerLeft = timerTotal;
+    btn.textContent = "Pausar Cronômetro";
+    timerInt = setInterval(() => {
+      if (timerLeft > 0) {
+        timerLeft--;
+        updateTimerUI();
+      } else {
+        clearInterval(timerInt);
+        timerInt = null;
+        btn.textContent = "Trava Concluída";
+        recordWaveWon("15 minutos vencidos! +1 onda registrada.");
+      }
+    }, 1000);
+    updateTimerUI();
+  }
+}
+function resetTimer() {
+  clearInterval(timerInt);
+  timerInt = null;
+  timerLeft = timerTotal;
+  document.getElementById('startTimerBtn').textContent = "Ativar Trava de 15 min";
+  updateTimerUI();
+}
+
+// Synthesized Harmonic Breathing Guide (100% offline Web Audio API)
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playBreathTone(phase) {
+  if (!state.soundEnabled) return;
+  try {
+    ensureAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const sub = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    sub.type = 'triangle';
+
+    if (phase === 'inhale1') {
+      osc.frequency.setValueAtTime(174, now);
+      osc.frequency.linearRampToValueAtTime(220, now + 1.75);
+      sub.frequency.setValueAtTime(87, now);
+      sub.frequency.linearRampToValueAtTime(110, now + 1.75);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.055, now + 1.5);
+      gain.gain.linearRampToValueAtTime(0.02, now + 1.85);
+      osc.connect(gain); sub.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); sub.start(now);
+      osc.stop(now + 1.88); sub.stop(now + 1.88);
+    } else if (phase === 'inhale2') {
+      osc.frequency.setValueAtTime(246.94, now);
+      osc.frequency.linearRampToValueAtTime(293.66, now + 0.75);
+      sub.frequency.setValueAtTime(123.47, now);
+      gain.gain.setValueAtTime(0.015, now);
+      gain.gain.linearRampToValueAtTime(0.065, now + 0.45);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.85);
+      osc.connect(gain); sub.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); sub.start(now);
+      osc.stop(now + 0.88); sub.stop(now + 0.88);
+    } else if (phase === 'exhale') {
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(146.83, now + 3.7);
+      sub.frequency.setValueAtTime(110, now);
+      sub.frequency.exponentialRampToValueAtTime(73.42, now + 3.7);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 3.8);
+      osc.connect(gain); sub.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); sub.start(now);
+      osc.stop(now + 3.85); sub.stop(now + 3.85);
+    }
+  } catch (_) {}
+}
+
+function updateSoundBtnUI() {
+  const btn = document.getElementById('soundToggleBtn');
+  btn.textContent = state.soundEnabled ? "Som Guia: Ativado" : "Som Guia: Desligado";
+  btn.classList.toggle('sound-on', state.soundEnabled);
+}
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  if (state.soundEnabled) ensureAudio();
+  updateSoundBtnUI();
+  saveState();
+}
+
+let breathRunning = false, breathTimeout = null, breathCycles = 0;
+function toggleBreath() {
+  const btn = document.getElementById('breathBtn');
+  const ring = document.getElementById('breathRing');
+  if (breathRunning) {
+    breathRunning = false;
+    clearTimeout(breathTimeout);
+    ring.className = 'breath-ring';
+    ring.innerHTML = 'Toque para<br>iniciar';
+    btn.textContent = "Iniciar Respiração (5x)";
+    return;
+  }
+  if (state.soundEnabled) ensureAudio();
+  breathRunning = true;
+  breathCycles = 0;
+  document.getElementById('breathCount').textContent = 'Ciclos concluídos: 0 / 5';
+  btn.textContent = "Parar Respiração";
+  runBreathCycle();
+}
+function runBreathCycle() {
+  if (!breathRunning) return;
+  const ring = document.getElementById('breathRing');
+  const cnt = document.getElementById('breathCount');
+  if (breathCycles >= 5) {
+    breathRunning = false;
+    ring.className = 'breath-ring';
+    ring.innerHTML = '5 ciclos<br>concluídos!';
+    document.getElementById('breathBtn').textContent = "Fazer mais 5 ciclos";
+    recordWaveWon("Reset fisiológico completo! +1 onda vencida.");
+    return;
+  }
+  ring.className = 'breath-ring inhale1';
+  ring.innerHTML = 'Inspire fundo<br>(nariz)';
+  playBreathTone('inhale1');
+  breathTimeout = setTimeout(() => {
+    if (!breathRunning) return;
+    ring.className = 'breath-ring inhale2';
+    ring.innerHTML = '+ Puxadinha<br>extra!';
+    playBreathTone('inhale2');
+    breathTimeout = setTimeout(() => {
+      if (!breathRunning) return;
+      ring.className = 'breath-ring exhale';
+      ring.innerHTML = 'Solte lento<br>(boca)';
+      playBreathTone('exhale');
+      breathTimeout = setTimeout(() => {
+        breathCycles++;
+        cnt.textContent = `Ciclos concluídos: ${breathCycles} / 5`;
+        runBreathCycle();
+      }, 3950);
+    }, 900);
+  }, 1900);
+}
+
+// Ember Particle Dissolve on Burn Message
+function launchEmbers() {
+  const canvas = document.getElementById('emberCanvas');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = Math.max(300, rect.width);
+  canvas.height = Math.max(124, rect.height);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const particles = Array.from({ length: 56 }, () => ({
+    x: Math.random() * canvas.width,
+    y: canvas.height * (0.35 + Math.random() * 0.65),
+    vx: (Math.random() - 0.5) * 1.6,
+    vy: -(1.2 + Math.random() * 2.6),
+    r: 1.5 + Math.random() * 3.2,
+    alpha: 0.95,
+    gold: Math.random() > 0.38
+  }));
+
+  let frame = 0;
+  function step() {
+    frame++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of particles) {
+      p.x += p.vx + Math.sin(frame * 0.08 + p.r) * 0.35;
+      p.y += p.vy;
+      p.alpha -= 0.017;
+      if (p.alpha > 0) {
+        alive = true;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.gold
+          ? `rgba(229, 205, 150, ${p.alpha.toFixed(2)})`
+          : `rgba(198, 92, 52, ${p.alpha.toFixed(2)})`;
+        ctx.fill();
+      }
+    }
+    if (alive && frame < 75) requestAnimationFrame(step);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(step);
+}
+
+function burnMessage() {
+  const box = document.getElementById('ventBox');
+  if (!box.value.trim()) {
+    showToast("Escreva o que está entalado antes de queimar.");
+    return;
+  }
+  launchEmbers();
+  box.classList.add('burning');
+  setTimeout(() => {
+    box.value = "";
+    box.classList.remove('burning');
+    recordWaveWon("Mensagem reduzida a cinzas. Postura preservada! (+1 onda)");
+  }, 860);
+}
+
+// ==================== TAB 2: ARCHETYPES & EX TRANSLATOR ====================
+function renderArchetypes() {
+  document.getElementById('archGrid').innerHTML = ARCHETYPES.map(a => `
+    <button class="arch-btn ${state.selectedArch === a.id ? 'active' : ''}" onclick="selectArch('${a.id}')">
+      <span class="arch-tag">${a.tag}</span>
+      <div class="arch-title">${a.title}</div>
+      <div class="arch-sub">${a.sub}</div>
+    </button>
+  `).join('');
+
+  const cur = ARCHETYPES.find(a => a.id === state.selectedArch) || ARCHETYPES[0];
+  document.getElementById('archDetail').innerHTML = `
+    <div style="font-family:var(--font-mono); font-size:10.5px; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em;">Diagnóstico Tático • ${cur.title}</div>
+    <div class="arch-cols">
+      <div class="arch-box"><strong>O que ocorre no cérebro</strong>${cur.neuro}</div>
+      <div class="arch-box"><strong style="color:var(--terracotta-light);">Armadilha que mais derruba</strong>${cur.mistake}</div>
+      <div class="arch-box"><strong style="color:var(--sage-light);">Manobra Código Zero</strong>${cur.action}</div>
+    </div>
+  `;
+}
+function selectArch(id) {
+  state.selectedArch = id;
+  saveState();
+  renderArchetypes();
+}
+
+let openTransIdx = 0;
+function renderTranslator() {
+  document.getElementById('translatorList').innerHTML = TRANSLATIONS.map((item, idx) => {
+    const isOpen = openTransIdx === idx;
+    return `
+      <div class="trans-item ${isOpen ? 'open' : ''}">
+        <button class="trans-head" onclick="toggleTrans(${idx})">
+          <span>${item.said}</span>
+          <span class="trans-toggle">${isOpen ? 'FECHAR −' : 'TRADUZIR +'}</span>
+        </button>
+        <div class="trans-body">
+          <div class="trans-grid">
+            <div class="trans-col real">
+              <span class="trans-label" style="color:var(--terracotta-light);">Tradução Real (Sem Filtro)</span>
+              ${item.real}
+            </div>
+            <div class="trans-col antidote">
+              <span class="trans-label" style="color:var(--sage-light);">Antídoto Código Zero</span>
+              ${item.antidote}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <button class="btn btn-gold" style="padding:8px 14px; font-size:12px;" onclick="jumpToScript('${item.scriptNum}')">Ir para o Script #${item.scriptNum}</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function toggleTrans(idx) {
+  openTransIdx = openTransIdx === idx ? -1 : idx;
+  renderTranslator();
+}
+function jumpToScript(num) {
+  currentCat = 'all';
+  document.getElementById('scriptSearch').value = '';
+  document.querySelectorAll('#scriptChips .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+  switchTab('scripts');
+  renderScripts();
+  const target = document.getElementById('script-card-' + num);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('highlight-flash');
+    setTimeout(() => target.classList.remove('highlight-flash'), 2200);
+  }
+}
+
+// ==================== TAB 3: SCRIPTS ====================
+let currentCat = 'all';
+function setScriptCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('#scriptChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderScripts();
+}
+function renderScripts() {
+  const q = document.getElementById('scriptSearch').value.toLowerCase();
+  const list = SCRIPTS.filter(s => {
+    const matchCat = currentCat === 'all' || s.cat === currentCat;
+    const matchQ = !q || (s.title + ' ' + s.reply + ' ' + s.trap + ' ' + s.num).toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  document.getElementById('scriptsContainer').innerHTML = list.map(s => `
+    <div class="script-item ${s.reset ? 'reset-card' : ''}" id="script-card-${s.num}">
+      <div class="s-top">
+        <div><span class="s-num">#${s.num}</span><strong>${s.title}</strong></div>
+        <span class="s-badge ${s.silence ? 'silence' : ''}">${s.badge}</span>
+      </div>
+      <div class="s-trap"><strong>Armadilha oculta:</strong> ${s.trap}</div>
+      <div class="s-reply">${s.reply}</div>
+      <div class="s-foot">
+        <div class="s-why">${s.why}</div>
+        ${!s.silence ? `<button class="btn btn-gold" style="padding:7px 13px; font-size:12px;" onclick='copyText(${JSON.stringify(s.reply)}, "Script #${s.num} copiado!")'>Copiar Resposta</button>` : ''}
+      </div>
+    </div>
+  `).join('') || '<p class="lead">Nenhum script encontrado para essa busca.</p>';
+}
+
+// ==================== TAB 4: DIAGNOSTIC & AUTOPSY ====================
+function renderDiag() {
+  document.getElementById('diagQuestions').innerHTML = DIAG_QS.map((q, i) => `
+    <div class="q-row">
+      <div style="font-size:13.5px; color:var(--ink);"><strong style="color:var(--gold); font-family:var(--font-mono);">${String(i+1).padStart(2,'0')}.</strong> ${q}</div>
+      <div class="q-btns">
+        ${[0,1,2,3].map(v => `<button class="q-btn ${state.diag[i]===v?'selected':''}" onclick="setDiag(${i},${v})">${v}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  updateDiagScore();
+}
+function setDiag(idx, val) {
+  state.diag[idx] = val;
+  saveState();
+  renderDiag();
+}
+function updateDiagScore() {
+  const answered = state.diag.filter(v => v !== null).length;
+  const total = state.diag.reduce((a, b) => a + (b || 0), 0);
+  document.getElementById('diagScoreText').textContent = `${total} / 30 pontos`;
+  const v = document.getElementById('diagVerdict');
+  if (answered < 10) {
+    v.innerHTML = `Você respondeu <strong>${answered} de 10</strong> perguntas. Complete todas para ver sua classificação precisa.`;
+  } else if (total <= 9) {
+    v.innerHTML = `<strong>Nível 1 — Luto Ativo Controlável:</strong> Sua lucidez está preservada. Complete a Autópsia dos 8 Pilares abaixo e mantenha o plano diário até o Dia 14.`;
+  } else if (total <= 19) {
+    v.innerHTML = `<strong>Nível 2 — Zona de Abstinência:</strong> Seu sistema de recompensa ainda busca doses diárias. Blinde suas redes por 7 dias e registre sua evolução todas as noites.`;
+  } else {
+    v.innerHTML = `<strong>Nível 3 — Sequestro Emocional Agudo:</strong> Alerta máximo contra impulsos noturnos. Use a Trava de 15 min antes de qualquer ação e mantenha os Cartões SOS no celular.`;
+  }
+}
+
+function renderPillars() {
+  document.getElementById('pillarsContainer').innerHTML = PILLARS.map((name, i) => `
+    <div class="slider-row">
+      <div class="slider-head"><span>${name}</span><span class="slider-val" id="pval-${i}">${state.pillars[i]} / 10</span></div>
+      <input type="range" min="1" max="10" value="${state.pillars[i]}" oninput="setPillar(${i}, this.value)">
+    </div>
+  `).join('');
+  updateAutopsyScore();
+}
+function setPillar(i, val) {
+  state.pillars[i] = Number(val);
+  document.getElementById(`pval-${i}`).textContent = `${val} / 10`;
+  saveState();
+  updateAutopsyScore();
+}
+function updateAutopsyScore() {
+  const total = state.pillars.reduce((a,b) => a + b, 0);
+  document.getElementById('autopsyScore').textContent = `${total} / 80 pontos`;
+  const el = document.getElementById('autopsyVerdict');
+  if (total <= 39) {
+    el.innerHTML = `<strong>Relação em Déficit Crônico (${total}/80):</strong> Os números desmontam a idealização. O que dói hoje não é perder paz, é a abstinência de tentar fazer funcionar o que drenava você.`;
+  } else if (total <= 59) {
+    el.innerHTML = `<strong>Montanha-Russa Intermitente (${total}/80):</strong> Alternância entre picos bons e insegurança constante. Esse padrão é quimicamente viciante, mas insustentável no longo prazo.`;
+  } else {
+    el.innerHTML = `<strong>Bom Vínculo, Ciclo Encerrado (${total}/80):</strong> Mesmo relações boas terminam quando uma das partes deixa de escolher o projeto. Honre sua história sem negociar sua dignidade.`;
+  }
+}
+
+// ==================== TAB 5: 14-DAY TRACKER & LIVE SVG CHART ====================
+function renderTracker() {
+  document.getElementById('daySelector').innerHTML = DAYS_PLAN.map(item => {
+    const saved = state.days[item.d];
+    const hasPain = saved && saved.pain !== undefined && saved.pain !== null;
+    return `<button class="day-pill ${hasPain?'has-data':''} ${state.selectedDay===item.d?'active':''}" onclick="selectDay(${item.d})">D${String(item.d).padStart(2,'0')}${hasPain ? '<br>'+saved.pain : ''}</button>`;
+  }).join('');
+
+  const cur = DAYS_PLAN.find(x => x.d === state.selectedDay);
+  const dState = state.days[cur.d] || { pain: null, checks: {} };
+  document.getElementById('dayDetailCard').innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <div class="eyebrow" style="margin:0;">${cur.phase} • DIA ${String(cur.d).padStart(2,'0')} DE 14</div>
+        <h3>${cur.title}</h3>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      ${cur.tasks.map((t, idx) => `
+        <label class="task-check ${dState.checks[idx]?'done':''}">
+          <input type="checkbox" ${dState.checks[idx]?'checked':''} onchange="toggleTask(${cur.d},${idx},this.checked)">
+          <span>${t}</span>
+        </label>
+      `).join('')}
+    </div>
+    <div style="font-family:var(--font-mono); font-size:11px; color:var(--gold); text-transform:uppercase;">Intensidade da dor hoje (0 = paz firme · 10 = dor máxima):</div>
+    <div class="pain-picker">
+      ${[0,1,2,3,4,5,6,7,8,9,10].map(p => `<button class="pain-btn ${dState.pain===p?'selected':''}" onclick="setDayPain(${cur.d},${p})">${p}</button>`).join('')}
+    </div>
+  `;
+  renderChart();
+}
+function selectDay(d) { state.selectedDay = d; saveState(); renderTracker(); }
+function toggleTask(d, idx, checked) {
+  if (!state.days[d]) state.days[d] = { pain: null, checks: {} };
+  state.days[d].checks[idx] = checked;
+  saveState(); renderTracker();
+}
+function setDayPain(d, p) {
+  if (!state.days[d]) state.days[d] = { pain: null, checks: {} };
+  state.days[d].pain = p;
+  saveState(); renderTracker();
+  showToast(`Dia ${String(d).padStart(2,'0')} registrado: nota ${p}/10`);
+}
+function renderChart() {
+  const svg = document.getElementById('livePainChart');
+  const typical = [8, 8.2, 9, 7.5, 6.8, 6, 5.4, 4.7, 4.1, 3.5, 3, 2.4, 1.9, 1.4];
+  const xFor = i => 42 + i * 47;
+  const yFor = v => 152 - (v / 10) * 132;
+
+  let grid = '';
+  for (let v = 0; v <= 10; v += 2) {
+    const y = yFor(v);
+    grid += `<line x1="36" y1="${y}" x2="664" y2="${y}" stroke="var(--border-soft)" stroke-width="1"/>`;
+    grid += `<text x="28" y="${y+3}" text-anchor="end" fill="var(--ink-muted)" font-family="var(--font-mono)" font-size="9">${v}</text>`;
+  }
+  for (let i = 0; i < 14; i++) {
+    grid += `<text x="${xFor(i)}" y="172" text-anchor="middle" fill="var(--ink-muted)" font-family="var(--font-mono)" font-size="9">D${String(i+1).padStart(2,'0')}</text>`;
+  }
+  const typPath = typical.map((v, i) => `${i===0?'M':'L'}${xFor(i)} ${yFor(v)}`).join(' ');
+  const pts = [];
+  for (let i = 0; i < 14; i++) {
+    const d = state.days[i+1];
+    if (d && d.pain !== null && d.pain !== undefined) pts.push({ x: xFor(i), y: yFor(d.pain), v: d.pain });
+  }
+  const userPath = pts.length > 1 ? `<path d="${pts.map((p,i)=>`${i===0?'M':'L'}${p.x} ${p.y}`).join(' ')}" fill="none" stroke="var(--sage-bright)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : '';
+  const userDots = pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="5.5" fill="var(--sage-bright)" stroke="var(--bg)" stroke-width="2"/><text x="${p.x}" y="${p.y-9}" text-anchor="middle" fill="var(--sage-light)" font-family="var(--font-mono)" font-size="9" font-weight="600">${p.v}</text>`).join('');
+
+  svg.innerHTML = `
+    ${grid}
+    <path d="${typPath}" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.68"/>
+    ${userPath}
+    ${userDots}
+    <text x="660" y="16" text-anchor="end" fill="var(--gold)" font-family="var(--font-mono)" font-size="9">--- Curva esperada</text>
+    <text x="545" y="16" text-anchor="end" fill="var(--sage-bright)" font-family="var(--font-mono)" font-size="9">Sua evolução</text>
+  `;
+}
+
+// ==================== TAB 6: AI PROMPTS ====================
+function renderPrompts() {
+  const msg = document.getElementById('aiMsg').value.trim() || "[COLE A MENSAGEM AQUI]";
+  const ctx = document.getElementById('aiCtx').value.trim() || "[RESUMA O CONTEXTO EM 2 LINHAS]";
+  const prompts = [
+    { name:"Comando 01 • Freio de Emergência (Antes de Enviar)", tag:"CRISE",
+      text:`Aja como um estrategista firme de psicologia comportamental. Estou em contato zero após um término e quase enviando isto para meu ex: "${msg}". Mostre em 3 pontos diretos a consequência real se eu enviar agora e me conduza por 2 minutos até o impulso passar.` },
+    { name:"Comando 02 • Decodificador Frio de Mensagem Recebida", tag:"SUBTEXTO",
+      text:`Meu ex mandou exatamente isto: "${msg}". Contexto do término: ${ctx}. Analise sem romantizar se é migalha de validação ou proposta madura. Depois indique se devo silenciar ou entregue uma resposta de no máximo 2 linhas.` },
+    { name:"Comando 03 • Desmonte de Idealização Noturna", tag:"CLAREZA",
+      text:`Minha mente está idealizando meu ex agora. Faça 5 perguntas cirúrgicas, uma por vez, para eu enxergar os fatos reais de convivência que a abstinência está apagando. Ao final, resuma meu ganho real em manter a postura.` },
+    { name:"Comando 04 • Simulador de Conversa Obrigatória", tag:"BLINDAGEM",
+      text:`Preciso tratar deste assunto inevitável com meu ex: ${ctx}. Simule 3 provocações emocionais que ele(a) pode usar e me treine para responder de modo executivo, sereno e curto.` },
+    { name:"Comando 05 • Plano Tático de 24h Calibrado Pela Dor", tag:"ROTINA",
+      text:`Estou no Dia ${state.selectedDay} do protocolo Código Zero, com dor nível ${state.days[state.selectedDay]?.pain ?? '[0 A 10]'}/10. O maior gatilho hoje foi: ${ctx}. Monte uma meta simples para minha manhã, tarde e noite de amanhã.` }
+  ];
+  document.getElementById('promptsContainer').innerHTML = prompts.map((p, i) => `
+    <div class="script-item">
+      <div class="s-top">
+        <strong>${p.name}</strong>
+        <span class="s-badge">${p.tag}</span>
+      </div>
+      <div class="s-reply" style="font-family:var(--font-mono); font-size:12px;">${p.text}</div>
+      <div style="text-align:right;">
+        <button class="btn btn-gold" style="padding:7px 14px; font-size:12px;" onclick='copyText(${JSON.stringify(p.text)}, "Comando 0${i+1} copiado!")'>Copiar Comando Pronto</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Init
+updateStatusPills();
+updateSoundBtnUI();
+renderArchetypes();
+renderTranslator();
+renderScripts();
+renderDiag();
+renderPillars();
+renderTracker();
+renderPrompts();
+</script>
+</body>
+</html>
