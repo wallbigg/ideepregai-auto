@@ -142,6 +142,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-24 02:02 UTC",
+      "topic": "Por que o homem demora 14 dias pra sentir o baque (Masculino #03)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "arpege.mp3",
+      "theme_start": "paper",
+      "broll_used": [
+        "35889",
+        "28893",
+        "52079"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Charon"
     }
   ]
 }
