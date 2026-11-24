@@ -127,6 +127,21 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Charon"
+    },
+    {
+      "date": "2026-11-24 00:09 UTC",
+      "topic": "Esta mensagem foi apagada na madrugada (Feminino #11)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "thriller.mp3",
+      "theme_start": "noir",
+      "broll_used": [
+        "43270",
+        "4915",
+        "2846"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
