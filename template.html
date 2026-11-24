@@ -6,21 +6,12 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
     <style>
       :root {
-        --bg-noir: #0d0e12;
-        --ink-noir: #f4f1ea;
-        --muted-noir: #a8a399;
-        --card-noir: #17181f;
-        --border-noir: rgba(244, 241, 234, 0.14);
-
-        --bg-paper: #efeae0;
-        --ink-paper: #121318;
-        --muted-paper: #56534b;
-        --card-paper: #faf7f0;
-        --border-paper: rgba(18, 19, 24, 0.14);
-
-        --crimson: #d92b4b;
-        --amber: #e2a43b;
-        --sage: #2e9e73;
+        --ink: #faf7f0;
+        --muted: #dbd5c9;
+        --gold: #f5b73b;
+        --crimson: #ff3b5c;
+        --sage: #39c993;
+        --obsidian: #08090d;
       }
 
       * {
@@ -34,9 +25,9 @@
         width: 1080px;
         height: 1920px;
         overflow: hidden;
-        background: #0d0e12;
+        background: var(--obsidian);
         font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-        color: #f4f1ea;
+        color: var(--ink);
       }
 
       #root {
@@ -44,19 +35,19 @@
         width: 1080px;
         height: 1920px;
         overflow: hidden;
-        background: #0d0e12;
+        background: var(--obsidian);
       }
 
-      /* ── Layer 1: Cinema HD B-Roll Footage Stage ── */
-      #footageStage {
+      /* ── Layer 1: Full-Bleed Multi-Shot Cinema Movie (8 unique real HD scenes) ── */
+      #cinemaStage {
         position: absolute;
         inset: 0;
         z-index: 1;
         overflow: hidden;
-        background: #0d0e12;
+        background: #08090d;
       }
 
-      .broll-vid {
+      .shot-vid {
         position: absolute;
         left: 0;
         top: 0;
@@ -65,451 +56,314 @@
         object-fit: cover;
       }
 
-      .cinema-scrim {
+      /* Cinema lighting feather: keeps faces/subject bright while protecting text legibility */
+      .cinema-veil {
         position: absolute;
         inset: 0;
-        z-index: 3;
+        z-index: 5;
         pointer-events: none;
         background: linear-gradient(
           180deg,
-          rgba(10, 11, 14, 0.58) 0%,
-          rgba(10, 11, 14, 0.25) 38%,
-          rgba(10, 11, 14, 0.42) 72%,
-          rgba(10, 11, 14, 0.78) 100%
+          rgba(7, 8, 12, 0.56) 0%,
+          rgba(7, 8, 12, 0.14) 28%,
+          rgba(7, 8, 12, 0.16) 54%,
+          rgba(7, 8, 12, 0.68) 78%,
+          rgba(7, 8, 12, 0.88) 100%
         );
       }
 
-      /* ── Layer 2: Dynamic Paper/Noir Architectural Curtain (Split / Full / Retracted) ── */
-      #paperStage {
+      /* Subtle drifting cinema bokeh specks */
+      .bokeh-layer {
         position: absolute;
         inset: 0;
-        z-index: 10;
+        z-index: 7;
         pointer-events: none;
-        overflow: hidden;
       }
 
-      #paperSheet {
+      .bokeh {
         position: absolute;
-        left: 0;
-        top: 0;
-        width: 1080px;
-        height: 1920px;
-        background-color: var(--bg-noir);
-        color: var(--ink-noir);
-        overflow: hidden;
-        box-shadow: 0 28px 65px rgba(0, 0, 0, 0.72);
+        border-radius: 50%;
+        background: rgba(245, 183, 59, 0.45);
+        filter: blur(2px);
       }
 
-      /* Editorial paper / noir texture grid + fiber overlay (no neon, no blurry blobs) */
-      .editorial-grid {
+      /* Cinematic Transition VFX (Dip-to-Black & Golden Light Leak) */
+      #fxBlackout {
         position: absolute;
         inset: 0;
+        z-index: 12;
+        background: #050608;
+        opacity: 0;
         pointer-events: none;
-        opacity: 0.35;
-        background-image:
-          linear-gradient(to right, rgba(130, 125, 115, 0.11) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(130, 125, 115, 0.11) 1px, transparent 1px);
-        background-size: 72px 72px;
       }
 
-      .film-grain {
+      #fxFlash {
         position: absolute;
         inset: 0;
-        z-index: 45;
+        z-index: 14;
+        background: radial-gradient(circle at 50% 45%, rgba(255, 224, 150, 0.9), rgba(245, 183, 59, 0.25) 65%, transparent 100%);
+        opacity: 0;
         pointer-events: none;
-        opacity: 0.055;
-        background-image: radial-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 0);
-        background-size: 4px 4px;
       }
 
-      .seam-edge {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 4px;
-        background: var(--crimson);
-      }
-
-      /* ── Layer 3: Editorial Visual Beats ── */
-      #beatCanvas {
+      /* ── Layer 2: Scene-Specific Cinema Overlays (Strictly inside IG Safe Zone) ── */
+      #sceneOverlays {
         position: absolute;
         inset: 0;
         z-index: 20;
         pointer-events: none;
       }
 
-      .beat-panel {
+      .sc-layer {
         position: absolute;
-        top: 235px;
-        left: 88px;
-        right: 144px;
+        top: 280px;
+        left: 90px;
+        right: 145px;
+        height: 790px;
         opacity: 0;
         display: flex;
         flex-direction: column;
-      }
-
-      /* Split top panel stays strictly above seam (y: 235 .. 955) */
-      .beat-panel.split-top {
-        height: 720px;
-        justify-content: center;
-      }
-
-      /* Full panel keeps all text cleanly above caption band (y: 235 .. 955) */
-      .beat-panel.full-stage {
-        height: 720px;
         justify-content: flex-start;
-        padding-top: 12px;
       }
 
-      .arch-meta {
-        display: flex;
+      /* Hook Cold Open */
+      .story-stamp {
+        align-self: flex-start;
+        display: inline-flex;
         align-items: center;
-        justify-content: space-between;
-        padding-bottom: 14px;
-        margin-bottom: 18px;
-        border-bottom: 2px solid rgba(130, 125, 115, 0.28);
+        gap: 10px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        background: rgba(8, 9, 13, 0.78);
+        border: 2px solid rgba(245, 183, 59, 0.7);
         font-family: "JetBrains Mono", monospace;
         font-size: 24px;
         font-weight: 700;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.1em;
+        color: var(--gold);
         text-transform: uppercase;
+        margin-bottom: 22px;
       }
 
-      .arch-tag {
-        padding: 6px 14px;
-        border-radius: 6px;
-        background: var(--crimson);
-        color: #fff;
-        font-size: 22px;
-      }
-
-      .hero-headline {
+      .hook-cinema-title {
         font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 62px;
+        font-size: 66px;
         line-height: 1.04;
-        letter-spacing: -0.025em;
+        letter-spacing: -0.02em;
         text-transform: uppercase;
-        margin-bottom: 24px;
+        color: #ffffff;
+        text-shadow: 0 8px 34px rgba(0, 0, 0, 0.96), 0 2px 8px rgba(0, 0, 0, 0.98);
         overflow-wrap: break-word;
       }
 
-      .marker-wrap {
-        position: relative;
-        display: inline-block;
-        color: var(--amber);
+      .hl-gold {
+        color: var(--gold);
       }
 
-      .noir-mode .marker-wrap {
-        color: var(--amber);
-      }
-
-      .paper-mode .marker-wrap {
+      .hl-red {
         color: var(--crimson);
       }
 
-      .marker-svg {
-        position: absolute;
-        left: -4px;
-        right: -4px;
-        bottom: -10px;
-        width: calc(100% + 8px);
-        height: 18px;
-        overflow: visible;
+      .hook-cinema-sub {
+        margin-top: 18px;
+        font-size: 32px;
+        line-height: 1.24;
+        font-weight: 700;
+        color: #f0ece2;
+        text-shadow: 0 5px 22px rgba(0, 0, 0, 0.98);
       }
 
-      /* iOS / WhatsApp notification card inside Hook */
-      .ios-notif {
-        background: rgba(22, 24, 30, 0.94);
-        border: 2px solid rgba(255, 255, 255, 0.14);
-        border-radius: 24px;
+      /* Realistic iOS Dark Lockscreen Notification */
+      .lock-wrap {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+
+      .lock-clock {
+        font-family: "Inter", sans-serif;
+        font-size: 112px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: rgba(255, 255, 255, 0.95);
+        text-shadow: 0 8px 36px rgba(0, 0, 0, 0.75);
+        margin-bottom: 8px;
+      }
+
+      .lock-date {
+        font-size: 26px;
+        font-weight: 600;
+        color: rgba(240, 236, 226, 0.9);
+        text-shadow: 0 4px 16px rgba(0, 0, 0, 0.85);
+        margin-bottom: 34px;
+      }
+
+      .ios-glass-card {
+        width: 100%;
+        background: rgba(22, 24, 32, 0.84);
+        border: 1.5px solid rgba(255, 255, 255, 0.22);
+        border-radius: 26px;
         padding: 24px 28px;
-        color: #f8f6f0;
-        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 26px 64px rgba(0, 0, 0, 0.65);
         position: relative;
       }
 
-      .paper-mode .ios-notif {
-        background: #ffffff;
-        color: #121318;
-        border-color: rgba(18, 19, 24, 0.14);
-        box-shadow: 0 22px 45px rgba(18, 19, 24, 0.16);
-      }
-
-      .ios-row {
+      .ios-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 10px;
         font-family: "JetBrains Mono", monospace;
-        font-size: 19px;
+        font-size: 22px;
         font-weight: 700;
-        opacity: 0.72;
+        color: #5ee29a;
       }
 
       .ios-sender {
-        font-size: 29px;
+        font-size: 32px;
         font-weight: 800;
+        color: #ffffff;
         margin-bottom: 6px;
       }
 
-      .ios-msg {
-        font-size: 32px;
+      .ios-body {
+        font-size: 34px;
         line-height: 1.24;
         font-weight: 600;
+        color: #f4f1ea;
       }
 
-      .stamp-badge {
+      .ios-seen-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 23px;
+        font-weight: 700;
+        color: #6cc4ff;
+      }
+
+      .drama-stamp {
         position: absolute;
         right: 22px;
-        bottom: -22px;
+        bottom: -24px;
         padding: 10px 22px;
         background: var(--crimson);
-        color: #fff;
+        color: #ffffff;
         font-family: "Archivo Black", "Inter", sans-serif;
         font-size: 24px;
-        letter-spacing: 0.06em;
-        border: 3px solid #faf7f0;
+        letter-spacing: 0.05em;
+        border: 3px solid #ffffff;
         border-radius: 8px;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.38);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
       }
 
-      .verdict-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        align-self: flex-start;
-        padding: 12px 22px;
-        border-radius: 10px;
-        background: var(--crimson);
-        color: #fff;
-        font-family: "JetBrains Mono", monospace;
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      /* Full-screen Cinema Callout (Beat 1 & Beat 3) */
-      .cinema-callout {
-        position: absolute;
-        top: 280px;
-        left: 88px;
-        right: 144px;
-        opacity: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-
-      .cinema-kicker {
-        align-self: flex-start;
-        padding: 8px 18px;
-        background: rgba(13, 14, 18, 0.88);
-        border: 2px solid var(--amber);
-        color: var(--amber);
-        font-family: "JetBrains Mono", monospace;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        border-radius: 6px;
-      }
-
-      .cinema-big {
-        font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 64px;
-        line-height: 1.05;
-        color: #fbf8f1;
-        text-transform: uppercase;
-        text-shadow: 0 6px 28px rgba(0, 0, 0, 0.92), 0 2px 6px rgba(0, 0, 0, 0.95);
-        overflow-wrap: break-word;
-      }
-
-      .cinema-sub {
-        font-size: 34px;
-        line-height: 1.25;
-        font-weight: 700;
-        color: #eae5d8;
-        text-shadow: 0 4px 18px rgba(0, 0, 0, 0.95);
-        max-width: 820px;
-      }
-
-      /* Beat 2: Editorial Evidence Boards */
-      .board-title {
-        font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 46px;
-        line-height: 1.08;
-        letter-spacing: -0.02em;
-        margin-bottom: 16px;
-      }
-
-      .stat-hero {
-        font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 112px;
-        line-height: 0.95;
-        color: var(--crimson);
-        margin-bottom: 12px;
-      }
-
-      .strike-card {
-        position: relative;
-        padding: 20px 24px;
-        border-radius: 16px;
-        border: 2px solid rgba(130, 125, 115, 0.3);
-        margin-bottom: 14px;
-        background: rgba(128, 124, 118, 0.08);
-      }
-
-      .strike-card.truth {
-        border-color: var(--sage);
-        background: rgba(46, 158, 115, 0.12);
-      }
-
-      .strike-lbl {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-      }
-
-      .strike-txt {
-        font-size: 30px;
-        line-height: 1.22;
-        font-weight: 700;
-      }
-
-      .strike-line-svg {
-        position: absolute;
-        inset: 0;
+      /* Dramatic Twist Statement (pure movie typography, zero box) */
+      .twist-wrap {
         width: 100%;
         height: 100%;
-        pointer-events: none;
-      }
-
-      .chart-box {
-        border-radius: 20px;
-        padding: 18px;
-        border: 2px solid rgba(130, 125, 115, 0.28);
-        background: rgba(128, 124, 118, 0.08);
-        margin-bottom: 16px;
-      }
-
-      .source-foot {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        opacity: 0.85;
-        margin-top: 8px;
-      }
-
-      /* Beat 4: Mid-video Gear Change / Re-hook Inverted Card */
-      .rehook-quote {
-        font-family: "Playfair Display", Georgia, serif;
-        font-style: italic;
-        font-weight: 700;
-        font-size: 64px;
-        line-height: 1.12;
-        margin-bottom: 24px;
-      }
-
-      .rehook-sub {
-        font-family: "Inter", sans-serif;
-        font-size: 34px;
-        line-height: 1.28;
-        font-weight: 700;
-        padding-left: 22px;
-        border-left: 6px solid var(--crimson);
-      }
-
-      /* Beat 5: Progressive Steps (one single crisp card at a time) */
-      .steps-viewport {
-        position: relative;
-        width: 100%;
-        height: 480px;
-      }
-
-      .step-single {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 18px;
+        gap: 20px;
       }
 
-      .step-counter-row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-
-      .step-pill {
-        padding: 8px 18px;
-        border-radius: 8px;
+      .twist-kicker {
         font-family: "JetBrains Mono", monospace;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 700;
-        border: 2px solid rgba(130, 125, 115, 0.35);
-        opacity: 0.45;
+        letter-spacing: 0.16em;
+        color: var(--gold);
+        text-transform: uppercase;
+        text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95);
       }
 
-      .step-pill.active {
+      .twist-serif {
+        font-family: "Playfair Display", Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 66px;
+        line-height: 1.1;
+        color: #ffffff;
+        text-shadow: 0 8px 34px rgba(0, 0, 0, 0.98);
+      }
+
+      .twist-rule {
+        width: 240px;
+        height: 5px;
         background: var(--crimson);
-        border-color: var(--crimson);
-        color: #fff;
-        opacity: 1;
+        transform-origin: left center;
       }
 
-      .step-big-title {
-        font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 56px;
-        line-height: 1.08;
+      .twist-sub {
+        font-size: 34px;
+        line-height: 1.24;
+        font-weight: 700;
+        color: #f2ede2;
+        text-shadow: 0 5px 22px rgba(0, 0, 0, 0.98);
       }
 
-      .step-big-desc {
-        font-size: 33px;
-        line-height: 1.28;
-        font-weight: 600;
-        opacity: 0.88;
+      /* Floating Minimalist Science / Documentary Telemetry Strip */
+      .neuro-hud {
+        margin-top: 26px;
+        background: rgba(10, 12, 18, 0.76);
+        border-left: 6px solid var(--gold);
+        border-radius: 0 18px 18px 0;
+        padding: 24px 28px;
+        box-shadow: 0 22px 54px rgba(0, 0, 0, 0.55);
       }
 
-      /* Beat 6: Native Instagram Comment Sheet + iOS DM Notification */
-      #ctaSheetWrap {
-        position: absolute;
-        left: 88px;
-        right: 144px;
-        top: 215px;
-        bottom: 610px;
-        z-index: 30;
-        opacity: 0;
+      .neuro-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 23px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      .neuro-main {
+        font-size: 38px;
+        line-height: 1.18;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 14px;
+      }
+
+      /* Native Instagram Comment + DM Proof Overlay */
+      .cta-cinema-wrap {
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
       }
 
-      .dm-banner {
-        background: rgba(250, 247, 240, 0.98);
-        color: #121318;
+      .dm-pill {
+        background: rgba(252, 250, 245, 0.96);
+        color: #111216;
         border-radius: 22px;
-        padding: 20px 24px;
+        padding: 18px 22px;
         display: flex;
         align-items: center;
-        gap: 18px;
-        box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+        gap: 16px;
+        box-shadow: 0 24px 56px rgba(0, 0, 0, 0.65);
         opacity: 0;
       }
 
-      .dm-avatar {
-        width: 58px;
-        height: 58px;
+      .dm-badge {
+        width: 56px;
+        height: 56px;
         border-radius: 14px;
-        background: #121318;
-        color: var(--amber);
+        background: #0d0e12;
+        color: var(--gold);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -520,52 +374,31 @@
         flex-shrink: 0;
       }
 
-      .dm-text-top {
-        font-size: 26px;
-        font-weight: 800;
-        color: #121318;
-      }
-
-      .dm-text-sub {
-        font-size: 24px;
-        font-weight: 600;
-        color: #3a3c45;
-      }
-
-      .ig-comments-card {
-        background: #ffffff;
-        color: #121318;
+      .ig-drawer {
+        background: rgba(255, 255, 255, 0.96);
+        color: #111216;
         border-radius: 26px;
         padding: 22px 26px;
-        box-shadow: 0 28px 65px rgba(0, 0, 0, 0.65);
+        box-shadow: 0 28px 68px rgba(0, 0, 0, 0.72);
       }
 
-      .ig-com-head {
+      .ig-drawer-head {
         text-align: center;
         font-size: 26px;
         font-weight: 800;
         padding-bottom: 12px;
-        border-bottom: 1.5px solid #e7e4dc;
+        border-bottom: 1.5px solid #e4e1d9;
         margin-bottom: 14px;
       }
 
-      .ig-com-item {
+      .ig-row {
         display: flex;
         align-items: center;
         gap: 14px;
         margin-bottom: 14px;
       }
 
-      .source-foot {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        opacity: 0.85;
-        margin-top: 8px;
-      }
-
-      .ig-dot {
+      .ig-av {
         width: 44px;
         height: 44px;
         border-radius: 50%;
@@ -578,24 +411,17 @@
         font-size: 22px;
       }
 
-      .ig-input-bar {
+      .ig-bar {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: space-between;
         border: 2px solid #d5d1c8;
         border-radius: 99px;
-        padding: 14px 22px;
-        margin-top: 10px;
+        padding: 12px 20px;
       }
 
-      .ig-typed {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 28px;
-        font-weight: 700;
-        color: #121318;
-      }
-
-      .ig-post-btn {
+      .ig-btn {
         background: #0095f6;
         color: #fff;
         padding: 8px 20px;
@@ -604,25 +430,24 @@
         font-weight: 800;
       }
 
-      /* Beat 7: Studio End Poster */
+      /* ── Layer 3: Cinema End Poster (Last 2.2s) ── */
       #endPoster {
         position: absolute;
         inset: 0;
         z-index: 35;
-        background: #0d0e12;
-        color: #f4f1ea;
+        background: rgba(8, 9, 13, 0.9);
         opacity: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
-        padding: 185px 144px 590px 88px;
+        padding: 240px 145px 540px 90px;
       }
 
       .poster-seal {
         width: 96px;
         height: 96px;
-        border: 3px solid var(--amber);
+        border: 3px solid var(--gold);
         border-radius: 18px;
         display: flex;
         align-items: center;
@@ -631,31 +456,30 @@
         font-size: 46px;
         font-weight: 700;
         font-style: italic;
-        color: var(--amber);
+        color: var(--gold);
         margin-bottom: 24px;
       }
 
-      .poster-brand {
+      .poster-title {
         font-family: "Archivo Black", "Inter", sans-serif;
-        font-size: 72px;
+        font-size: 74px;
         line-height: 0.98;
-        letter-spacing: -0.02em;
+        color: #ffffff;
         margin-bottom: 16px;
       }
 
-      .poster-rule {
-        width: 180px;
+      .poster-bar {
+        width: 190px;
         height: 5px;
         background: var(--crimson);
         margin-bottom: 22px;
       }
 
-      .poster-pillars {
+      .poster-tags {
         font-family: "JetBrains Mono", monospace;
         font-size: 24px;
         font-weight: 700;
-        color: #b7b2a8;
-        letter-spacing: 0.06em;
+        color: #d6d0c4;
         margin-bottom: 28px;
       }
 
@@ -663,7 +487,7 @@
         padding: 18px 26px;
         border-radius: 14px;
         background: var(--crimson);
-        color: #fff;
+        color: #ffffff;
         font-size: 30px;
         font-weight: 800;
       }
@@ -671,17 +495,17 @@
       .poster-handle {
         margin-top: 20px;
         font-family: "JetBrains Mono", monospace;
-        font-size: 24px;
-        color: var(--amber);
+        font-size: 25px;
+        color: var(--gold);
       }
 
-      /* ── Layer 4: Studio Captions on Seam Band (100% Contrast Everywhere) ── */
+      /* ── Layer 4: Clean Floating Cinema Subtitles (ZERO ugly box!) ── */
       #captionsLayer {
         position: absolute;
-        left: 88px;
-        right: 144px;
-        top: 990px;
-        height: 150px;
+        left: 90px;
+        right: 145px;
+        top: 1125px;
+        height: 155px;
         z-index: 40;
         display: flex;
         align-items: center;
@@ -695,33 +519,31 @@
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        gap: 6px 12px;
-        padding: 12px 24px;
-        background: rgba(13, 14, 18, 0.94);
-        border: 2px solid rgba(244, 241, 234, 0.18);
-        border-radius: 14px;
-        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.55);
+        gap: 6px 14px;
+        text-align: center;
         opacity: 0;
       }
 
       .w {
         display: inline-block;
         font-family: "Inter", sans-serif;
-        font-size: 46px;
-        line-height: 1.12;
+        font-size: 52px;
+        line-height: 1.14;
         font-weight: 900;
         letter-spacing: -0.02em;
-        color: #fbf8f1;
-        padding: 3px 6px;
-        border-radius: 8px;
+        color: #ffffff;
+        text-shadow:
+          0 6px 24px rgba(0, 0, 0, 0.98),
+          0 2px 6px rgba(0, 0, 0, 1),
+          0 0 2px rgba(0, 0, 0, 1);
       }
 
-      /* Subtle corner studio frame index (always readable on paper & dark) */
-      .studio-topbar {
+      /* Top slim progress hairline (subtle, unobtrusive) */
+      .cinema-top-rail {
         position: absolute;
-        top: 108px;
-        left: 88px;
-        right: 144px;
+        top: 130px;
+        left: 90px;
+        right: 145px;
         z-index: 42;
         display: flex;
         align-items: center;
@@ -729,273 +551,185 @@
         pointer-events: none;
       }
 
-      .top-progress-track {
+      .rail-track {
         flex: 1;
-        height: 5px;
+        height: 4px;
         border-radius: 99px;
-        background: rgba(128, 128, 128, 0.35);
+        background: rgba(255, 255, 255, 0.24);
         overflow: hidden;
       }
 
-      .top-progress-fill {
+      .rail-fill {
         width: 100%;
         height: 100%;
-        background: var(--amber);
+        background: var(--gold);
         transform-origin: left center;
       }
 
-      .top-handle {
+      .rail-handle {
         font-family: "JetBrains Mono", monospace;
         font-size: 20px;
         font-weight: 700;
-        color: #f4f1ea;
-        background: rgba(13, 14, 18, 0.86);
-        padding: 5px 12px;
-        border-radius: 6px;
+        color: rgba(250, 247, 240, 0.9);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
       }
     </style>
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="__DURATION__" data-width="1080" data-height="1920">
-      <!-- Real Graded HD Cinema Footage Stage -->
-      <div id="footageStage">
-        <video id="broll0" class="clip broll-vid" data-start="0" data-duration="__V0_DUR__" src="assets/clip0.mp4" muted playsinline></video>
-        <video id="broll1" class="clip broll-vid" data-start="__V1_START__" data-duration="__V1_DUR__" src="assets/clip1.mp4" muted playsinline></video>
-        <video id="broll2" class="clip broll-vid" data-start="__V2_START__" data-duration="__V2_DUR__" src="assets/clip2.mp4" muted playsinline></video>
-        <div class="cinema-scrim" data-layout-ignore="true"></div>
+      <!-- 100% Full-Bleed Multi-Shot Cinema Movie -->
+      <div id="cinemaStage">
+        __SHOTS_HTML__
+        <div class="cinema-veil" data-layout-ignore="true"></div>
       </div>
 
-      <!-- Dynamic Split / Full Architectural Paper/Noir Curtain -->
-      <div id="paperStage" data-layout-ignore="true">
-        <div id="paperSheet" class="__THEME_START__-mode">
-          <div class="editorial-grid" data-layout-ignore="true"></div>
-          <div class="seam-edge" data-layout-ignore="true"></div>
-        </div>
+      <!-- Subtle Drifting Atmospheric Bokeh -->
+      <div class="bokeh-layer" data-layout-ignore="true">
+        <div class="bokeh" id="bk0" style="width: 5px; height: 5px; left: 140px; top: 420px"></div>
+        <div class="bokeh" id="bk1" style="width: 4px; height: 4px; left: 760px; top: 340px"></div>
+        <div class="bokeh" id="bk2" style="width: 6px; height: 6px; left: 320px; top: 880px"></div>
+        <div class="bokeh" id="bk3" style="width: 4px; height: 4px; left: 820px; top: 960px"></div>
+        <div class="bokeh" id="bk4" style="width: 5px; height: 5px; left: 210px; top: 1380px"></div>
+        <div class="bokeh" id="bk5" style="width: 4px; height: 4px; left: 680px; top: 1490px"></div>
       </div>
 
-      <!-- Editorial Visual Beats Layer -->
-      <div id="beatCanvas">
-        <!-- Beat 0: Scroll-Stopper Cold Open (Visible on Frame 0) -->
-        <div class="beat-panel split-top __THEME_START__-mode" id="beat0">__BEAT0_HTML__</div>
+      <!-- Cinema Transition VFX -->
+      <div id="fxBlackout" data-layout-ignore="true"></div>
+      <div id="fxFlash" data-layout-ignore="true"></div>
 
-        <!-- Beat 1: Full-Bleed Cinema B-Roll + Giant Kinetic Callout -->
-        <div class="cinema-callout" id="beat1">__BEAT1_HTML__</div>
+      <!-- Scene-by-Scene Synced Cinema Overlays -->
+      <div id="sceneOverlays">__SCENES_HTML__</div>
 
-        <!-- Beat 2: Full-Canvas Editorial Evidence Board -->
-        <div class="beat-panel full-stage __THEME_START__-mode" id="beat2">__BEAT2_HTML__</div>
-
-        <!-- Beat 3: Cut to B-Roll #2 + Concise Truth Overlay -->
-        <div class="cinema-callout" id="beat3">__BEAT3_HTML__</div>
-
-        <!-- Beat 4: Mid-Video Gear Change (Theme Inverted!) -->
-        <div class="beat-panel full-stage __THEME_INVERT__-mode" id="beat4">__BEAT4_HTML__</div>
-
-        <!-- Beat 5: 3 Progressive Single-Focus Steps over Split B-Roll #3 -->
-        <div class="beat-panel split-top __THEME_INVERT__-mode" id="beat5">__BEAT5_HTML__</div>
-      </div>
-
-      <!-- Beat 6: Native Instagram Comment + iOS DM Proof -->
-      <div id="ctaSheetWrap">
-        <div class="dm-banner" id="dmBanner">
-          <div class="dm-avatar">CZ</div>
-          <div>
-            <div class="dm-text-top">@protocolocodigozero • agora</div>
-            <div class="dm-text-sub">Enviado: Protocolo 14 Dias + 16 Scripts no seu DM</div>
-          </div>
-        </div>
-        <div class="ig-comments-card" id="igCard">
-          <div class="ig-com-head">Comentários</div>
-          <div class="ig-com-item" id="igCommentNew" style="opacity: 0">
-            <div class="ig-dot">V</div>
-            <div>
-              <div style="font-size: 21px; font-weight: 800">@voce • agora</div>
-              <div style="font-size: 27px; font-weight: 700">ZERO</div>
-            </div>
-          </div>
-          <div class="ig-com-item" style="opacity: 0.72">
-            <div class="ig-dot" style="background: #d92b4b">M</div>
-            <div>
-              <div style="font-size: 20px; font-weight: 700">@marcos_r • 4 min</div>
-              <div style="font-size: 24px; font-weight: 600">ZERO</div>
-            </div>
-          </div>
-          <div class="ig-input-bar" style="position: relative">
-            <div class="ig-typed" id="igPlaceholder">Comente ZERO...</div>
-            <div class="ig-typed" id="igTypedZero" style="position: absolute; left: 22px; opacity: 0; color: #121318">ZERO</div>
-            <div class="ig-post-btn" id="igPostBtn">Publicar</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Beat 7: Crisp Minimal Studio End Poster -->
+      <!-- Luxury Cinema End Poster -->
       <div id="endPoster">
         <div class="poster-seal">CZ</div>
-        <div class="poster-brand">CÓDIGO<br />ZERO</div>
-        <div class="poster-rule"></div>
-        <div class="poster-pillars">PROTOCOLO 14 DIAS • CENTRAL SOS • 16 SCRIPTS</div>
+        <div class="poster-title">CÓDIGO<br />ZERO</div>
+        <div class="poster-bar"></div>
+        <div class="poster-tags">PROTOCOLO 14 DIAS • CENTRAL SOS • 16 SCRIPTS</div>
         <div class="poster-cta">Comente ZERO ou chame: (12) 99659-3222</div>
         <div class="poster-handle">@protocolocodigozero</div>
       </div>
 
-      <!-- Seam Captions Band -->
+      <!-- Floating Cinema Subtitles (zero bounding box) -->
       <div id="captionsLayer" data-layout-allow-caption-zone="true">__CAPTIONS_HTML__</div>
 
-      <!-- Top Archival Progress Bar -->
-      <div class="studio-topbar" data-layout-ignore="true">
-        <div class="top-progress-track"><div class="top-progress-fill" id="masterProgress"></div></div>
-        <div class="top-handle">@protocolocodigozero</div>
+      <!-- Top Slim Film Progress Rail -->
+      <div class="cinema-top-rail" data-layout-ignore="true">
+        <div class="rail-track"><div class="rail-fill" id="masterRail"></div></div>
+        <div class="rail-handle">@protocolocodigozero</div>
       </div>
-
-      <div class="film-grain" data-layout-ignore="true"></div>
     </div>
 
     <script>
       window.__timelines = window.__timelines || {};
       const DUR = __DURATION__;
-      const T = __TIMES_JSON__; // [t1, t2, t3, t4, t5, t6, t7]
-      const THEME_START = "__THEME_START__";
-      const THEME_INVERT = "__THEME_INVERT__";
-      const BG_NOIR = "#0d0e12";
-      const INK_NOIR = "#f4f1ea";
-      const BG_PAPER = "#efeae0";
-      const INK_PAPER = "#121318";
-      const HOOK_MODE = "__HOOK_MODE__";
-      const BOARD_TYPE = "__BOARD_TYPE__";
+      const SCENES = __SCENES_META_JSON__; // [{idx, start, end, fx, overlay_type}, ...]
+      const POSTER_AT = __POSTER_AT__;
       const CHUNKS = __CHUNKS_JSON__;
 
-      const startBg = THEME_START === "paper" ? BG_PAPER : BG_NOIR;
-      const startInk = THEME_START === "paper" ? INK_PAPER : INK_NOIR;
-      const invBg = THEME_INVERT === "paper" ? BG_PAPER : BG_NOIR;
-      const invInk = THEME_INVERT === "paper" ? INK_PAPER : INK_NOIR;
-
       const tl = gsap.timeline({ paused: true });
-      const [t1, t2, t3, t4, t5, t6, t7] = T;
 
-      // Top Progress Bar
-      tl.fromTo("#masterProgress", { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: "none" }, 0);
+      // Top rail progress
+      tl.fromTo("#masterRail", { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: "none" }, 0);
 
-      // Helper: seam positions
-      // y = -900 -> top split (paper covers 0..1020, footage shows 1020..1920)
-      // y = -1960 -> full-bleed footage
-      // y = 0 -> full canvas paper/noir board
-      const splitY = -900;
-      const openY = -1960;
-
-      // Initial curtain state at t=0
-      if (HOOK_MODE === "cinema") {
-        tl.set("#paperSheet", { y: openY, backgroundColor: startBg, color: startInk }, 0);
-        tl.set("#beat0", { opacity: 1, color: "#fbf8f1" }, 0);
-      } else {
-        tl.set("#paperSheet", { y: splitY, backgroundColor: startBg, color: startInk }, 0);
-        tl.set("#beat0", { opacity: 1, color: startInk }, 0);
+      // Gentle ambient dust drift
+      for (let i = 0; i < 6; i++) {
+        tl.fromTo(
+          "#bk" + i,
+          { x: 0, y: 0, opacity: 0.25 },
+          { x: (i % 2 === 0 ? 1 : -1) * 48, y: -140 - i * 18, opacity: 0.65, duration: DUR, ease: "none" },
+          0
+        );
       }
 
-      // Beat 0 internal punch & marker draw (0.0s .. t1)
-      tl.to("#hookMarker", { strokeDashoffset: 0, duration: 0.42, ease: "power3.out" }, 0.08);
-      if (document.getElementById("hookCard")) {
-        tl.fromTo("#hookCard", { y: 24, opacity: 0.25 }, { y: 0, opacity: 1, duration: 0.34, ease: "power4.out" }, 0.04);
-      }
-      if (document.getElementById("hookStamp")) {
-        tl.fromTo("#hookStamp", { scale: 1.5, rotation: -12, opacity: 0 }, { scale: 1, rotation: -4, opacity: 1, duration: 0.22, ease: "power4.out" }, Math.max(0.35, t1 * 0.45));
-      }
+      // Scene-driven exact animations (100% synced to spoken words!)
+      SCENES.forEach((sc, i) => {
+        const sid = "#sc-" + i;
+        const st = sc.start;
+        const en = sc.end;
+        const span = Math.max(0.8, en - st);
 
-      // Exit Beat 0 -> Beat 1 (Full-Bleed Cinema B-Roll + Kinetic Callout at t1)
-      tl.to("#beat0", { opacity: 0, y: -32, duration: 0.2, ease: "power3.in" }, Math.max(0.4, t1 - 0.14));
-      tl.to("#paperSheet", { y: openY, duration: 0.26, ease: "power3.in" }, Math.max(0.4, t1 - 0.12));
-
-      tl.fromTo("#beat1", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.26, ease: "power4.out" }, t1);
-      tl.to("#b1Marker", { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, t1 + 0.18);
-      tl.to("#beat1", { opacity: 0, y: -24, duration: 0.2, ease: "power2.in" }, t2 - 0.14);
-
-      // Enter Beat 2 (Full Editorial Evidence Board at t2)
-      tl.to("#paperSheet", { y: 0, duration: 0.28, ease: "power4.out" }, t2 - 0.04);
-      tl.set("#beat2", { color: startInk }, t2 - 0.04);
-      tl.fromTo("#beat2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.26, ease: "power3.out" }, t2 + 0.02);
-
-      if (BOARD_TYPE === "strike_stat") {
-        tl.fromTo("#statWrong", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.28, ease: "power3.out" }, t2 + 0.15);
-        tl.to("#strikeSlash", { strokeDashoffset: 0, duration: 0.34, ease: "power3.inOut" }, t2 + 0.75);
-        tl.fromTo("#statRight", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, t2 + 1.15);
-      } else if (BOARD_TYPE === "neuro_curve") {
-        tl.to("#neuroCurve", { strokeDashoffset: 0, duration: Math.min(2.0, (t3 - t2) * 0.55), ease: "power2.inOut" }, t2 + 0.2);
-        tl.fromTo("#neuroDot", { opacity: 0, x: 0, y: 0 }, { opacity: 1, x: 220, y: -135, duration: 0.75, ease: "power2.out" }, t2 + 0.22);
-        tl.to("#neuroDot", { x: 640, y: -10, duration: 1.0, ease: "power2.inOut" }, t2 + 0.98);
-      } else {
-        tl.to("#msgUnder", { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" }, t2 + 0.45);
-        tl.fromTo("#msgDecode", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, t2 + 0.85);
-      }
-      tl.to("#beat2", { opacity: 0, y: -26, duration: 0.2, ease: "power2.in" }, t3 - 0.14);
-
-      // Enter Beat 3 (B-Roll #2 Cut at t3)
-      tl.to("#paperSheet", { y: openY, duration: 0.26, ease: "power3.in" }, t3 - 0.1);
-      tl.fromTo("#beat3", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.26, ease: "power4.out" }, t3 + 0.04);
-      tl.to("#beat3", { opacity: 0, y: -24, duration: 0.2, ease: "power2.in" }, t4 - 0.14);
-
-      // Enter Beat 4 (MID-VIDEO GEAR CHANGE — Theme World Inverts at t4!)
-      tl.fromTo(
-        "#paperSheet",
-        { backgroundColor: startBg, color: startInk },
-        { backgroundColor: invBg, color: invInk, duration: 0.08, ease: "none" },
-        t4 - 0.08
-      );
-      tl.fromTo("#beat4", { color: invInk }, { color: invInk, duration: 0.01 }, t4 - 0.08);
-      tl.to("#paperSheet", { y: 0, duration: 0.22, ease: "power4.out" }, t4 - 0.02);
-      tl.fromTo("#beat4", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.24, ease: "power4.out" }, t4 + 0.02);
-      tl.to("#beat4", { opacity: 0, y: -28, duration: 0.2, ease: "power2.in" }, t5 - 0.14);
-
-      // Enter Beat 5 (Split-Screen B-Roll #3 + 3 Progressive Action Steps, ONE BY ONE!)
-      tl.to("#paperSheet", { y: splitY, duration: 0.28, ease: "power3.inOut" }, t5 - 0.08);
-      tl.fromTo("#beat5", { opacity: 0, color: invInk }, { opacity: 1, color: invInk, duration: 0.16 }, t5 - 0.02);
-      const sSpan = Math.max(2.4, t6 - t5);
-      const stepSlice = sSpan / 3;
-      for (let i = 0; i < 3; i++) {
-        const sStart = t5 + i * stepSlice;
-        const sEnd = t5 + (i + 1) * stepSlice;
-        tl.fromTo("#stepSingle" + i, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, sStart + 0.04);
-        if (i < 2) {
-          tl.to("#stepSingle" + i, { opacity: 0, y: -18, duration: 0.16, ease: "power2.in" }, sEnd - 0.12);
-        } else {
-          tl.to("#beat5", { opacity: 0, y: -24, duration: 0.2, ease: "power2.in" }, t6 - 0.14);
+        // Transition FX entering scene
+        if (sc.fx === "dark_drop" && i > 0) {
+          tl.fromTo("#fxBlackout", { opacity: 0 }, { opacity: 0.96, duration: 0.14, ease: "power2.in" }, Math.max(0, st - 0.18));
+          tl.to("#fxBlackout", { opacity: 0, duration: 0.22, ease: "power2.out" }, st + 0.04);
+        } else if (sc.fx === "warm_flash" && i > 0) {
+          tl.fromTo("#fxFlash", { opacity: 0 }, { opacity: 0.62, duration: 0.09, ease: "power2.out" }, Math.max(0, st - 0.06));
+          tl.to("#fxFlash", { opacity: 0, duration: 0.24, ease: "power2.in" }, st + 0.03);
         }
-      }
 
-      // Enter Beat 6 (Native IG Comment Drawer + iOS DM Proof over Full B-Roll #3 at t6)
-      tl.to("#captionsLayer", { opacity: 0, duration: 0.14 }, t6 - 0.14);
-      tl.to("#paperSheet", { y: openY, duration: 0.24, ease: "power3.in" }, t6 - 0.1);
-      tl.fromTo("#ctaSheetWrap", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.28, ease: "power4.out" }, t6);
-      tl.to("#igPlaceholder", { opacity: 0, duration: 0.06 }, t6 + 0.35);
-      tl.fromTo("#igTypedZero", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.14, ease: "power2.out" }, t6 + 0.42);
-      tl.fromTo("#igCommentNew", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.20, ease: "power3.out" }, t6 + 0.56);
-      tl.fromTo("#dmBanner", { opacity: 0, y: -34 }, { opacity: 1, y: 0, duration: 0.24, ease: "power4.out" }, t6 + 0.68);
-      tl.to("#ctaSheetWrap", { opacity: 0, y: -20, duration: 0.2, ease: "power2.in" }, t7 - 0.14);
+        // Frame 0 starts fully visible immediately (no blank first frame!)
+        if (i === 0) {
+          tl.fromTo(sid, { opacity: 1, y: 0 }, { opacity: 1, y: 0, duration: 0.05 }, 0);
+        } else {
+          tl.fromTo(sid, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.24, ease: "power4.out" }, st);
+        }
 
-      // Enter Beat 7 (Minimalist High-Craft Studio End Poster at t7 .. DUR)
-      tl.fromTo("#endPoster", { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power2.out" }, t7);
+        // Internal micro-choreography by overlay type
+        if (sc.overlay_type === "phone_lockscreen" || sc.overlay_type === "whatsapp_draft") {
+          const card = sid + " .ios-glass-card";
+          const stamp = sid + " .drama-stamp";
+          if (document.querySelector(card)) {
+            tl.fromTo(card, { y: 28, scale: 0.95, opacity: 0.2 }, { y: 0, scale: 1, opacity: 1, duration: 0.34, ease: "power4.out" }, st + 0.06);
+          }
+          if (document.querySelector(stamp)) {
+            tl.fromTo(stamp, { scale: 1.45, rotation: -12, opacity: 0 }, { scale: 1, rotation: -3, opacity: 1, duration: 0.22, ease: "power4.out" }, st + Math.min(1.1, span * 0.42));
+          }
+        } else if (sc.overlay_type === "twist_card") {
+          const rule = sid + " .twist-rule";
+          if (document.querySelector(rule)) {
+            tl.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, st + 0.14);
+          }
+        } else if (sc.overlay_type === "neuro_hud") {
+          const path = sid + " .hud-pulse";
+          if (document.querySelector(path)) {
+            tl.to(path, { strokeDashoffset: 0, duration: Math.min(1.6, span * 0.6), ease: "power2.out" }, st + 0.15);
+          }
+        } else if (sc.overlay_type === "ig_dm_cta") {
+          const ph = sid + " .ig-ph";
+          const typed = sid + " .ig-zero";
+          const newc = sid + " .ig-new";
+          const dm = sid + " .dm-pill";
+          if (document.querySelector(ph)) {
+            tl.to(ph, { opacity: 0, duration: 0.08 }, st + 0.35);
+            tl.fromTo(typed, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.14, ease: "power2.out" }, st + 0.42);
+            tl.fromTo(newc, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.22, ease: "power3.out" }, st + 0.62);
+            tl.fromTo(dm, { opacity: 0, y: -28 }, { opacity: 1, y: 0, duration: 0.28, ease: "power4.out" }, st + 0.78);
+          }
+        }
 
-      // Seam Captions Timeline (instant snappy word chip flip, zero grey mid-fade contrast warning)
+        // Clean exit before next scene (or before End Poster)
+        const exitAt = Math.max(st + 0.4, en - 0.16);
+        tl.to(sid, { opacity: 0, y: -18, duration: 0.16, ease: "power2.in" }, exitAt);
+      });
+
+      // End Poster (Last ~2.2s)
+      tl.to("#captionsLayer", { opacity: 0, duration: 0.14 }, Math.max(0.5, POSTER_AT - 0.14));
+      tl.fromTo("#endPoster", { opacity: 0 }, { opacity: 1, duration: 0.26, ease: "power2.out" }, POSTER_AT);
+
+      // Word-by-word Floating Cinema Captions (clean crisp gold/crimson highlight, zero box)
       CHUNKS.forEach((chunk, ci) => {
         const cid = "#chunk-" + ci;
         const cStart = Math.max(0, chunk.start);
-        const cEnd = Math.min(t6 - 0.16, chunk.end);
-        if (cStart >= t6 - 0.22) return;
-        tl.fromTo(cid, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.07, ease: "power3.out" }, cStart);
+        const cEnd = Math.min(POSTER_AT - 0.15, chunk.end);
+        if (cStart >= POSTER_AT - 0.2) return;
+        tl.fromTo(cid, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.08, ease: "power3.out" }, cStart);
         chunk.words.forEach((w, wi) => {
           const wid = "#w-" + ci + "-" + wi;
           const ws = Math.max(cStart, w.start);
           const we = Math.min(cEnd, w.end);
-          const chipBg = w.emphasis ? "#d92b4b" : "#e2a43b";
-          const chipInk = w.emphasis ? "#ffffff" : "#0d0e12";
+          const hiColor = w.emphasis ? "#ff3b5c" : "#f5b73b";
           tl.fromTo(
             wid,
-            { backgroundColor: "#0d0e12", color: "#fbf8f1" },
-            { backgroundColor: chipBg, color: chipInk, duration: 0.005, ease: "none" },
+            { color: "#ffffff", scale: 1 },
+            { color: hiColor, scale: 1.09, duration: 0.04, ease: "power2.out" },
             ws
           );
           if (wi < chunk.words.length - 1) {
-            tl.to(wid, { backgroundColor: "#0d0e12", color: "#fbf8f1", duration: 0.005, ease: "none" }, Math.max(ws + 0.06, we));
+            tl.to(wid, { color: "#ffffff", scale: 1, duration: 0.06, ease: "power2.in" }, Math.max(ws + 0.08, we));
           }
         });
-        tl.to(cid, { opacity: 0, duration: 0.06 }, Math.max(cStart + 0.1, cEnd));
+        tl.to(cid, { opacity: 0, y: -8, duration: 0.07, ease: "power2.in" }, Math.max(cStart + 0.1, cEnd));
       });
 
       window.__timelines["main"] = tl;
