@@ -54,7 +54,7 @@ jobs:
           fi
           pip install -q edge-tts faster-whisper numpy
 
-      - name: Generate Codigo Zero Studio v4 Reel (Male & Female Voices + Mixkit B-Roll + Multi-Beat Editorial)
+      - name: Generate Codigo Zero Cinema Storytelling v5 (8-Scene Real Movie + Orchestral Score + Dual Voices)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
@@ -64,10 +64,11 @@ jobs:
         uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: cz-reel-${{ github.run_number }}-${{ github.run_attempt }}
-          name: Codigo Zero Studio v4 #${{ github.run_number }}
+          name: Codigo Zero Cinema v5 #${{ github.run_number }}
           files: |
             build/reel_final.mp4
             build/caption.txt
+            build/caption_tiktok.txt
             build/meta.json
 
       - name: Publish Reel to Instagram
@@ -76,6 +77,17 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           VIDEO_PUBLIC_URL: https://github.com/${{ github.repository }}/releases/download/cz-reel-${{ github.run_number }}-${{ github.run_attempt }}/reel_final.mp4
         run: python publish.py
+
+      - name: Publish Video to TikTok
+        env:
+          TIKTOK_ACCESS_TOKEN: ${{ secrets.TIKTOK_ACCESS_TOKEN }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_SESSIONID: ${{ secrets.TIKTOK_SESSIONID }}
+          TIKTOK_COOKIES_JSON: ${{ secrets.TIKTOK_COOKIES_JSON }}
+          VIDEO_PUBLIC_URL: https://github.com/${{ github.repository }}/releases/download/cz-reel-${{ github.run_number }}-${{ github.run_attempt }}/reel_final.mp4
+        run: python publish_tiktok.py
 
       - name: Commit updated history.json
         run: |
