@@ -1,0 +1,67 @@
+name: Codigo Zero Live Dupla Zero (RTMP Cloud)
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: "Duração da live na nuvem em minutos (máx seguro: 330)"
+        required: false
+        default: "300"
+        type: string
+      tiktok_chat_user:
+        description: "Usuário do TikTok para ler comentários ao vivo (sem @)"
+        required: false
+        default: "projetocodigozero_"
+        type: string
+      cta_text:
+        description: "Texto do banner de conversão na tela"
+        required: false
+        default: "CÓDIGO ZERO R$ 47 • LINK NA BIO"
+        type: string
+
+concurrency:
+  group: codigo-zero-live
+  cancel-in-progress: false
+
+jobs:
+  live-broadcast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg, Fonts & Voice Dependencies
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          else
+            sudo apt-get update && sudo apt-get install -y --no-install-recommends fonts-dejavu-core
+          fi
+          pip install -q edge-tts
+          pip install -q TikTokLive || echo "TikTokLive opcional não disponível; rodando com acervo rotativo."
+
+      - name: Start Dupla Zero 24/7 Cloud Live Stream
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LIVE_RTMP_URL: ${{ secrets.LIVE_RTMP_URL }}
+        run: |
+          if [ -z "$LIVE_RTMP_URL" ]; then
+            echo "=================================================================="
+            echo "LIVE_RTMP_URL não configurado nos GitHub Secrets."
+            echo "Para transmitir ao vivo 100% na nuvem (Instagram Live Producer,"
+            echo "YouTube Live ou TikTok LIVE), adicione o Secret LIVE_RTMP_URL"
+            echo "com Server URL + Stream Key (ex: rtmps://live-upload.instagram.com:443/rtmp/CHAVE)"
+            echo "em Settings -> Secrets and variables -> Actions -> Repository secrets."
+            echo "=================================================================="
+            exit 0
+          fi
+          python live_dupla_zero.py \
+            --rtmp-url "$LIVE_RTMP_URL" \
+            --max-minutes "${{ inputs.duration_minutes }}" \
+            --tiktok-user "${{ inputs.tiktok_chat_user }}" \
+            --cta-text "${{ inputs.cta_text }}"
