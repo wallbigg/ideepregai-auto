@@ -571,6 +571,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Enceladus"
+    },
+    {
+      "date": "2026-11-25 20:08 UTC",
+      "topic": "A Mensagem Apagada da Camila às 23:54 (História Feminino #01)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "cinema_piano.mp3",
+      "broll_used": [
+        "51399",
+        "43270",
+        "46741",
+        "5888",
+        "2846",
+        "28901",
+        "4629",
+        "41859"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Aoede"
     }
   ]
 }
