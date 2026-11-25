@@ -476,6 +476,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Aoede"
+    },
+    {
+      "date": "2026-11-25 05:04 UTC",
+      "topic": "O Dia em que o Thiago Recusou Ser o Amigo Reserva (História Masculino #04)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "cinema_strings.mp3",
+      "broll_used": [
+        "939",
+        "35426",
+        "34538",
+        "40640",
+        "28897",
+        "23410",
+        "4855",
+        "26532"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Enceladus"
     }
   ]
 }
