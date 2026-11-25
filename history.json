@@ -457,6 +457,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Enceladus"
+    },
+    {
+      "date": "2026-11-25 04:27 UTC",
+      "topic": "A Armadilha do 'Vamos Continuar Amigos' da Larissa (História Feminino #03)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "cinema_piano.mp3",
+      "broll_used": [
+        "4664",
+        "46702",
+        "5888",
+        "2846",
+        "28901",
+        "46741",
+        "4629",
+        "6850"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Aoede"
     }
   ]
 }
