@@ -533,6 +533,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Fenrir"
+    },
+    {
+      "date": "2026-11-25 11:36 UTC",
+      "topic": "Os 3 Dias no Vácuo que Acordaram a Beatriz (História Feminino #05)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "cinema_piano.mp3",
+      "broll_used": [
+        "51399",
+        "43270",
+        "8739",
+        "25586",
+        "2846",
+        "28901",
+        "4629",
+        "6734"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
