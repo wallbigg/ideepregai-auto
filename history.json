@@ -780,6 +780,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Aoede"
+    },
+    {
+      "date": "2026-11-26 14:09 UTC",
+      "topic": "O Pedido de Tempo que Mudou a Postura do Rafael (História Masculino #02)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "cinema_epic.mp3",
+      "broll_used": [
+        "4701",
+        "4808",
+        "64",
+        "50756",
+        "4433",
+        "41375",
+        "4855",
+        "26532"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Enceladus"
     }
   ]
 }
