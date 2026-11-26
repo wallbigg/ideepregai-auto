@@ -818,6 +818,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-26 21:53 UTC",
+      "topic": "O Dia 14 em que o Bruno Quase Desabou no Espelho (História Masculino #03)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "cinema_ambient.mp3",
+      "broll_used": [
+        "23410",
+        "35426",
+        "4915",
+        "50756",
+        "28893",
+        "40640",
+        "52079",
+        "6734"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Fenrir"
     }
   ]
 }
