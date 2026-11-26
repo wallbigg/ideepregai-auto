@@ -742,6 +742,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-26 08:45 UTC",
+      "topic": "A Madrugada das 02:14 do Lucas (História Masculino #01)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "cinema_piano.mp3",
+      "broll_used": [
+        "16139",
+        "4915",
+        "20843",
+        "34538",
+        "28897",
+        "40640",
+        "52079",
+        "6734"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Enceladus"
     }
   ]
 }
