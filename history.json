@@ -1065,6 +1065,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Fenrir"
+    },
+    {
+      "date": "2026-11-27 22:55 UTC",
+      "topic": "A Noite em que a Júlia Saiu do Teatro dos Stories (História Feminino #04)",
+      "audience": "feminino",
+      "voice_gender": "feminino",
+      "music_bed": "cinema_ambient.mp3",
+      "broll_used": [
+        "42733",
+        "43270",
+        "5888",
+        "46702",
+        "2846",
+        "28899",
+        "4629",
+        "41859"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Sulafat"
     }
   ]
 }
