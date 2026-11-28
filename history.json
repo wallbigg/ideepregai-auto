@@ -1084,6 +1084,25 @@
       ],
       "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
       "tts_voice": "Sulafat"
+    },
+    {
+      "date": "2026-11-28 00:15 UTC",
+      "topic": "As 23:40 que Quase Custaram 14 Dias do Mateus (História Masculino #05)",
+      "audience": "masculino",
+      "voice_gender": "masculino",
+      "music_bed": "cinema_ambient.mp3",
+      "broll_used": [
+        "52079",
+        "16139",
+        "4915",
+        "41375",
+        "28893",
+        "4433",
+        "236",
+        "6850"
+      ],
+      "tts_engine": "gemini:gemini-2.5-flash-preview-tts",
+      "tts_voice": "Enceladus"
     }
   ]
 }
